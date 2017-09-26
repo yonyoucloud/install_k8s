@@ -1,0 +1,1 @@
+KUBE_SCHEDULER_ARGS="--kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true"

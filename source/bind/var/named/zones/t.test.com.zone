@@ -1,0 +1,9 @@
+$TTL 1D
+@	IN SOA . mail.mydns.com. (
+					0	; serial
+					1D	; refresh
+					1H	; retry
+					1W	; expire
+					3H )	; minimum
+@		IN	NS	@
+t.test.com.	IN	A	10.10.10.10

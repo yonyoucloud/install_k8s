@@ -1,0 +1,6 @@
+KUBE_API_ADDRESS="--insecure-bind-address=K8S_HOST"
+KUBE_API_PORT="--insecure-port=0"
+KUBE_ETCD_SERVERS="--etcd-servers=https://ETCD_LVS_HOST:2379"
+KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=192.168.0.0/16"
+KUBE_ADMISSION_CONTROL="--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,ServiceAccount,PersistentVolumeLabel,SecurityContextDeny,ResourceQuota,DefaultStorageClass,DefaultTolerationSeconds"
+KUBE_API_ARGS="--etcd-cafile=/etc/flannel/etcd_ssl/ca.pem --etcd-certfile=/etc/flannel/etcd_ssl/etcd.pem --etcd-keyfile=/etc/flannel/etcd_ssl/etcd-key.pem --tls-cert-file=/etc/kubernetes/pki/apiserver.pem --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem --client-ca-file=/etc/kubernetes/pki/ca.pem --service-account-key-file=/etc/kubernetes/pki/ca-key.pem --experimental-bootstrap-token-auth=true --authorization-mode=RBAC --kubelet-certificate-authority=/etc/kubernetes/pki/ca.pem --kubelet-client-certificate=/etc/kubernetes/pki/admin.pem --kubelet-client-key=/etc/kubernetes/pki/admin-key.pem"

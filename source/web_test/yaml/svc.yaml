@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: web-test
+  name: web-test
+  namespace: esn-system
+spec:
+  #type: ClusterIP
+  type: NodePort
+  #type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 31000
+  selector:
+    app: web-test
