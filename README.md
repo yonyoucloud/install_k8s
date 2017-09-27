@@ -1,3 +1,10 @@
+此项目包含大文件，故需安装git lfs，参考：https://git-lfs.github.com/<br>
+git clone git@github.com:yonyoucloud/install_k8s.git<br>
+cd install_k8s<br>
+git lfs pull # 下载大文件<br>
+也可以直接从百度网盘下载安装包: https://pan.baidu.com/s/1geC3XGf 密码: 5vgv<br>
+注意: 下载下来的压缩包336M, 解压后大小1.2G; git clone下来目录大概2.3G, 需要注意大小, 确保大文件二进制文件及镜像文件都在<br>
+<br>
 本安装包，运行在centos7上，包含的服务有:<br>
 etcd集群<br>
 kubernets master集群<br>
@@ -11,6 +18,9 @@ bind 私有dns服务,方便内网域名拦截解析<br>
 kube-dns<br>
 kubernetes-dashboard k8s UI<br>
 heapster 监控<br>
+<br>
+测试例子微服务(golang写的一个小的输出服务):<br>
+web_test<br>
 <br>
 第一步, 说明:<br>
 └── install_k8s        安装包<br>

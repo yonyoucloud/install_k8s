@@ -89,7 +89,7 @@ fab install_dns
 echo -e "\033[32m{`date`}[结束]安装dns.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]启动所有服务.............................\033[0m"
-fab service:restart
+fab service:start
 # 有可能flanneld启动太快，导致docker网络没被覆盖，这里重启一下flannel和docker
 fab service_flannel_docker:restart
 echo -e "\033[32m{`date`}[结束]启动所有服务.............................\n\n\n\n\n\n\033[0m"
