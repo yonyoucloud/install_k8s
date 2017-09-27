@@ -250,14 +250,13 @@ def remote_install_lvs():
     ipvsadm += ' && ipvsadm -A -t ' + etcdvip + ':2379 -s wrr'
     for host in env.roledefs['etcd']['hosts']:
         ipvsadm += ' && ipvsadm -a -t ' + etcdvip + ':2379 -r ' + host.split(':')[0] + ':2379 -g -w 1'
-    run(ipvsadm)
 
     # master
     ipvsadm += ' && ipvsadm -A -t ' + mastervip + ':6443 -s wrr'
     for host in env.roledefs['master']['hosts']:
         ipvsadm += ' && ipvsadm -a -t ' + mastervip + ':6443 -r ' + host.split(':')[0] + ':6443 -g -w 1'
-    run(ipvsadm)
 
+    run(ipvsadm)
     run('ipvsadm --save > /etc/sysconfig/ipvsadm && systemctl restart ipvsadm && ipvsadm -Ln')
     pass
 
@@ -583,7 +582,7 @@ def install_dns():
     local('cd source/bind && tar zcvf bind.gz var etc')
     run('yum install -y bind-chroot')
     put('source/bind/bind.gz', '/tmp', mode=0640)
-    run('tar zxvf /tmp/bind.gz -C / && rm -rf /tmp/bind.gz && systemctl enable named-chroot')
+    run('tar zxvf /tmp/bind.gz -C / && rm -rf /tmp/bind.gz && chown -R named:named /var/named/zones && chown root:named /var/named /etc/named.conf /etc/named.rfc1912.zones && systemctl enable named-chroot')
     local('rm -rf source/bind/bind.gz')
     pass
 
