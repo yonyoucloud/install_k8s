@@ -233,31 +233,33 @@ def remote_install_lvs():
     etcdvip = env.roledefs['etcd']['vip']
     mastervip = env.roledefs['master']['vip']
 
-    cmd = 'ifconfig eth0:lvs:0 ' + etcdvip + ' broadcast ' + etcdvip + ' netmask 255.255.255.255 up'
-    run(cmd + ' && echo -e "#/bin/sh\\n# chkconfig:   2345 90 10\\n' + cmd + '" > /etc/rc.d/init.d/vip_route_lvs.sh')
-    cmd = 'ifconfig eth0:lvs:1 ' + mastervip + ' broadcast ' + mastervip + ' netmask 255.255.255.255 up'
-    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
-    cmd = 'route add -host ' + etcdvip + ' dev eth0:lvs:0 ; echo "" > /dev/null'
-    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
-    cmd = 'route add -host ' + mastervip + ' dev eth0:lvs:1 ; echo "" > /dev/null'
-    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
-    run('chmod +x /etc/rc.d/init.d/vip_route_lvs.sh && chkconfig --add vip_route_lvs.sh && chkconfig vip_route_lvs.sh on')
-    run('echo "1" > /proc/sys/net/ipv4/ip_forward')
+    while True:
+        cmd = 'ifconfig eth0:lvs:0 ' + etcdvip + ' broadcast ' + etcdvip + ' netmask 255.255.255.255 up'
+        run(cmd + ' && echo -e "#/bin/sh\\n# chkconfig:   2345 90 10\\n' + cmd + '" > /etc/rc.d/init.d/vip_route_lvs.sh')
+        cmd = 'ifconfig eth0:lvs:1 ' + mastervip + ' broadcast ' + mastervip + ' netmask 255.255.255.255 up'
+        run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
+        cmd = 'route add -host ' + etcdvip + ' dev eth0:lvs:0 ; echo "" > /dev/null'
+        run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
+        cmd = 'route add -host ' + mastervip + ' dev eth0:lvs:1 ; echo "" > /dev/null'
+        run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
+        run('chmod +x /etc/rc.d/init.d/vip_route_lvs.sh && chkconfig --add vip_route_lvs.sh && chkconfig vip_route_lvs.sh on')
+        run('echo "1" > /proc/sys/net/ipv4/ip_forward')
 
-    ipvsadm = 'ipvsadm -C'
+        # etcd
+        ipvsadm = '-A -t ' + etcdvip + ':2379 -s wrr\n'
+        for host in env.roledefs['etcd']['hosts']:
+            ipvsadm += '-a -t ' + etcdvip + ':2379 -r ' + host.split(':')[0] + ':2379 -g -w 1\n'
 
-    # etcd
-    ipvsadm += ' && ipvsadm -A -t ' + etcdvip + ':2379 -s wrr'
-    for host in env.roledefs['etcd']['hosts']:
-        ipvsadm += ' && ipvsadm -a -t ' + etcdvip + ':2379 -r ' + host.split(':')[0] + ':2379 -g -w 1'
+        # master
+        ipvsadm += '-A -t ' + mastervip + ':6443 -s wrr\n'
+        for host in env.roledefs['master']['hosts']:
+            ipvsadm += '-a -t ' + mastervip + ':6443 -r ' + host.split(':')[0] + ':6443 -g -w 1\n'
 
-    # master
-    ipvsadm += ' && ipvsadm -A -t ' + mastervip + ':6443 -s wrr'
-    for host in env.roledefs['master']['hosts']:
-        ipvsadm += ' && ipvsadm -a -t ' + mastervip + ':6443 -r ' + host.split(':')[0] + ':6443 -g -w 1'
-
-    run(ipvsadm)
-    run('ipvsadm --save > /etc/sysconfig/ipvsadm && systemctl restart ipvsadm && ipvsadm -Ln')
+        run('echo "' + ipvsadm + '" > /etc/sysconfig/ipvsadm')
+        with settings(warn_only = True):
+            result = run('systemctl restart ipvsadm && ipvsadm -Ln')
+            if result.return_code == 0:
+                break
     pass
 
 def uninstall_lvs():
