@@ -232,6 +232,18 @@ def remote_install_lvs():
 
     etcdvip = env.roledefs['etcd']['vip']
     mastervip = env.roledefs['master']['vip']
+
+    cmd = 'ifconfig eth0:lvs:0 ' + etcdvip + ' broadcast ' + etcdvip + ' netmask 255.255.255.255 up'
+    run(cmd + ' && echo -e "#/bin/sh\\n# chkconfig:   2345 90 10\\n' + cmd + '" > /etc/rc.d/init.d/vip_route_lvs.sh')
+    cmd = 'ifconfig eth0:lvs:1 ' + mastervip + ' broadcast ' + mastervip + ' netmask 255.255.255.255 up'
+    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
+    cmd = 'route add -host ' + etcdvip + ' dev eth0:lvs:0 ; echo "" > /dev/null'
+    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
+    cmd = 'route add -host ' + mastervip + ' dev eth0:lvs:1 ; echo "" > /dev/null'
+    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
+    run('chmod +x /etc/rc.d/init.d/vip_route_lvs.sh && chkconfig --add vip_route_lvs.sh && chkconfig vip_route_lvs.sh on')
+    run('echo "1" > /proc/sys/net/ipv4/ip_forward')
+
     ipvsadm = 'ipvsadm -C'
 
     # etcd
@@ -247,18 +259,6 @@ def remote_install_lvs():
     run(ipvsadm)
 
     run('ipvsadm --save > /etc/sysconfig/ipvsadm && systemctl restart ipvsadm && ipvsadm -Ln')
-
-    cmd = 'ifconfig eth0:lvs:0 ' + etcdvip + ' broadcast ' + etcdvip + ' netmask 255.255.255.255 up'
-    run(cmd + ' && echo -e "#/bin/sh\\n# chkconfig:   2345 90 10\\n' + cmd + '" > /etc/rc.d/init.d/vip_route_lvs.sh')
-    cmd = 'ifconfig eth0:lvs:1 ' + mastervip + ' broadcast ' + mastervip + ' netmask 255.255.255.255 up'
-    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
-    cmd = 'route add -host ' + etcdvip + ' dev eth0:lvs:0 ; echo "" > /dev/null'
-    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
-    cmd = 'route add -host ' + mastervip + ' dev eth0:lvs:1 ; echo "" > /dev/null'
-    run(cmd + ' && echo "' + cmd + '" >> /etc/rc.d/init.d/vip_route_lvs.sh')
-    run('chmod +x /etc/rc.d/init.d/vip_route_lvs.sh && chkconfig --add vip_route_lvs.sh && chkconfig vip_route_lvs.sh on')
-
-    run('echo "1" > /proc/sys/net/ipv4/ip_forward')
     pass
 
 def uninstall_lvs():
