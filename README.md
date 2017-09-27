@@ -99,3 +99,14 @@ env.roledefs = {<br>
 只需执行install.sh文件<br>
 cd install_k8s<br>
 ./install.sh<br>
+<br>
+安装后最终输出下图样子即为成功:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/finish-install.jpeg)<br>
+获取pods命令正常输出:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/getpods.jpeg)<br>
+访问dashboard:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
+访问grafana:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana.jpeg)<br>
+访问微服务例子:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
