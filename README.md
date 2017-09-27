@@ -1,3 +1,18 @@
+先展示一下结果
+===============
+安装后最终输出下图样子即为成功:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/finish-install.jpeg)<br>
+获取pods命令正常输出:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/getpods.jpeg)<br>
+访问dashboard:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
+访问grafana:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana.jpeg)<br>
+访问微服务例子:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
+<br>
+下面是安装方法
+=============
 此项目包含大文件，故需安装git lfs，参考：https://git-lfs.github.com/<br>
 git clone git@github.com:yonyoucloud/install_k8s.git<br>
 cd install_k8s<br>
@@ -100,13 +115,3 @@ env.roledefs = {<br>
 cd install_k8s<br>
 ./install.sh<br>
 <br>
-安装后最终输出下图样子即为成功:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/finish-install.jpeg)<br>
-获取pods命令正常输出:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/getpods.jpeg)<br>
-访问dashboard:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
-访问grafana:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana.jpeg)<br>
-访问微服务例子:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
