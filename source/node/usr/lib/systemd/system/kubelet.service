@@ -12,7 +12,6 @@ ExecStart=/usr/bin/kubelet  \
     $KUBE_LOGTOSTDERR \
     $KUBE_LOG_LEVEL \
     $KUBE_ALLOW_PRIV \
-    $KUBELET_API_SERVER \
     $KUBELET_ADDRESS \
     $KUBELET_PORT \
     $KUBELET_HOSTNAME \

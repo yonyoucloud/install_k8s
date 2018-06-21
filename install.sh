@@ -1,13 +1,13 @@
 #!/bin/sh
 # -------------------------------------------------------------------------------
 # Filename:    install.sh
-# Revision:    1.0
-# Date:        2017/09/20
+# Revision:    2.0
+# Date:        2018/06/21
 # Author:      bishenghua
 # Email:       net.bsh@gmail.com
 # Description: Script to install the kubernets system
 # -------------------------------------------------------------------------------
-# Copyright:   2017 (c) Bishenghua
+# Copyright:   2018 (c) Bishenghua
 # License:     GPL
 #
 # This program is free software; you can redistribute it and/or
@@ -38,8 +38,8 @@ do
 done
 while true
 do
-    pip install fabric
-    pip install --upgrade pip
+    pip install "fabric<2"
+    #pip install --upgrade pip
     which fab > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         break
@@ -49,53 +49,50 @@ tar zxvf source/needbin.gz -C /
 echo -e "\033[32m{`date`}[结束]初始化安装.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装基础环境.............................\033[0m"
-fab install_base
+fab install_base || exit 1
 echo -e "\033[32m{`date`}[结束]安装基础环境.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装docker.............................\033[0m"
-fab install_docker
+fab install_docker || exit 1
 echo -e "\033[32m{`date`}[结束]安装docker.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装docker私有仓库.............................\033[0m"
-fab install_pridocker
+fab install_pridocker || exit 1
 echo -e "\033[32m{`date`}[结束]安装docker私有仓库.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装etcd.............................\033[0m"
-fab install_etcd
+fab install_etcd || exit 1
 echo -e "\033[32m{`date`}[结束]安装etcd.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装master节点.............................\033[0m"
-fab install_master
+fab install_master || exit 1
 echo -e "\033[32m{`date`}[结束]安装master节点.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装node节点.............................\033[0m"
-fab install_node
+fab install_node || exit 1
 echo -e "\033[32m{`date`}[结束]安装node节点.............................\n\n\n\n\n\n\033[0m"
 
-echo -e "\033[32m{`date`}[开始]安装flannel节点.............................\033[0m"
-fab install_flannel
-echo -e "\033[32m{`date`}[结束]安装flannel节点.............................\n\n\n\n\n\n\033[0m"
-
 echo -e "\033[32m{`date`}[开始]安装docker证书.............................\033[0m"
-fab install_dockercrt
+fab install_dockercrt || exit 1
 echo -e "\033[32m{`date`}[结束]安装docker证书.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装负载均衡.............................\033[0m"
-fab install_lvs
+fab install_lvs || exit 1
 echo -e "\033[32m{`date`}[结束]安装负载均衡.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装dns.............................\033[0m"
-fab install_dns
+fab install_dns || exit 1
 echo -e "\033[32m{`date`}[结束]安装dns.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]启动所有服务.............................\033[0m"
-fab service:start
-# 有可能flanneld启动太快，导致docker网络没被覆盖，这里重启一下flannel和docker
-fab service_flannel_docker:restart
+fab service_etcd:start || exit 1
+sleep 5
+fab service_master:start || exit 1
+sleep 3
+fab service_node:start || exit 1
+sleep 3
+fab service_dns:start || exit 1
 echo -e "\033[32m{`date`}[结束]启动所有服务.............................\n\n\n\n\n\n\033[0m"
-
-
-#!/bin/sh
 
 echo -e "\033[32m{`date`}[开始]验证k8s集群.............................\033[0m"
 i=0
@@ -113,15 +110,20 @@ done
 echo -e "\033[32m{`date`}[结束]验证k8s集群.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]初始化镜像.............................\033[0m"
-fab init_images
+fab init_images || exit 1
 echo -e "\033[32m{`date`}[结束]初始化镜像.............................\n\n\n\n\n\n\033[0m"
 
+echo -e "\033[32m{`date`}[开始]初始化calico.............................\033[0m"
+fab init_calico || exit 1
+fab kubeletcni_node || exit 1
+echo -e "\033[32m{`date`}[结束]初始化calico.............................\n\n\n\n\n\n\033[0m"
+
 echo -e "\033[32m{`date`}[开始]初始k8s系统镜像服务.............................\033[0m"
-fab init_k8s_system
+fab init_k8s_system || exit 1
 echo -e "\033[32m{`date`}[结束]初始k8s系统镜像服务.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]初始化测试微服务.............................\033[0m"
-fab init_web_test
+fab init_web_test || exit 1
 echo -e "\033[32m{`date`}[结束]初始化测试微服务.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]需要您验证测试以下说明.............................\033[0m"

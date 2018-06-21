@@ -1,4 +1,3 @@
----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -21,7 +20,7 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: PRI_DOCKER_HOST:5000/google_containers/heapster-amd64:v1.3.0
+        image: PRI_DOCKER_HOST:5000/google_containers/heapster-amd64:v1.5.3
         imagePullPolicy: IfNotPresent
         command:
         - /heapster

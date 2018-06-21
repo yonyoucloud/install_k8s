@@ -2,13 +2,13 @@
 #coding:utf-8
 # -------------------------------------------------------------------------------
 # Filename:    fabfile.py
-# Revision:    1.0
-# Date:        2017/09/20
+# Revision:    2.0
+# Date:        2018/06/21
 # Author:      bishenghua
 # Email:       net.bsh@gmail.com
 # Description: Script to install the kubernets system
 # -------------------------------------------------------------------------------
-# Copyright:   2017 (c) Bishenghua
+# Copyright:   2018 (c) Bishenghua
 # License:     GPL
 #
 # This program is free software; you can redistribute it and/or
@@ -104,7 +104,12 @@ env.roledefs = {
             '10.211.55.25:22',
         ]
     },
-
+    # 新加Node节点(支持集群)
+    'newnode': {
+        'hosts': [
+            '10.211.55.26:22',
+        ]
+    },
 }
 
 def exec_cmd(cmd):
@@ -117,7 +122,6 @@ def exec_cmd(cmd):
 ##########################[启动服务]############################
 def service(dowhat = 'start'):
     execute(service_etcd, dowhat)
-    execute(service_flannel_docker, dowhat)
     execute(service_master, dowhat)
     execute(service_node, dowhat)
     execute(service_dns, dowhat)
@@ -130,33 +134,21 @@ def service(dowhat = 'start'):
 #fab service_etcd:status
 def service_etcd(dowhat = 'start'):
     etcdlvs = env.roledefs['etcd']['vip']
-    run('systemctl ' + dowhat + ' etcd ; echo "" > /dev/null')
+    run('systemctl ' + dowhat + ' etcd')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
-        local('etcdctl --ca-file=source/etcd/etc/etcd/ssl/ca.pem --cert-file=source/etcd/etc/etcd/ssl/etcd.pem --key-file=source/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://' + etcdlvs + ':2379 set /esn.com/network/config \'{"Network":"172.30.0.0/16","SubnetLen":25,"Backend":{"Type":"vxlan"}}\'')
+        #local('etcdctl --ca-file=source/etcd/etc/etcd/ssl/ca.pem --cert-file=source/etcd/etc/etcd/ssl/etcd.pem --key-file=source/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://' + etcdlvs + ':2379 set /esn.com/network/config \'{"Network":"172.30.0.0/16","SubnetLen":25,"Backend":{"Type":"vxlan"}}\'')
     pass
 ##########################[etcd控制]############################
-
-
-##########################[flannel_docker控制]############################
-@parallel
-@roles('master', 'node')
-def service_flannel_docker(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' flanneld ; echo "" > /dev/null')
-    run('systemctl ' + dowhat + ' docker ; echo "" > /dev/null')
-    if dowhat == 'start' or dowhat == 'restart':
-        run('iptables -P FORWARD ACCEPT')
-    pass
-##########################[flannel_docker控制]############################
 
 
 ##########################[master控制]############################
 @parallel
 @roles('master')
 def service_master(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' kube-apiserver ; echo "" > /dev/null')
-    run('systemctl ' + dowhat + ' kube-controller-manager ; echo "" > /dev/null')
-    run('systemctl ' + dowhat + ' kube-scheduler ; echo "" > /dev/null')
+    run('systemctl ' + dowhat + ' kube-apiserver')
+    run('systemctl ' + dowhat + ' kube-controller-manager')
+    run('systemctl ' + dowhat + ' kube-scheduler')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
     pass
@@ -167,8 +159,47 @@ def service_master(dowhat = 'start'):
 @parallel
 @roles('node')
 def service_node(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' kubelet ; echo "" > /dev/null')
-    run('systemctl ' + dowhat + ' kube-proxy ; echo "" > /dev/null')
+    execute(_service_node, dowhat = 'start')
+    pass
+
+def newnode_service_node_start():
+    execute(_newnode_service_node_start)
+
+    i = 0
+    while True:
+        i = i + 1
+        hosts = ''
+        split = ''
+        for host in env.roledefs['newnode']['hosts']:
+            hosts += split + host.split(':')[0]
+            split = '|'
+        num = local('kubectl get nodes | grep -E "' + hosts + '" | grep Ready | wc -l', capture = True)
+        total = len(env.roledefs['newnode']['hosts'])
+        print '等待所有节点运行状态变为Ready(%ds)(%d = %s)' % (i, total, num)
+        if int(num) == total:
+            break
+        time.sleep(3)
+
+    i = 0
+    while True:
+        i = i + 1
+        num = local('kubectl get pods -o wide -n kube-system | grep -E "' + hosts + '" | grep calico-node | grep Running | wc -l', capture = True)
+        total = len(env.roledefs['newnode']['hosts'])
+        print '等待所有节点calico-node容器正常运行(%ds)(%d = %s)' % (i, total, num)
+        if int(num) == total:
+            break
+        time.sleep(3)
+    pass
+
+@parallel
+@roles('newnode')
+def _newnode_service_node_start():
+    execute(_service_node, 'start')
+    pass
+
+def _service_node(dowhat = 'start'):
+    run('systemctl ' + dowhat + ' kubelet')
+    run('systemctl ' + dowhat + ' kube-proxy')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
     pass
@@ -179,7 +210,7 @@ def service_node(dowhat = 'start'):
 @parallel
 @roles('pridns')
 def service_dns(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' named-chroot ; echo "" > /dev/null')
+    run('systemctl ' + dowhat + ' named-chroot')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
     pass
@@ -190,12 +221,23 @@ def service_dns(dowhat = 'start'):
 @parallel
 @roles('etcd', 'master', 'node', 'pridocker', 'lvs')
 def install_base():
+    execute(_install_base)
+    pass
+
+@parallel
+@roles('newnode')
+def newnode_install_base():
+    execute(_install_base)
+    pass
+
+def _install_base():
     run('yum install -y telnet')
     run('mkdir /data > /dev/null 2>&1;if [ $? == 0 ];then useradd -d /data/www esn && useradd -d /data/www www && usermod -G esn www && chmod 750 /data/www && mkdir -p /data/log/php && mkdir -p /data/log/nginx && mkdir -p /data/yy_log && chown -R www:www /data/log /data/yy_log && chmod 750 /data/log /data/yy_log;fi')
     run('systemctl stop firewalld && systemctl disable firewalld')
     run('sed -i "s#SELINUX=enforcing#SELINUX=disabled#g" /etc/selinux/config && setenforce 0 ; echo "" > /dev/null')
-    run('sed -i "s#umask 022#umask 027#g" /etc/profile')
+    #run('sed -i "s#umask 022#umask 027#g" /etc/profile')
     run('cat /etc/sysctl.conf | grep net.ipv4.ip_forward > /dev/null 2>&1 ; if [ $? -ne 0 ];then echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf && sysctl -p;fi')
+    run('cat /etc/sysctl.conf | grep net.ipv4.conf.all.rp_filter > /dev/null 2>&1 ; if [ $? -ne 0 ];then echo "net.ipv4.conf.all.rp_filter = 1" >> /etc/sysctl.conf && sysctl -p;fi')
     pass
 ##########################[基础安装]############################
 
@@ -204,6 +246,16 @@ def install_base():
 @parallel
 @roles('pridocker', 'master', 'node')
 def install_docker():
+    execute(_install_docker)
+    pass
+
+@parallel
+@roles('newnode')
+def newnode_install_docker():
+    execute(_install_docker)
+    pass
+
+def _install_docker():
     put('source/docker/docker_engine_packages.gz', '/tmp', mode=0640)
     run('cd /tmp && tar zxvf docker_engine_packages.gz && cd docker_engine_packages && yum -y localinstall * && rm -rf /tmp/docker_engine_packages.gz /tmp/docker_engine_packages')
     put('source/docker/conf.gz', '/tmp', mode=0640)
@@ -400,6 +452,8 @@ def remote_install_master():
     local('cd source/master && sed "s#K8S_HOST#' + curhost + '#g" apiserver.tpl > etc/kubernetes/apiserver')
     local('cd source/master && sed "s#K8S_HOST#' + curhost + '#g" config.tpl > etc/kubernetes/config')
     local('cd source/master && sed -i "s#ETCD_LVS_HOST#' + etcdlvs + '#g" etc/kubernetes/apiserver')
+    local('cd source/master && mkdir -p etc/kubernetes/pki/etcd && chmod 750 etc/kubernetes/pki/etcd')
+    local('/usr/bin/cp -rpf source/etcd/etc/etcd/ssl/{ca.pem,etcd.pem,etcd-key.pem} source/master/etc/kubernetes/pki/etcd')
 
     local('cd source/master && tar zcvf master.gz etc usr')
     put('source/master/master.gz', '/master.gz', mode=0640)
@@ -476,32 +530,18 @@ def uninstall_lvsvip_master():
 ##########################[安装master]############################
 
 
-##########################[安装flannel]############################
-@roles('master', 'node')
-def install_flannel():
-    etcdlvs = env.roledefs['etcd']['vip']
-
-    local('cd source/flannel && sed "s#ETCD_LVS_HOST#' + etcdlvs + '#g" flanneld.tpl > etc/flannel/flanneld')
-
-    local('cd source/flannel && /usr/bin/cp -rpf ../etcd/*.pem etc/flannel/etcd_ssl')
-    local('cd source/flannel && tar zcvf flannel.gz etc usr')
-    put('source/flannel/flannel.gz', '/flannel.gz', mode=0640)
-    run('tar zxvf /flannel.gz -C / && rm -rf /flannel.gz')
-    local('rm -rf source/flannel/flannel.gz')
-    run('systemctl daemon-reload && systemctl enable flanneld')
-    pass
-
-@roles('master', 'node')
-def uninstall_flannel():
-    run('systemctl disable flanneld ; echo "" > /dev/null')
-    run('rm -rf /usr/bin/flanneld /etc/flannel /usr/lib/systemd/system/flanneld.service')
-    pass
-##########################[安装flannel]############################
-
-
 ##########################[安装docker证书]############################
 @roles('node')
 def install_dockercrt():
+    execute(_install_dockercrt)
+    pass
+
+@roles('newnode')
+def newnode_install_dockercrt():
+    execute(_install_dockercrt)
+    pass
+
+def _install_dockercrt():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
 
     local('cd source/docker && chmod 640 ca.crt && /usr/bin/cp -rpf ca.crt HOST:5000')
@@ -528,6 +568,15 @@ def install_node():
 
 @roles('node')
 def remote_install_node():
+    execute(_remote_install_node)
+    pass
+
+@roles('newnode')
+def newnode_install_node():
+    execute(_remote_install_node)
+    pass
+
+def _remote_install_node():
     curhost = env.host_string.split(':')[0]
     masterlvs = env.roledefs['master']['vip']
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
@@ -604,23 +653,75 @@ def init_images():
 
     local('docker images | grep "esn_base" || (cd source/images && sha256=`docker load -i esn-containers~esn_base:1.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/esn-containers/esn_base:1.0)')
 
-    local('docker images | grep "pause-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google-containers~pause-amd64:3.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google-containers/pause-amd64:3.0 && docker push ' + pridocker + ':5000/google-containers/pause-amd64:3.0)')
+    local('docker images | grep "pause-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google-containers~pause-amd64:3.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google-containers/pause-amd64:3.1 && docker push ' + pridocker + ':5000/google-containers/pause-amd64:3.1)')
 
-    local('docker images | grep "kubernetes-dashboard-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~kubernetes-dashboard-amd64:v1.6.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/kubernetes-dashboard-amd64:v1.6.1 && docker push ' + pridocker + ':5000/google_containers/kubernetes-dashboard-amd64:v1.6.1)')
+    local('docker images | grep "kubernetes-dashboard-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~kubernetes-dashboard-amd64:v1.8.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/kubernetes-dashboard-amd64:v1.8.3 && docker push ' + pridocker + ':5000/google_containers/kubernetes-dashboard-amd64:v1.8.3)')
 
-    local('docker images | grep "k8s-dns-sidecar-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-sidecar-amd64:1.14.2.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-sidecar-amd64:1.14.2 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-sidecar-amd64:1.14.2)')
+    local('docker images | grep "k8s-dns-sidecar-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-sidecar-amd64:1.14.10.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-sidecar-amd64:1.14.10 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-sidecar-amd64:1.14.10)')
 
-    local('docker images | grep "k8s-dns-kube-dns-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-kube-dns-amd64:1.14.2.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-kube-dns-amd64:1.14.2 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-kube-dns-amd64:1.14.2)')
+    local('docker images | grep "k8s-dns-kube-dns-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-kube-dns-amd64:1.14.10.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-kube-dns-amd64:1.14.10 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-kube-dns-amd64:1.14.10)')
 
-    local('docker images | grep "k8s-dns-dnsmasq-nanny-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-dnsmasq-nanny-amd64:1.14.2.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.2 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.2)')
+    local('docker images | grep "k8s-dns-dnsmasq-nanny-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-dnsmasq-nanny-amd64:1.14.10.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.10 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.10)')
 
-    local('docker images | grep "heapster-influxdb-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-influxdb-amd64:v1.1.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.1.1 && docker push ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.1.1)')
+    local('docker images | grep "heapster-influxdb-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-influxdb-amd64:v1.3.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.3.3 && docker push ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.3.3)')
 
-    local('docker images | grep "heapster-grafana-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-grafana-amd64:v4.2.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-grafana-amd64:v4.2.1 && docker push ' + pridocker + ':5000/google_containers/heapster-grafana-amd64:v4.2.1)')
+    local('docker images | grep "heapster-grafana-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-grafana-amd64:v4.4.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-grafana-amd64:v4.4.3 && docker push ' + pridocker + ':5000/google_containers/heapster-grafana-amd64:v4.4.3)')
 
-    local('docker images | grep "heapster-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-amd64:v1.3.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-amd64:v1.3.0 && docker push ' + pridocker + ':5000/google_containers/heapster-amd64:v1.3.0)')
+    local('docker images | grep "heapster-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-amd64:v1.5.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-amd64:v1.5.3 && docker push ' + pridocker + ':5000/google_containers/heapster-amd64:v1.5.3)')
+
+    local('docker images | grep "calico" | grep node || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~calico~node:v3.1.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/calico/node:v3.1.3 && docker push ' + pridocker + ':5000/quay.io/calico/node:v3.1.3)')
+
+    local('docker images | grep "calico" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~calico~cni:v3.1.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/calico/cni:v3.1.3 && docker push ' + pridocker + ':5000/quay.io/calico/cni:v3.1.3)')
+
+    local('docker images | grep "calico" | grep kube-controllers || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~calico~kube-controllers:v3.1.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/calico/kube-controllers:v3.1.3 && docker push ' + pridocker + ':5000/quay.io/calico/kube-controllers:v3.1.3)')
     pass
 ##########################[初始化镜像]############################
+
+
+##########################[初始化calico]############################
+def init_calico():
+    etcdlvs = env.roledefs['etcd']['vip']
+    pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
+
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/calico/calico.yaml.tpl > source/calico/calico.yaml')
+    local('sed -i "s#ETCD_LVS_HOST#' + etcdlvs + '#g" source/calico/calico.yaml')
+    local('TLS_ETCD_KEY=$(cat source/etcd/etc/etcd/ssl/etcd-key.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_KEY#$TLS_ETCD_KEY#g" source/calico/calico.yaml')
+    local('TLS_ETCD_CERT=$(cat source/etcd/etc/etcd/ssl/etcd.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_CERT#$TLS_ETCD_CERT#g" source/calico/calico.yaml')
+    local('TLS_ETCD_CA=$(cat source/etcd/etc/etcd/ssl/ca.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_CA#$TLS_ETCD_CA#g" source/calico/calico.yaml')
+
+    local('kubectl apply -f source/calico')
+
+    i = 0
+    while True:
+        i = i + 1
+        num = local('kubectl get pods -o wide -n kube-system | grep calico | grep Running | wc -l', capture = True)
+        total = len(env.roledefs['node']['hosts']) + 1
+        print '等待所有节点calico容器正常运行(%ds)(%d = %s)' % (i, total, num)
+        if int(num) == total:
+            break
+        time.sleep(3)
+    pass
+##########################[初始化calico]############################
+
+
+##########################[修改kubelet配置，加载cni网络插件（calico启动后才会生成）]############################
+@parallel
+@roles('node')
+def kubeletcni_node():
+    execute(_kubeletcni_node)
+    pass
+
+@parallel
+@roles('newnode')
+def newnode_kubeletcni_node():
+    execute(_kubeletcni_node)
+    pass
+
+def _kubeletcni_node():
+    run("sed -i 's#--fail-swap-on=false\"#--fail-swap-on=false --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin\"#g' /etc/kubernetes/kubelet")
+    run('systemctl restart kubelet')
+    pass
+##########################[修改kubelet配置，加载cni网络插件（calico启动后才会生成）]############################
 
 
 ##########################[初始化k8s系统]############################
@@ -628,7 +729,7 @@ def init_k8s_system():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
     pridns = env.roledefs['pridns']['hosts'][0].split(':')[0]
 
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dashboard/kubernetes-dashboard.yaml.tpl > source/dashboard/kubernetes-dashboard.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dashboard/dashboard-controller.yaml.tpl > source/dashboard/dashboard-controller.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dns/kubedns-controller.yaml.tpl > source/dns/kubedns-controller.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/grafana.yaml.tpl > source/heapster/grafana.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/heapster.yaml.tpl > source/heapster/heapster.yaml')

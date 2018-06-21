@@ -1,4 +1,3 @@
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -14,7 +13,7 @@ spec:
     spec:
       containers:
       - name: influxdb
-        image: PRI_DOCKER_HOST:5000/google_containers/heapster-influxdb-amd64:v1.1.1
+        image: PRI_DOCKER_HOST:5000/google_containers/heapster-influxdb-amd64:v1.3.3
         volumeMounts:
         - mountPath: /data
           name: influxdb-storage

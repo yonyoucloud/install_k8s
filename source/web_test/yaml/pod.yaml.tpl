@@ -7,6 +7,11 @@ metadata:
   namespace: esn-system
 spec:
   replicas: 1
+  minReadySeconds: 10     #滚动升级时10s后认为该pod就绪
+  strategy:
+    rollingUpdate:  ##由于replicas为3,则整个升级,pod个数在2-4个之间
+      maxSurge: 1     #滚动升级时会先启动1个pod
+      maxUnavailable: 1 #滚动升级时允许的最大Unavailable的pod个数
   selector:
     matchLabels:
       app: web-test
@@ -26,6 +31,11 @@ spec:
         - name: web-test
           #image: PRI_DOCKER_HOST:5000/esn-containers/web_test:1.0
           image: PRO_IMAGE
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              memory: 80Mi
           lifecycle:
             postStart:
               exec:
@@ -38,12 +48,16 @@ spec:
           ports:
           - containerPort: 80
             protocol: TCP
-          #livenessProbe: #(活性探针)
-            #httpGet:
-              #path: /
-              #port: 80
-            #initialDelaySeconds: 30
-            #timeoutSeconds: 30
+          livenessProbe: #(活性探针)
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 6
+            periodSeconds: 3
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 4
+            periodSeconds: 2
           volumeMounts:
             - mountPath: /data/log/nginx
               name: accesslog

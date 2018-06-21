@@ -1,23 +1,8 @@
-先展示一下结果
-===============
-安装后最终输出下图样子即为成功:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/finish-install.jpeg)<br>
-获取pods命令正常输出:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/getpods.jpeg)<br>
-访问dashboard:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
-访问grafana:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana.jpeg)<br>
-访问微服务例子:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
-<br>
-下面是安装方法
-=============
 此项目包含大文件，故需安装git lfs，参考：https://git-lfs.github.com/<br>
 git clone git@github.com:yonyoucloud/install_k8s.git<br>
 cd install_k8s<br>
 git lfs pull # 下载大文件<br>
-也可以直接从百度网盘下载安装包: 链接: https://pan.baidu.com/s/1pLdsbhD 密码: cq28<br>
+也可以直接从百度网盘下载安装包: 链接: https://pan.baidu.com/s/1bp3yXwN 密码: 258g<br>
 注意: 下载下来的压缩包336M, 解压后大小1.2G; git clone下来目录大概2.3G, 需要注意大小, 确保大文件二进制文件及镜像文件都在<br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
@@ -45,6 +30,8 @@ web_test<br>
     ├── source         源文件目录，也包括配置<br>
     └── ssh            直连容器需要的秘钥<br>
     └── uninstall.sh   卸载脚本<br>
+    └── start.sh       如果采用LVS代理Etcd、Master集群，LVS机器发生重启时，需要在其上执行此脚本<br>
+    └── add_node.sh    修改fabric.py中newnode配置，执行此脚本可以添加node节点，支持一次添加多个<br>
 <br>
 第二步, 修改fabfile.py文件中主机登录密码及安装目的主机地址:<br>
 注意: 整个集群支持安装到一台主机上面, 需要注意vip要在同一网段, 且etcd和master的vip必须不同<br>
@@ -109,9 +96,14 @@ env.roledefs = {<br>
             '10.211.55.25:22',<br>
         ]<br>
     },<br>
+    # 新加Node节点(支持集群)<br>
+    'newnode': {<br>
+        'hosts': [<br>
+            '10.211.55.26:22',<br>
+        ]<br>
+    },<br>
 <br>
 第三步:<br>
 只需执行install.sh文件<br>
 cd install_k8s<br>
 ./install.sh<br>
-<br>

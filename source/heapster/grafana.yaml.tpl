@@ -1,4 +1,3 @@
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -14,11 +13,14 @@ spec:
     spec:
       containers:
       - name: grafana
-        image: PRI_DOCKER_HOST:5000/google_containers/heapster-grafana-amd64:v4.2.1
+        image: PRI_DOCKER_HOST:5000/google_containers/heapster-grafana-amd64:v4.4.3
         ports:
         - containerPort: 3000
           protocol: TCP
         volumeMounts:
+        - mountPath: /etc/ssl/certs
+          name: ca-certificates
+          readOnly: true
         - mountPath: /var
           name: grafana-storage
         env:
@@ -38,9 +40,12 @@ spec:
           value: Admin
         - name: GF_SERVER_ROOT_URL
           # If you're only using the API Server proxy, set this value instead:
-          # value: /api/v1/proxy/namespaces/kube-system/services/monitoring-grafana/
+          # value: /api/v1/namespaces/kube-system/services/monitoring-grafana/proxy
           value: /
       volumes:
+      - name: ca-certificates
+        hostPath:
+          path: /etc/ssl/certs
       - name: grafana-storage
         emptyDir: {}
       #nodeSelector:
@@ -61,7 +66,6 @@ spec:
   # or through a public IP.
   # type: LoadBalancer
   # You could also use NodePort to expose the service at a randomly-generated port
-  # type: NodePort
   type: NodePort
   ports:
   - port: 80
