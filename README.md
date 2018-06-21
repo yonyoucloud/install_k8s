@@ -2,8 +2,6 @@
 git clone git@github.com:yonyoucloud/install_k8s.git<br>
 cd install_k8s<br>
 git lfs pull # 下载大文件<br>
-也可以直接从百度网盘下载安装包: 链接: https://pan.baidu.com/s/1bp3yXwN 密码: 258g<br>
-注意: 下载下来的压缩包336M, 解压后大小1.2G; git clone下来目录大概2.3G, 需要注意大小, 确保大文件二进制文件及镜像文件都在<br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
 etcd集群<br>
