@@ -7,7 +7,7 @@ git lfs pull # 下载大文件<br>
 etcd集群<br>
 kubernets master集群<br>
 kubernets node集群<br>
-flannel 网络<br>
+calico 网络<br>
 docker 私有镜像仓库<br>
 ipvsadm(lvs) 负载均衡<br>
 bind 私有dns服务,方便内网域名拦截解析<br>
@@ -37,7 +37,7 @@ web_test<br>
 特别注意三项:<br>
 1、修改脚本中的主机密码信息<br>
 2、修改脚本中的主机地址信息<br>
-3、确保系统是centos7，并且网口名字是eth0<br>
+3、确保系统是centos7，并且网卡名字是eth0<br>
 <br>
 编辑脚本配置信息, vim fabfile.py:<br>
 env.user = 'root'<br>
