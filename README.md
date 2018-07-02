@@ -13,12 +13,16 @@
 <br>
 下面是安装方法
 =============
-此项目包含大文件，故需安装git lfs，参考：https://git-lfs.github.com/<br>
-git clone git@github.com:yonyoucloud/install_k8s.git<br>
+最新版本安装方法（v1.11.0）:<br>
+此项目包含大文件，故需先下载ls-files.gz包：<br>
+链接: https://pan.baidu.com/s/1JOh0_t_OfNyBmq7xjxuEtw 密码: 1j52<br>
+git clone https://github.com/yonyoucloud/install_k8s<br>
 cd install_k8s<br>
-git lfs pull # 下载大文件<br>
-百度网盘打包下载：<br>
-链接: https://pan.baidu.com/s/1PTl8WwyyMhjoBPttGC--7w 密码: qfgr<br>
+mv ls-files.gz .<br>
+tar zxvf ls-files.gz<br>
+<br>
+其他版本：(直接解压缩即可)<br>
+v1.10.4: 链接: https://pan.baidu.com/s/1_BfFVQ--bftFZ3jN3Eij8A 密码: r437<br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
 etcd集群<br>
