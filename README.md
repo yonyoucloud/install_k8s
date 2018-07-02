@@ -17,6 +17,8 @@
 git clone git@github.com:yonyoucloud/install_k8s.git<br>
 cd install_k8s<br>
 git lfs pull # 下载大文件<br>
+百度网盘打包下载：<br>
+链接: https://pan.baidu.com/s/1PTl8WwyyMhjoBPttGC--7w 密码: qfgr<br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
 etcd集群<br>
