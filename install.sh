@@ -135,7 +135,7 @@ do
     echo -e "\033[32m等待kubernetes-dashboard running($i)s...\033[0m"
     kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running
     if [ $? -eq 0 ]; then
-        kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: http://"$7":30000\033[0m"}'
+        kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: https://"$7":30000\033[0m"}'
         break
     fi
 done
