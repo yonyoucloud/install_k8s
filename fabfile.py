@@ -459,7 +459,7 @@ def remote_install_master():
     etcdlvs = env.roledefs['etcd']['vip']
 
     local('cd source/master && sed "s#K8S_HOST#' + curhost + '#g" config.tpl > etc/kubernetes/config')
-    local('cd source/master && sed -i "s#ETCD_LVS_HOST#' + etcdlvs + '#g" etc/kubernetes/apiserver')
+    local('cd source/master && sed "s#ETCD_LVS_HOST#' + etcdlvs + '#g" apiserver.tpl > etc/kubernetes/apiserver')
     local('cd source/master && mkdir -p etc/kubernetes/pki/etcd && chmod 750 etc/kubernetes/pki/etcd')
     local('/usr/bin/cp -rpf source/etcd/etc/etcd/ssl/{ca.pem,etcd.pem,etcd-key.pem} source/master/etc/kubernetes/pki/etcd')
 

@@ -6,6 +6,8 @@ address: "NODE_HOST"
 staticPodPath: "/etc/kubernetes/manifests"
 clusterDNS: ["192.168.0.2"]
 clusterDomain: "cluster.local"
+tlsCertFile: "/etc/kubernetes/pki/kubelet.pem"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet-key.pem"
 authorization:
   mode: Webhook
   webhook:
@@ -14,8 +16,6 @@ authorization:
 authentication:
   x509:
     clientCAFile: "/etc/kubernetes/pki/ca.pem"
-    tlsCertFile: "/etc/kubernetes/pki/kubelet.pem"
-    tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet-key.pem"
   webhook:
     enabled: false
     cacheTTL: "0s"
