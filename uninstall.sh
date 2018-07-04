@@ -66,7 +66,7 @@ echo -e "\033[32m{`date`}[结束]卸载docker.............................\n\n\n
 echo -e "\033[32m{`date`}[开始]卸载工具包.............................\033[0m"
 rm -rf /usr/local/bin/cfssl*
 rm -rf /usr/local/bin/{etcdctl,kubectl,kubeadm,kubemark}
-rm -rf /root/.kube
+rm -rf /root/.kube /opt/cni /etc/cni
 echo -e "\033[32m{`date`}[结束]卸载工具包.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[31m{`date`}[k8s集群卸载完毕！].............................\n\n\n\n\n\n\033[0m"

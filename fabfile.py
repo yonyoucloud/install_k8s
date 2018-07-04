@@ -146,11 +146,15 @@ def service_etcd(dowhat = 'start'):
 @parallel
 @roles('master')
 def service_master(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' kube-apiserver')
-    run('systemctl ' + dowhat + ' kube-controller-manager')
-    run('systemctl ' + dowhat + ' kube-scheduler')
+    run('systemctl ' + dowhat + ' kube-apiserver ; echo "" > /dev/null 2>&1')
+    run('systemctl ' + dowhat + ' kube-controller-manager ; echo "" > /dev/null 2>&1')
+    run('systemctl ' + dowhat + ' kube-scheduler ; echo "" > /dev/null 2>&1')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
+    if dowhat == 'stop':
+        run("ps aux | grep kube-apiserver | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
+        run("ps aux | grep kube-controller-manager | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
+        run("ps aux | grep kube-scheduler | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
     pass
 ##########################[master控制]############################
 
@@ -198,10 +202,15 @@ def _newnode_service_node_start():
     pass
 
 def _service_node(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' kubelet')
-    run('systemctl ' + dowhat + ' kube-proxy')
+    run('systemctl ' + dowhat + ' kubelet ; echo "" > /dev/null 2>&1')
+    run('systemctl ' + dowhat + ' kube-proxy ; echo "" > /dev/null 2>&1')
+    run('systemctl ' + dowhat + ' docker ; echo "" > /dev/null 2>&1')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
+    if dowhat == 'stop':
+        run("ps aux | grep kubelet | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
+        run("ps aux | grep kube-proxy | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
+        run("ps aux | grep docker | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
     pass
 ##########################[node控制]############################
 
