@@ -146,9 +146,9 @@ def service_etcd(dowhat = 'start'):
 @parallel
 @roles('master')
 def service_master(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' kube-apiserver ; echo "" > /dev/null 2>&1')
-    run('systemctl ' + dowhat + ' kube-controller-manager ; echo "" > /dev/null 2>&1')
-    run('systemctl ' + dowhat + ' kube-scheduler ; echo "" > /dev/null 2>&1')
+    run('systemctl ' + dowhat + ' kube-apiserver')
+    run('systemctl ' + dowhat + ' kube-controller-manager')
+    run('systemctl ' + dowhat + ' kube-scheduler')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
     if dowhat == 'stop':
@@ -202,9 +202,9 @@ def _newnode_service_node_start():
     pass
 
 def _service_node(dowhat = 'start'):
-    run('systemctl ' + dowhat + ' kubelet ; echo "" > /dev/null 2>&1')
-    run('systemctl ' + dowhat + ' kube-proxy ; echo "" > /dev/null 2>&1')
-    run('systemctl ' + dowhat + ' docker ; echo "" > /dev/null 2>&1')
+    run('systemctl ' + dowhat + ' kubelet')
+    run('systemctl ' + dowhat + ' kube-proxy')
+    run('systemctl ' + dowhat + ' docker')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT')
     if dowhat == 'stop':
