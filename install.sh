@@ -166,7 +166,8 @@ do
     echo -e "\033[32m等待web-test running($i)s...\033[0m"
     kubectl -n esn-system get pods -o wide | grep web-test | grep Running
     if [ $? -eq 0 ]; then
-        kubectl -n esn-system get pods -o wide | grep web-test | grep Running | awk '{print "\033[31m您可以访问web-test: http://"$7":31000\033[0m";print "\033[31m您可以执行: ssh -i ssh/root/id_rsa root@"$6" 直接登录到容器中\033[0m";print "\033[31m您也可以执行: ssh -i ssh/esn/id_rsa esn@"$6" 直接登录到容器中\033[0m"}'
+        chmod 600 source/esn_base/ssh/root/* source/esn_base/ssh/esn/*
+        kubectl -n esn-system get pods -o wide | grep web-test | grep Running | awk '{print "\033[31m您可以访问web-test: http://"$7":31000\033[0m";print "\033[31m您可以执行: ssh -i source/esn_base/ssh/root/id_rsa root@"$6" 直接登录到容器中\033[0m";print "\033[31m您也可以执行: ssh -i source/esn_base/ssh/esn/id_rsa esn@"$6" 直接登录到容器中\033[0m"}'
         break
     fi
 done
