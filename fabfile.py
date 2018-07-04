@@ -163,7 +163,7 @@ def service_master(dowhat = 'start'):
 @parallel
 @roles('node')
 def service_node(dowhat = 'start'):
-    execute(_service_node)
+    execute(_service_node, dowhat)
     pass
 
 def newnode_service_node_start():
