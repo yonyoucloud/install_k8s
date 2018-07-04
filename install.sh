@@ -45,6 +45,7 @@ do
         break
     fi
 done
+chown -R root:root ../install_k8s
 tar zxvf source/needbin.gz -C /
 echo -e "\033[32m{`date`}[结束]初始化安装.............................\n\n\n\n\n\n\033[0m"
 
@@ -86,10 +87,13 @@ echo -e "\033[32m{`date`}[结束]安装dns.............................\n\n\n\n\
 
 echo -e "\033[32m{`date`}[开始]启动所有服务.............................\033[0m"
 fab service_etcd:start || exit 1
+fab service_etcd:restart || exit 1
 sleep 5
 fab service_master:start || exit 1
+fab service_master:restart || exit 1
 sleep 3
 fab service_node:start || exit 1
+fab service_node:restart || exit 1
 sleep 3
 fab service_dns:start || exit 1
 echo -e "\033[32m{`date`}[结束]启动所有服务.............................\n\n\n\n\n\n\033[0m"
@@ -135,7 +139,7 @@ do
     echo -e "\033[32m等待kubernetes-dashboard running($i)s...\033[0m"
     kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running
     if [ $? -eq 0 ]; then
-        kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: http://"$7":30000\033[0m"}'
+        kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: https://"$7":30000\033[0m"}'
         break
     fi
 done

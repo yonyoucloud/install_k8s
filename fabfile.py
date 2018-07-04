@@ -699,6 +699,9 @@ def init_calico():
         print '等待所有节点calico容器正常运行(%ds)(%d = %s)' % (i, total, num)
         if int(num) == total:
             break
+        # 15次都没成功，重启一下master服务
+        if i == 15:
+            execute(service_master, dowhat = 'restart')
         time.sleep(3)
     pass
 ##########################[初始化calico]############################
