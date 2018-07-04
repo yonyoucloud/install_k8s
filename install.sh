@@ -88,16 +88,17 @@ echo -e "\033[32m{`date`}[结束]安装dns.............................\n\n\n\n\
 echo -e "\033[32m{`date`}[开始]启动所有服务.............................\033[0m"
 fab service_etcd:start || exit 1
 fab service_etcd:restart || exit 1
-sleep 5
+sleep 10
 fab service_master:start || exit 1
 fab service_master:restart || exit 1
-sleep 3
+sleep 8
 fab service_node:start || exit 1
 fab service_node:restart || exit 1
-sleep 3
+sleep 8
 fab service_dns:start || exit 1
 echo -e "\033[32m{`date`}[结束]启动所有服务.............................\n\n\n\n\n\n\033[0m"
 
+sleep 5
 echo -e "\033[32m{`date`}[开始]验证k8s集群.............................\033[0m"
 i=0
 while true

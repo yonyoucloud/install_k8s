@@ -163,7 +163,7 @@ def service_master(dowhat = 'start'):
 @parallel
 @roles('node')
 def service_node(dowhat = 'start'):
-    execute(_service_node, dowhat = 'start')
+    execute(_service_node)
     pass
 
 def newnode_service_node_start():
@@ -553,8 +553,7 @@ def newnode_install_dockercrt():
 def _install_dockercrt():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
 
-    local('cd source/docker && chmod 640 ca.crt && /usr/bin/cp -rpf ca.crt HOST:5000')
-    local('cd source/docker && rm -rf etc/docker/certs.d/* && /usr/bin/cp -rpf HOST:5000 etc/docker/certs.d/' + pridocker + ':5000')
+    local('cd source/docker && rm -rf etc/docker/certs.d/* && chmod 640 ca.crt && mkdir etc/docker/certs.d/' + pridocker + ':5000 && chmod 750 etc/docker/certs.d/' + pridocker + ':5000 && /usr/bin/cp -rpf ca.crt etc/docker/certs.d/' + pridocker + ':5000')
 
     local('cd source/docker && tar zcvf docker.gz etc')
     put('source/docker/docker.gz', '/docker.gz', mode=0640)
