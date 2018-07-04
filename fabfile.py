@@ -458,7 +458,6 @@ def remote_install_master():
     curhost = env.host_string.split(':')[0]
     etcdlvs = env.roledefs['etcd']['vip']
 
-    local('cd source/master && sed "s#K8S_HOST#' + curhost + '#g" apiserver.tpl > etc/kubernetes/apiserver')
     local('cd source/master && sed "s#K8S_HOST#' + curhost + '#g" config.tpl > etc/kubernetes/config')
     local('cd source/master && sed -i "s#ETCD_LVS_HOST#' + etcdlvs + '#g" etc/kubernetes/apiserver')
     local('cd source/master && mkdir -p etc/kubernetes/pki/etcd && chmod 750 etc/kubernetes/pki/etcd')
@@ -591,6 +590,7 @@ def _remote_install_node():
 
     local('cd source/node && sed "s#NODE_HOST#' + curhost + '#g" kubelet-csr.json.tpl > kubelet-csr.json')
     local('cd source/node && sed "s#NODE_HOST#' + curhost + '#g" kubelet.tpl > etc/kubernetes/kubelet')
+    local('cd source/node && sed "s#NODE_HOST#' + curhost + '#g" kubelet.yaml.tpl > etc/kubernetes/kubelet.yaml')
     local('cd source/node && sed "s#K8S_MASTER_LVS#' + masterlvs + '#g" config.tpl > etc/kubernetes/config')
     local('cd source/node && sed -i "s#K8S_MASTER_LVS#' + masterlvs + '#g" etc/kubernetes/kubelet')
     local('cd source/node && sed -i "s#PRI_DOCKER_HOST#' + pridocker + '#g" etc/kubernetes/kubelet')
@@ -729,7 +729,7 @@ def newnode_kubeletcni_node():
     pass
 
 def _kubeletcni_node():
-    run("sed -i 's#--fail-swap-on=false\"#--fail-swap-on=false --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin\"#g' /etc/kubernetes/kubelet")
+    run("sed -i 's#--config=/etc/kubernetes/kubelet.yaml\"#--config=/etc/kubernetes/kubelet.yaml --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin\"#g' /etc/kubernetes/kubelet")
     run('systemctl restart kubelet')
     pass
 ##########################[修改kubelet配置，加载cni网络插件（calico启动后才会生成）]############################

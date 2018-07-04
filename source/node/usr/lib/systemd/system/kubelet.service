@@ -11,13 +11,8 @@ EnvironmentFile=-/etc/kubernetes/kubelet
 ExecStart=/usr/bin/kubelet  \
     $KUBE_LOGTOSTDERR \
     $KUBE_LOG_LEVEL \
-    $KUBE_ALLOW_PRIV \
-    $KUBELET_ADDRESS \
-    $KUBELET_PORT \
     $KUBELET_HOSTNAME \
     $KUBELET_PAUSE_IMAGE \
-    $KUBELET_CLUSTER_DOMAIN \
-    $KUBELET_CLUSTER_DNS \
     $KUBELET_ARGS
 Restart=on-failure
 LimitNOFILE=65536

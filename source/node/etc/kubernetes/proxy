@@ -1,1 +1,1 @@
-KUBELET_PROXY_ARGS="--proxy-mode=iptables --kubeconfig=/etc/kubernetes/kube-proxy.conf"
+KUBELET_PROXY_ARGS="--config=/etc/kubernetes/kube-proxy.yaml"
