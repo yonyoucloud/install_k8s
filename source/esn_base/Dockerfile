@@ -26,7 +26,8 @@ COPY ssh/esn /data/www/.ssh
 COPY docker-entrypoint.sh /usr/local/bin
 
 RUN chown -R esn:esn /data/www/.ssh && \
-    chmod 750 /data/www/.ssh
+    chmod 750 /root/.ssh /data/www/.ssh && \
+    chmod 600 /root/.ssh/* /data/www/.ssh/*
 
 EXPOSE 22
 ENTRYPOINT ["docker-entrypoint.sh"]
