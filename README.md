@@ -22,7 +22,7 @@ mv ls-files.gz .<br>
 tar zxvf ls-files.gz<br>
 <br>
 其他版本：(直接解压缩即可)<br>
-v1.10.4: 链接: https://pan.baidu.com/s/1_BfFVQ--bftFZ3jN3Eij8A 密码: r437<br>
+v1.11.0: 链接: https://pan.baidu.com/s/1q9OhrzCevFaOKDKX_5AbrA 密码: 85ih<br>
 <br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
