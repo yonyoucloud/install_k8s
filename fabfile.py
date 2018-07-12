@@ -58,7 +58,7 @@ env.abort_on_prompts = True
 env.colors = True
 
 env.roledefs = { 
-    # 此发布脚本运行主机, 需要把地址加到master证书, 否则后面执行kubectl认证不通过, 此机可做发布机用
+    # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
             '10.211.55.46:22',

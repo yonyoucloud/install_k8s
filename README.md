@@ -11,7 +11,7 @@
 访问微服务例子:<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
 <br>
-下面是安装方法
+下面是安装方法（安装过程有疑问可以加我微信：bsh888）
 =============
 最新版本安装方法（v1.11.0）:<br>
 此项目包含大文件，故需先下载ls-files.gz包：<br>
