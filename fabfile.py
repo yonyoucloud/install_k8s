@@ -61,13 +61,14 @@ env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
         ],
     },
     # etcd节点安装主机(支持集群)
     'etcd': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
+            '10.211.55.49:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
         'vip': '10.211.55.201'
@@ -75,7 +76,8 @@ env.roledefs = {
     # master节点安装主机(支持集群)
     'master': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
+            '10.211.55.49:22',
         ],
         # 负载均衡master入口ip(虚ip)
         'vip': '10.211.55.202'
@@ -83,31 +85,32 @@ env.roledefs = {
     # node节点安装主机(支持集群)
     'node': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
+            '10.211.55.49:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
     'lvs': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
         ]
     },
     # 私有docker镜像仓库安装主机(暂不支持集群)
     'pridocker': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
         ]
     },
     # 私有dns服务器安装主机(暂不支持集群)
     'pridns': {
         'hosts': [
-            '10.211.55.46:22',
+            '10.211.55.48:22',
         ]
     },
     # 新加Node节点(支持集群)
     'newnode': {
         'hosts': [
-            '10.211.55.47:22',
+            '10.211.55.50:22',
         ]
     },
 }
@@ -367,6 +370,7 @@ def uninstall_pridocker():
 
 
 ##########################[安装etcd]############################
+etcd_index = 0
 def install_etcd():
     # 证书要保证一样，所以只需要生成一次
     execute('create_ssl_etcd')
@@ -378,10 +382,10 @@ def remote_install_etcd():
     #if env.roledefs['etcd'].has_key('lvs'):
     cluster_hosts = ''
     tmpstr = ''
-    etcdname = ''
+    etcd_index += 1
+    etcdname = 'etcd' + str(etcd_index)
     for index, host in enumerate(env.all_hosts):
-        etcdname = 'etcd' + str(index + 1)
-        cluster_hosts += tmpstr + etcdname + '=https://' + host.split(':')[0]  + ':2380'
+        cluster_hosts += tmpstr + ('etcd' + str(index + 1)) + '=https://' + host.split(':')[0]  + ':2380'
         tmpstr = ','
 
     local('cd source/etcd && sed "s#CLUSTER_HOSTS#' + cluster_hosts + '#g" etcd.conf.tpl > etc/etcd/etcd.conf')

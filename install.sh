@@ -47,6 +47,23 @@ do
 done
 chown -R root:root ../install_k8s
 tar zxvf source/needbin.gz -C /
+if [ ! -f "source/docker/docker_engine_packages.gz" ]; then
+    tee /etc/yum.repos.d/docker.repo <<-'EOF'
+[dockerrepo]
+name=Docker Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg
+EOF
+    yum -y install --downloadonly --downloaddir source/docker/docker_engine_packages docker-engine
+    if [[ $? -ne 0 ]]; then
+        echo "下载docker失败，请重新执行"
+        exit
+    fi
+    cd source/docker && tar zcvf docker_engine_packages.gz docker_engine_packages && rm -rf docker_engine_packages
+    cd ../..
+fi
 echo -e "\033[32m{`date`}[结束]初始化安装.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装基础环境.............................\033[0m"
