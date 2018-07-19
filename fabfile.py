@@ -68,7 +68,6 @@ env.roledefs = {
     'etcd': {
         'hosts': [
             '10.211.55.48:22',
-            '10.211.55.49:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
         'vip': '10.211.55.201'
@@ -77,7 +76,6 @@ env.roledefs = {
     'master': {
         'hosts': [
             '10.211.55.48:22',
-            '10.211.55.49:22',
         ],
         # 负载均衡master入口ip(虚ip)
         'vip': '10.211.55.202'
@@ -86,10 +84,10 @@ env.roledefs = {
     'node': {
         'hosts': [
             '10.211.55.48:22',
-            '10.211.55.49:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
+    # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口）
     'lvs': {
         'hosts': [
             '10.211.55.48:22',
@@ -110,7 +108,7 @@ env.roledefs = {
     # 新加Node节点(支持集群)
     'newnode': {
         'hosts': [
-            '10.211.55.50:22',
+            '10.211.55.49:22',
         ]
     },
 }
@@ -243,7 +241,7 @@ def newnode_install_base():
     pass
 
 def _install_base():
-    run('yum install -y telnet')
+    run('yum install -y telnet net-tools')
     run('mkdir /data > /dev/null 2>&1;if [ $? == 0 ];then useradd -d /data/www esn && useradd -d /data/www www && usermod -G esn www && chmod 750 /data/www && mkdir -p /data/log/php && mkdir -p /data/log/nginx && mkdir -p /data/yy_log && chown -R www:www /data/log /data/yy_log && chmod 750 /data/log /data/yy_log;fi')
     run('systemctl stop firewalld && systemctl disable firewalld')
     run('sed -i "s#SELINUX=enforcing#SELINUX=disabled#g" /etc/selinux/config && setenforce 0 ; echo "" > /dev/null')
