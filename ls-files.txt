@@ -1,6 +1,4 @@
 source/docker/conf.gz
-source/docker/docker_engine_packages.gz
-source/flannel/usr/bin/flanneld
 source/images/HOST:PORT~google-containers~pause-amd64:3.1.tar
 source/images/HOST:PORT~google_containers~heapster-amd64:v1.5.3.tar
 source/images/HOST:PORT~google_containers~heapster-grafana-amd64:v4.4.3.tar
