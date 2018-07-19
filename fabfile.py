@@ -378,6 +378,7 @@ def install_etcd():
 
 @roles('etcd')
 def remote_install_etcd():
+    global etcd_index
     curhost = env.host_string.split(':')[0]
     #if env.roledefs['etcd'].has_key('lvs'):
     cluster_hosts = ''
