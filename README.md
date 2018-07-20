@@ -15,14 +15,11 @@
 =============
 最新版本安装方法（v1.11.0）:<br>
 此项目包含大文件，故需先下载ls-files.gz包：<br>
-链接: https://pan.baidu.com/s/1JOh0_t_OfNyBmq7xjxuEtw 密码: 1j52<br>
+链接: https://pan.baidu.com/s/1_0paXuUDWfCqIR-biokpXQ 密码: 3j9w<br>
 git clone https://github.com/yonyoucloud/install_k8s<br>
 cd install_k8s<br>
 mv ls-files.gz .<br>
 tar zxvf ls-files.gz<br>
-<br>
-其他版本：(直接解压缩即可)<br>
-v1.11.0: 链接: https://pan.baidu.com/s/1q9OhrzCevFaOKDKX_5AbrA 密码: 85ih<br>
 <br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
