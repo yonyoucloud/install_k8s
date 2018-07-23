@@ -48,7 +48,8 @@ web_test<br>
     └── ssh            直连容器需要的秘钥<br>
     └── uninstall.sh   卸载脚本<br>
     └── start.sh       如果采用LVS代理Etcd、Master集群，LVS机器发生重启时，需要在其上执行此脚本<br>
-    └── add_node.sh    修改fabric.py中newnode配置，执行此脚本可以添加node节点，支持一次添加多个<br>
+    └── add_node.sh    修改fabric.py中newnode配置，执行此脚本可以添加node节点，支持一次添加多个，执行完把newnode合并到node配置中，便于集中控制<br>
+    └── add_etcd.sh    修改fabric.py中newetcd配置，执行此脚本可以添加etcd节点，支持一次添加多个，执行完把newetcd合并到etcd配置中，便于集中控制<br>
 <br>
 第二步, 修改fabfile.py文件中主机登录密码及安装目的主机地址:<br>
 注意: 整个集群支持安装到一台主机上面, 需要注意vip要在同一网段, 且etcd和master的vip必须不同<br>

@@ -61,13 +61,14 @@ env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.53:22',
         ],
     },
     # etcd节点安装主机(支持集群)
     'etcd': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.55:22',
+            '10.211.55.53:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
         'vip': '10.211.55.201'
@@ -75,7 +76,8 @@ env.roledefs = {
     # master节点安装主机(支持集群)
     'master': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.55:22',
+            '10.211.55.53:22',
         ],
         # 负载均衡master入口ip(虚ip)
         'vip': '10.211.55.202'
@@ -83,32 +85,45 @@ env.roledefs = {
     # node节点安装主机(支持集群)
     'node': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.55:22',
+            '10.211.55.53:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
     # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，且不要和发布机在一起，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口），其实最好lvs单独部署，因为在其上面是无法访问其负载均衡的节点的，为了节省资源，上面可以放私有镜像仓库、私有dns服务
     'lvs': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.54:22',
         ]
     },
     # 私有docker镜像仓库安装主机(暂不支持集群)
     'pridocker': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.54:22',
         ]
     },
     # 私有dns服务器安装主机(暂不支持集群)
     'pridns': {
         'hosts': [
-            '10.211.55.48:22',
+            '10.211.55.54:22',
         ]
     },
     # 新加Node节点(支持集群)
     'newnode': {
         'hosts': [
-            '10.211.55.49:22',
+            '10.211.55.59:22',
+            '10.211.55.60:22',
+        ]
+    },
+    # 新加etcd节点(支持集群)
+    'newetcd': {
+        'hosts': [
+            '10.211.55.57:22',
+        ]
+    },
+    # 新加master节点(支持集群)
+    'newmaster': {
+        'hosts': [
         ]
     },
 }
@@ -134,11 +149,21 @@ def service(dowhat = 'start'):
 @roles('etcd')
 #fab service_etcd:status
 def service_etcd(dowhat = 'start'):
+    execute(_service_etcd, dowhat)
+    pass
+
+def _service_etcd(dowhat = 'start'):
     etcdlvs = env.roledefs['etcd']['vip']
     run('systemctl ' + dowhat + ' etcd')
     if dowhat == 'start' or dowhat == 'restart':
-        run('iptables -P FORWARD ACCEPT')
+        run('iptables -P FORWARD ACCEPT ; echo "" > /dev/null')
         #local('etcdctl --ca-file=source/etcd/etc/etcd/ssl/ca.pem --cert-file=source/etcd/etc/etcd/ssl/etcd.pem --key-file=source/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://' + etcdlvs + ':2379 set /esn.com/network/config \'{"Network":"172.30.0.0/16","SubnetLen":25,"Backend":{"Type":"vxlan"}}\'')
+    pass
+
+@parallel
+@roles('newetcd')
+def newetcd_service_etcd_start():
+    execute(_service_etcd, 'start')
     pass
 ##########################[etcd控制]############################
 
@@ -151,7 +176,7 @@ def service_master(dowhat = 'start'):
     run('systemctl ' + dowhat + ' kube-controller-manager')
     run('systemctl ' + dowhat + ' kube-scheduler')
     if dowhat == 'start' or dowhat == 'restart':
-        run('iptables -P FORWARD ACCEPT')
+        run('iptables -P FORWARD ACCEPT ; echo "" > /dev/null')
     if dowhat == 'stop':
         run("ps aux | grep kube-apiserver | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
         run("ps aux | grep kube-controller-manager | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
@@ -207,7 +232,7 @@ def _service_node(dowhat = 'start'):
     run('systemctl ' + dowhat + ' kube-proxy')
     run('systemctl ' + dowhat + ' docker')
     if dowhat == 'start' or dowhat == 'restart':
-        run('iptables -P FORWARD ACCEPT')
+        run('iptables -P FORWARD ACCEPT ; echo "" > /dev/null')
     if dowhat == 'stop':
         run("ps aux | grep kubelet | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
         run("ps aux | grep kube-proxy | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
@@ -222,7 +247,7 @@ def _service_node(dowhat = 'start'):
 def service_dns(dowhat = 'start'):
     run('systemctl ' + dowhat + ' named-chroot')
     if dowhat == 'start' or dowhat == 'restart':
-        run('iptables -P FORWARD ACCEPT')
+        run('iptables -P FORWARD ACCEPT ; echo "" > /dev/null')
     pass
 ##########################[dns控制]############################
 
@@ -237,6 +262,12 @@ def install_base():
 @parallel
 @roles('newnode')
 def newnode_install_base():
+    execute(_install_base)
+    pass
+
+@parallel
+@roles('newetcd')
+def newetcd_install_base():
     execute(_install_base)
     pass
 
@@ -324,6 +355,34 @@ def remote_install_lvs():
                 break
     pass
 
+@roles('lvs')
+def remote_install_lvs_new():
+    etcdvip = env.roledefs['etcd']['vip']
+    mastervip = env.roledefs['master']['vip']
+
+    run('systemctl stop ipvsadm')
+
+    # etcd
+    ipvsadm = '-A -t ' + etcdvip + ':2379 -s wrr\n'
+    etcd_hosts = env.roledefs['etcd']['hosts'] + env.roledefs['newetcd']['hosts']
+    for index, host in enumerate(etcd_hosts):
+        ipvsadm += '-a -t ' + etcdvip + ':2379 -r ' + host.split(':')[0] + ':2379 -g -w 1\n'
+
+    # master
+    ipvsadm += '-A -t ' + mastervip + ':6443 -s wrr\n'
+    master_hosts = env.roledefs['master']['hosts'] + env.roledefs['newmaster']['hosts']
+    for index, host in enumerate(master_hosts):
+        ipvsadm += '-a -t ' + mastervip + ':6443 -r ' + host.split(':')[0] + ':6443 -g -w 1\n'
+
+    run('echo "' + ipvsadm + '" > /etc/sysconfig/ipvsadm')
+    with settings(warn_only = True):
+        result = run('systemctl start ipvsadm && ipvsadm -Ln')
+        if result.return_code == 0:
+            print 'ipvsadm reload ok'
+        else:
+            print 'ipvsadm reload fail'
+    pass
+
 def uninstall_lvs():
     execute('remote_uninstall_lvs')
     execute('uninstall_lvsvip_etcd')
@@ -373,9 +432,46 @@ def install_etcd():
     # 证书要保证一样，所以只需要生成一次
     execute('create_ssl_etcd')
     execute('remote_install_etcd')
+    pass
+
+def newetcd_install_etcd():
+    execute('create_ssl_etcd', True)
+    execute('newetcd_remote_install_etcd')
+    execute('newetcd_remote_modify_etcd_conf')
+    execute('remote_update_master_etcd_ssl')
+    pass
 
 @roles('etcd')
 def remote_install_etcd():
+    execute(_remote_install_etcd)
+    pass
+
+@roles('etcd', 'newetcd')
+def newetcd_remote_install_etcd():
+    execute(_remote_install_etcd, True)
+    pass
+
+@roles('newetcd')
+def newetcd_remote_modify_etcd_conf():
+    run('sed -i \'s#ETCD_INITIAL_CLUSTER_STATE="new"#ETCD_INITIAL_CLUSTER_STATE="existing"#g\' /etc/etcd/etcd.conf')
+    pass
+
+def newetcd_cluster_addnew():
+    global etcd_index
+    etcd_index = len(env.roledefs['etcd']['hosts'])
+    etcdlvs = env.roledefs['etcd']['vip']
+    for index, host in enumerate(env.roledefs['newetcd']['hosts']):
+        etcd_index += 1
+        local('etcdctl --ca-file=source/etcd/etc/etcd/ssl/ca.pem --cert-file=source/etcd/etc/etcd/ssl/etcd.pem --key-file=source/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://' + etcdlvs + ':2379 member add etcd' + str(etcd_index) + ' https://' + host.split(':')[0]  + ':2380')
+    pass
+
+def newetcd_cluster_addnew_check():
+    etcdlvs = env.roledefs['etcd']['vip']
+    local('etcdctl --ca-file=source/etcd/etc/etcd/ssl/ca.pem --cert-file=source/etcd/etc/etcd/ssl/etcd.pem --key-file=source/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://' + etcdlvs + ':2379 member list')
+    local('etcdctl --ca-file=source/etcd/etc/etcd/ssl/ca.pem --cert-file=source/etcd/etc/etcd/ssl/etcd.pem --key-file=source/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://' + etcdlvs + ':2379 cluster-health')
+    pass
+
+def _remote_install_etcd(addnew = False):
     global etcd_index
     curhost = env.host_string.split(':')[0]
     #if env.roledefs['etcd'].has_key('lvs'):
@@ -383,7 +479,10 @@ def remote_install_etcd():
     tmpstr = ''
     etcd_index += 1
     etcdname = 'etcd' + str(etcd_index)
-    for index, host in enumerate(env.all_hosts):
+    etcd_hosts = env.roledefs['etcd']['hosts']
+    if addnew:
+        etcd_hosts = env.roledefs['etcd']['hosts'] + env.roledefs['newetcd']['hosts']
+    for index, host in enumerate(etcd_hosts):
         cluster_hosts += tmpstr + ('etcd' + str(index + 1)) + '=https://' + host.split(':')[0]  + ':2380'
         tmpstr = ','
 
@@ -400,11 +499,14 @@ def remote_install_etcd():
     run('systemctl daemon-reload && systemctl enable etcd')
     pass
 
-def create_ssl_etcd():
+def create_ssl_etcd(addnew = False):
     lvs = env.roledefs['etcd']['vip']
     hosts = ''
     lines_sed = 'N;'
-    for index, host in enumerate(env.roledefs['etcd']['hosts']):
+    etcd_hosts = env.roledefs['etcd']['hosts']
+    if addnew:
+        etcd_hosts = env.roledefs['etcd']['hosts'] + env.roledefs['newetcd']['hosts']
+    for index, host in enumerate(etcd_hosts):
         hosts += ',\\n      \\"' + host.split(':')[0] + '\\"'
         lines_sed += 'N;'
 
@@ -427,6 +529,16 @@ def uninstall_etcd():
 @parallel
 @roles('etcd')
 def install_lvsvip_etcd():
+    execute(_install_lvsvip_etcd)
+    pass
+
+@parallel
+@roles('newetcd')
+def newetcd_install_lvsvip_etcd():
+    execute(_install_lvsvip_etcd)
+    pass
+
+def _install_lvsvip_etcd():
     lvsvip = env.roledefs['etcd']['vip']
 
     cmd = 'ifconfig lo:etcd:0 ' + lvsvip  + ' broadcast ' + lvsvip  + ' netmask 255.255.255.255 up'
@@ -471,6 +583,15 @@ def remote_install_master():
     run('tar zxvf /master.gz -C / && rm -rf /master.gz')
     local('rm -rf source/master/master.gz')
     run('systemctl daemon-reload && systemctl enable kube-apiserver && systemctl enable kube-controller-manager && systemctl enable kube-scheduler')
+    pass
+
+@roles('master')
+def remote_update_master_etcd_ssl():
+    local('/usr/bin/cp -rpf source/etcd/etc/etcd/ssl/{ca.pem,etcd.pem,etcd-key.pem} source/master/etc/kubernetes/pki/etcd')
+    local('cd source/master/etc/kubernetes/pki && tar zcvf etcd.gz etcd')
+    put('source/master/etc/kubernetes/pki/etcd.gz', '/etc/kubernetes/pki', mode=0640)
+    run('cd /etc/kubernetes/pki && tar zxvf etcd.gz && rm -rf etcd.gz')
+    local('rm -rf source/master/etc/kubernetes/pki/etcd.gz')
     pass
 
 def create_ssl_master():
