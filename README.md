@@ -13,9 +13,9 @@
 <br>
 下面是安装方法（安装过程有疑问可以加我微信：bsh888）
 =============
-最新版本安装方法（v1.11.0）:<br>
+最新版本安装方法（v1.11.1）:<br>
 此项目包含大文件，故需先下载ls-files.gz包：<br>
-链接: https://pan.baidu.com/s/1_0paXuUDWfCqIR-biokpXQ 密码: 3j9w<br>
+链接: https://pan.baidu.com/s/1fCKenipryqfb_2LhA59YWw 密码: q2wq<br>
 git clone https://github.com/yonyoucloud/install_k8s<br>
 cd install_k8s<br>
 mv ls-files.gz .<br>
