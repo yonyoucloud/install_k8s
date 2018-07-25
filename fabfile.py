@@ -141,7 +141,17 @@ def service(dowhat = 'start'):
     execute(service_master, dowhat)
     execute(service_node, dowhat)
     execute(service_dns, dowhat)
+    execute(service_publish, dowhat)
 ##########################[启动服务]############################
+
+
+##########################[publish控制]############################
+@parallel
+@roles('publish')
+def service_publish(dowhat = 'start'):
+    run('systemctl ' + dowhat + ' docker')
+    pass
+##########################[publish控制]############################
 
 
 ##########################[etcd控制]############################
@@ -348,7 +358,7 @@ def _install_base():
 
 ##########################[安装docker]############################
 @parallel
-@roles('pridocker', 'master', 'node')
+@roles('publish', 'pridocker', 'master', 'node')
 def install_docker():
     execute(_install_docker)
     pass
@@ -369,7 +379,7 @@ def _install_docker():
     pass
 
 @parallel
-@roles('pridocker', 'master', 'node')
+@roles('publish', 'pridocker', 'master', 'node')
 def uninstall_docker():
     run('systemctl disable docker ; echo "" > /dev/null')
     run('yum remove -y docker-engine')
@@ -777,7 +787,7 @@ def uninstall_lvsvip_master():
 
 
 ##########################[安装docker证书]############################
-@roles('node')
+@roles('publish', 'node')
 def install_dockercrt():
     execute(_install_dockercrt)
     pass
@@ -800,7 +810,7 @@ def _install_dockercrt():
     local('rm -rf source/docker/docker.gz')
     pass
 
-@roles('node')
+@roles('publish', 'node')
 def uninstall_dockercrt():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
     run('rm -rf /etc/docker/certs.d/' + pridocker + ':5000')

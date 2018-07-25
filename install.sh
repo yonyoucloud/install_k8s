@@ -103,6 +103,7 @@ fab install_dns || exit 1
 echo -e "\033[32m{`date`}[结束]安装dns.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]启动所有服务.............................\033[0m"
+fab service_publish:start || exit 1
 fab service_etcd:start || exit 1
 fab service_etcd:restart || exit 1
 sleep 10
