@@ -57,7 +57,7 @@ env.port = 22
 env.abort_on_prompts = True
 env.colors = True
 
-env.roledefs = { 
+env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
@@ -67,8 +67,8 @@ env.roledefs = {
     # etcd节点安装主机(支持集群)
     'etcd': {
         'hosts': [
+            '10.211.55.54:22',
             '10.211.55.55:22',
-            '10.211.55.53:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
         'vip': '10.211.55.201'
@@ -76,8 +76,8 @@ env.roledefs = {
     # master节点安装主机(支持集群)
     'master': {
         'hosts': [
+            '10.211.55.54:22',
             '10.211.55.55:22',
-            '10.211.55.53:22',
         ],
         # 负载均衡master入口ip(虚ip)
         'vip': '10.211.55.202'
@@ -85,45 +85,45 @@ env.roledefs = {
     # node节点安装主机(支持集群)
     'node': {
         'hosts': [
+            '10.211.55.54:22',
             '10.211.55.55:22',
-            '10.211.55.53:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
     # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，且不要和发布机在一起，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口），其实最好lvs单独部署，因为在其上面是无法访问其负载均衡的节点的，为了节省资源，上面可以放私有镜像仓库、私有dns服务
     'lvs': {
         'hosts': [
-            '10.211.55.54:22',
+            '10.211.55.56:22',
         ]
     },
     # 私有docker镜像仓库安装主机(暂不支持集群)
     'pridocker': {
         'hosts': [
-            '10.211.55.54:22',
+            '10.211.55.56:22',
         ]
     },
     # 私有dns服务器安装主机(暂不支持集群)
     'pridns': {
         'hosts': [
-            '10.211.55.54:22',
+            '10.211.55.53:22',
         ]
     },
     # 新加Node节点(支持集群)
     'newnode': {
         'hosts': [
-            '10.211.55.59:22',
-            '10.211.55.60:22',
+            #'10.211.55.57:22',
         ]
     },
     # 新加etcd节点(支持集群)
     'newetcd': {
         'hosts': [
-            '10.211.55.57:22',
+            #'10.211.55.58:22',
         ]
     },
     # 新加master节点(支持集群)
     'newmaster': {
         'hosts': [
+            #'10.211.55.59:22',
         ]
     },
 }
@@ -163,6 +163,8 @@ def _service_etcd(dowhat = 'start'):
 @parallel
 @roles('newetcd')
 def newetcd_service_etcd_start():
+    if not len(env.roledefs['newetcd']['hosts']):
+        return
     execute(_service_etcd, 'start')
     pass
 ##########################[etcd控制]############################
@@ -172,6 +174,10 @@ def newetcd_service_etcd_start():
 @parallel
 @roles('master')
 def service_master(dowhat = 'start'):
+    execute(_service_master, dowhat)
+    pass
+
+def _service_master(dowhat = 'start'):
     run('systemctl ' + dowhat + ' kube-apiserver')
     run('systemctl ' + dowhat + ' kube-controller-manager')
     run('systemctl ' + dowhat + ' kube-scheduler')
@@ -182,6 +188,14 @@ def service_master(dowhat = 'start'):
         run("ps aux | grep kube-controller-manager | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
         run("ps aux | grep kube-scheduler | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
     pass
+
+@parallel
+@roles('newmaster')
+def newmaster_service_master_start():
+    if not len(env.roledefs['newmaster']['hosts']):
+        return
+    execute(_service_master, 'start')
+    pass
 ##########################[master控制]############################
 
 
@@ -190,6 +204,12 @@ def service_master(dowhat = 'start'):
 @roles('node')
 def service_node(dowhat = 'start'):
     execute(_service_node, dowhat)
+    pass
+
+@parallel
+@roles('node', 'newnode')
+def newmaster_service_node_restart():
+    execute(_service_node, 'restart', False)
     pass
 
 def newnode_service_node_start():
@@ -224,21 +244,52 @@ def newnode_service_node_start():
 @parallel
 @roles('newnode')
 def _newnode_service_node_start():
+    if not len(env.roledefs['newnode']['hosts']):
+        return
     execute(_service_node, 'start')
     pass
 
-def _service_node(dowhat = 'start'):
+def _service_node(dowhat = 'start', docker = True):
     run('systemctl ' + dowhat + ' kubelet')
     run('systemctl ' + dowhat + ' kube-proxy')
-    run('systemctl ' + dowhat + ' docker')
+    if docker:
+        run('systemctl ' + dowhat + ' docker')
     if dowhat == 'start' or dowhat == 'restart':
         run('iptables -P FORWARD ACCEPT ; echo "" > /dev/null')
     if dowhat == 'stop':
         run("ps aux | grep kubelet | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
         run("ps aux | grep kube-proxy | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
-        run("ps aux | grep docker | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
+        if docker:
+            run("ps aux | grep docker | grep -v grep | awk '{if($2 != \"\"){system(\"kill -9 \"$2)}}'")
     pass
 ##########################[node控制]############################
+
+
+##########################[lvs控制]############################
+def service_lvs_start(dowhat = 'start'):
+    execute('service_lvs')
+    execute('service_lvs_etcd')
+    execute('service_lvs_master')
+    pass
+
+@parallel
+@roles('lvs')
+def service_lvs():
+    run('/etc/rc.d/init.d/vip_route_lvs.sh')
+    pass
+
+@parallel
+@roles('etcd', 'newetcd')
+def service_lvs_etcd():
+    run('/etc/rc.d/init.d/vip_route_etcd.sh')
+    pass
+
+@parallel
+@roles('master', 'newmaster')
+def service_lvs_master():
+    run('/etc/rc.d/init.d/vip_route_master.sh')
+    pass
+##########################[lvs控制]############################
 
 
 ##########################[dns控制]############################
@@ -262,12 +313,24 @@ def install_base():
 @parallel
 @roles('newnode')
 def newnode_install_base():
+    if not len(env.roledefs['newnode']['hosts']):
+        return
     execute(_install_base)
     pass
 
 @parallel
 @roles('newetcd')
 def newetcd_install_base():
+    if not len(env.roledefs['newetcd']['hosts']):
+        return
+    execute(_install_base)
+    pass
+
+@parallel
+@roles('newmaster')
+def newmaster_install_base():
+    if not len(env.roledefs['newmaster']['hosts']):
+        return
     execute(_install_base)
     pass
 
@@ -293,6 +356,8 @@ def install_docker():
 @parallel
 @roles('newnode')
 def newnode_install_docker():
+    if not len(env.roledefs['newnode']['hosts']):
+        return
     execute(_install_docker)
     pass
 
@@ -453,6 +518,8 @@ def newetcd_remote_install_etcd():
 
 @roles('newetcd')
 def newetcd_remote_modify_etcd_conf():
+    if not len(env.roledefs['newetcd']['hosts']):
+        return
     run('sed -i \'s#ETCD_INITIAL_CLUSTER_STATE="new"#ETCD_INITIAL_CLUSTER_STATE="existing"#g\' /etc/etcd/etcd.conf')
     pass
 
@@ -535,6 +602,8 @@ def install_lvsvip_etcd():
 @parallel
 @roles('newetcd')
 def newetcd_install_lvsvip_etcd():
+    if not len(env.roledefs['newetcd']['hosts']):
+        return
     execute(_install_lvsvip_etcd)
     pass
 
@@ -568,8 +637,35 @@ def install_master():
     execute('create_ssl_master')
     execute('remote_install_master')
 
+def newmaster_install_master():
+    execute('create_ssl_master', True)
+    execute('newmaster_remote_install_master')
+    execute('newmaster_remote_modify_node_conf')
+    pass
+
+def newmaster_remote_modify_node_conf():
+    execute('create_ssl_node')
+    execute(_newmaster_remote_modify_node_conf)
+    execute('kubeletcni_node', True)
+    execute('newnode_kubeletcni_node', True)
+    pass
+
+@roles('node', 'newnode')
+def _newmaster_remote_modify_node_conf():
+    execute(_remote_install_node, True)
+    pass
+
 @roles('master')
 def remote_install_master():
+    execute(_remote_install_master)
+    pass
+
+@roles('master', 'newmaster')
+def newmaster_remote_install_master():
+    execute(_remote_install_master, True)
+    pass
+
+def _remote_install_master(addnew = False):
     curhost = env.host_string.split(':')[0]
     etcdlvs = env.roledefs['etcd']['vip']
 
@@ -578,7 +674,10 @@ def remote_install_master():
     local('cd source/master && mkdir -p etc/kubernetes/pki/etcd && chmod 750 etc/kubernetes/pki/etcd')
     local('/usr/bin/cp -rpf source/etcd/etc/etcd/ssl/{ca.pem,etcd.pem,etcd-key.pem} source/master/etc/kubernetes/pki/etcd')
 
-    local('cd source/master && tar zcvf master.gz etc usr')
+    if addnew and env.host_string in env.roledefs['master']['hosts']:
+        local('cd source/master && tar zcvf master.gz etc')
+    else:
+        local('cd source/master && tar zcvf master.gz etc usr')
     put('source/master/master.gz', '/master.gz', mode=0640)
     run('tar zxvf /master.gz -C / && rm -rf /master.gz')
     local('rm -rf source/master/master.gz')
@@ -594,10 +693,13 @@ def remote_update_master_etcd_ssl():
     local('rm -rf source/master/etc/kubernetes/pki/etcd.gz')
     pass
 
-def create_ssl_master():
+def create_ssl_master(addnew = False):
     hosts = ',\\n      \\"' + env.roledefs['publish']['hosts'][0].split(':')[0] + '\\"'
     lines_sed = 'N;'
-    for host in env.roledefs['master']['hosts']:
+    master_hosts = env.roledefs['master']['hosts']
+    if addnew:
+        master_hosts = env.roledefs['master']['hosts'] + env.roledefs['newmaster']['hosts']
+    for index, host in enumerate(master_hosts):
         hosts += ',\\n      \\"' + host.split(':')[0] + '\\"'
         lines_sed += 'N;'
     masterlvs = env.roledefs['master']['vip']
@@ -640,8 +742,20 @@ def uninstall_master():
     pass
 
 @parallel
+@roles('newmaster')
+def newmaster_install_lvsvip_master():
+    if not len(env.roledefs['newmaster']['hosts']):
+        return
+    execute(_install_lvsvip_master)
+    pass
+
+@parallel
 @roles('master')
 def install_lvsvip_master():
+    execute(_install_lvsvip_master)
+    pass
+
+def _install_lvsvip_master():
     lvsvip = env.roledefs['master']['vip']
     cmd = 'ifconfig lo:master:0 ' + lvsvip  + ' broadcast ' + lvsvip  + ' netmask 255.255.255.255 up'
     run(cmd + ' && echo -e "#/bin/sh\\n# chkconfig:   2345 90 10\\n' + cmd + '" > /etc/rc.d/init.d/vip_route_master.sh')
@@ -670,6 +784,8 @@ def install_dockercrt():
 
 @roles('newnode')
 def newnode_install_dockercrt():
+    if not len(env.roledefs['newnode']['hosts']):
+        return
     execute(_install_dockercrt)
     pass
 
@@ -704,10 +820,12 @@ def remote_install_node():
 
 @roles('newnode')
 def newnode_install_node():
+    if not len(env.roledefs['newnode']['hosts']):
+        return
     execute(_remote_install_node)
     pass
 
-def _remote_install_node():
+def _remote_install_node(onlyconf = False):
     curhost = env.host_string.split(':')[0]
     masterlvs = env.roledefs['master']['vip']
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
@@ -729,7 +847,10 @@ def _remote_install_node():
 
     local('cd source/node && /usr/bin/cp -rpf *.pem etc/kubernetes/pki')
 
-    local('cd source/node && tar zcvf node.gz etc usr')
+    if onlyconf:
+        local('cd source/node && tar zcvf node.gz etc')
+    else:
+        local('cd source/node && tar zcvf node.gz etc usr')
     put('source/node/node.gz', '/node.gz', mode=0640)
     run('tar zxvf /node.gz -C / && rm -rf /node.gz')
     local('rm -rf source/node/node.gz')
@@ -815,6 +936,8 @@ def init_calico():
     etcdlvs = env.roledefs['etcd']['vip']
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
 
+    local('kubectl delete -f source/calico ; echo "" > /dev/null')
+
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/calico/calico.yaml.tpl > source/calico/calico.yaml')
     local('sed -i "s#ETCD_LVS_HOST#' + etcdlvs + '#g" source/calico/calico.yaml')
     local('TLS_ETCD_KEY=$(cat source/etcd/etc/etcd/ssl/etcd-key.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_KEY#$TLS_ETCD_KEY#g" source/calico/calico.yaml')
@@ -842,19 +965,22 @@ def init_calico():
 ##########################[修改kubelet配置，加载cni网络插件（calico启动后才会生成）]############################
 @parallel
 @roles('node')
-def kubeletcni_node():
-    execute(_kubeletcni_node)
+def kubeletcni_node(onlyconf = False):
+    execute(_kubeletcni_node, onlyconf)
     pass
 
 @parallel
 @roles('newnode')
-def newnode_kubeletcni_node():
-    execute(_kubeletcni_node)
+def newnode_kubeletcni_node(onlyconf = False):
+    if not len(env.roledefs['newnode']['hosts']):
+        return
+    execute(_kubeletcni_node, onlyconf)
     pass
 
-def _kubeletcni_node():
+def _kubeletcni_node(onlyconf = False):
     run("sed -i 's#--config=/etc/kubernetes/kubelet.yaml\"#--config=/etc/kubernetes/kubelet.yaml --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin\"#g' /etc/kubernetes/kubelet")
-    run('systemctl restart kubelet')
+    if not onlyconf:
+        run('systemctl restart kubelet')
     pass
 ##########################[修改kubelet配置，加载cni网络插件（calico启动后才会生成）]############################
 
@@ -877,6 +1003,15 @@ def init_k8s_system():
     local('kubectl apply -f source/heapster')
     pass
 ##########################[初始化k8s系统]############################
+
+
+##########################[k8s系统报错]############################
+@parallel
+@roles('publish', 'etcd', 'master', 'node', 'newetcd', 'newmaster', 'newnode', 'lvs', 'pridocker')
+def error():
+    run('tail -f /var/log/messages')
+    pass
+##########################[k8s系统报错]############################
 
 
 ##########################[初始化web_test]############################

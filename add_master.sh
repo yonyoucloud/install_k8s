@@ -27,35 +27,30 @@
 # If any changes are made to this script, please mail me a copy of the changes
 # -------------------------------------------------------------------------------
 
-echo -e "\033[32m{`date`}[开始]关闭master服务及etcd服务.............................\033[0m"
+echo -e "\033[32m{`date`}[开始]关闭master服务服务.............................\033[0m"
 fab service_master:stop || exit 1
-fab service_etcd:stop || exit 1
-echo -e "\033[32m{`date`}[结束]关闭master服务及etcd服务.............................\n\n\n\n\n\n\033[0m"
+echo -e "\033[32m{`date`}[结束]关闭master服务服务.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]安装基础环境.............................\033[0m"
-fab newetcd_install_base || exit 1
+fab newmaster_install_base || exit 1
 echo -e "\033[32m{`date`}[结束]安装基础环境.............................\n\n\n\n\n\n\033[0m"
 
-echo -e "\033[32m{`date`}[开始]安装etcd节点.............................\033[0m"
-fab newetcd_install_etcd || exit 1
-echo -e "\033[32m{`date`}[结束]安装etcd节点.............................\n\n\n\n\n\n\033[0m"
+echo -e "\033[32m{`date`}[开始]安装master节点.............................\033[0m"
+fab newmaster_install_master || exit 1
+echo -e "\033[32m{`date`}[结束]安装master节点.............................\n\n\n\n\n\n\033[0m"
 
-echo -e "\033[32m{`date`}[开始]启动新etcd节点服务及master服务.............................\033[0m"
-fab service_etcd:start || exit 1
-sleep 8
-fab newetcd_cluster_addnew || exit 1
-fab newetcd_service_etcd_start || exit 1
-fab newetcd_cluster_addnew_check || exit 1
+echo -e "\033[32m{`date`}[开始]启动新master节点.............................\033[0m"
 fab service_master:start || exit 1
-echo -e "\033[32m{`date`}[结束]启动新etcd节点服务及master服务.............................\n\n\n\n\n\n\033[0m"
+fab newmaster_service_master_start || exit 1
+echo -e "\033[32m{`date`}[结束]启动新master节点.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[开始]修改lvs配置.............................\033[0m"
-fab newetcd_install_lvsvip_etcd || exit 1
+fab newmaster_install_lvsvip_master || exit 1
 fab remote_install_lvs_new || exit 1
 echo -e "\033[32m{`date`}[结束]修改lvs配置.............................\n\n\n\n\n\n\033[0m"
 
-echo -e "\033[32m{`date`}[开始]重新配置calico.............................\033[0m"
-fab init_calico || exit 1
-echo -e "\033[32m{`date`}[结束]重新配置calico.............................\n\n\n\n\n\n\033[0m"
+echo -e "\033[32m{`date`}[开始]重启node服务.............................\033[0m"
+fab newmaster_service_node_restart || exit 1
+echo -e "\033[32m{`date`}[结束]重启node服务.............................\n\n\n\n\n\n\033[0m"
 
 echo -e "\033[32m{`date`}[结束]所有节点添加完毕\033[0m\033[31m[祝您好运！]\033[0m\033[32m.............................\n\n\n\n\n\n\033[0m"
