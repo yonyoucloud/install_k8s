@@ -57,6 +57,11 @@ env.port = 22
 env.abort_on_prompts = True
 env.colors = True
 
+# 如果在阿里云、华为云部署等云IaaS部署，请设置为False，env.roledefs['lvs']['hosts']置为空，
+# 并且配置env.roledefs['etcd']['vip']及env.roledefs['master']['vip']分别为etcd、master
+# 负载均衡地址，并且事先将端口及虚机设置好
+env.use_lvs = True
+
 env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
@@ -277,6 +282,8 @@ def _service_node(dowhat = 'start', docker = True):
 
 ##########################[lvs控制]############################
 def service_lvs_start(dowhat = 'start'):
+    if not env.use_lvs:
+        return
     execute('service_lvs')
     execute('service_lvs_etcd')
     execute('service_lvs_master')
@@ -285,18 +292,24 @@ def service_lvs_start(dowhat = 'start'):
 @parallel
 @roles('lvs')
 def service_lvs():
+    if not env.use_lvs:
+        return
     run('/etc/rc.d/init.d/vip_route_lvs.sh')
     pass
 
 @parallel
 @roles('etcd', 'newetcd')
 def service_lvs_etcd():
+    if not env.use_lvs:
+        return
     run('/etc/rc.d/init.d/vip_route_etcd.sh')
     pass
 
 @parallel
 @roles('master', 'newmaster')
 def service_lvs_master():
+    if not env.use_lvs:
+        return
     run('/etc/rc.d/init.d/vip_route_master.sh')
     pass
 ##########################[lvs控制]############################
@@ -390,12 +403,16 @@ def uninstall_docker():
 
 ##########################[安装lvs]############################
 def install_lvs():
+    if not env.use_lvs:
+        return
     execute('remote_install_lvs')
     execute('install_lvsvip_etcd')
     execute('install_lvsvip_master')
 
 @roles('lvs')
 def remote_install_lvs():
+    if not env.use_lvs:
+        return
     run('yum install -y ipvsadm && systemctl enable ipvsadm')
 
     etcdvip = env.roledefs['etcd']['vip']
@@ -432,6 +449,8 @@ def remote_install_lvs():
 
 @roles('lvs')
 def remote_install_lvs_new():
+    if not env.use_lvs:
+        return
     etcdvip = env.roledefs['etcd']['vip']
     mastervip = env.roledefs['master']['vip']
 
@@ -459,12 +478,16 @@ def remote_install_lvs_new():
     pass
 
 def uninstall_lvs():
+    if not env.use_lvs:
+        return
     execute('remote_uninstall_lvs')
     execute('uninstall_lvsvip_etcd')
     execute('uninstall_lvsvip_master')
 
 @roles('lvs')
 def remote_uninstall_lvs():
+    if not env.use_lvs:
+        return
     run('ifconfig eth0:lvs:0 down ; echo "" > /dev/null')
     run('ifconfig eth0:lvs:1 down ; echo "" > /dev/null')
     run('chkconfig vip_route_lvs.sh off && chkconfig --del vip_route_lvs.sh ; echo "" > /dev/null')
@@ -965,7 +988,7 @@ def init_calico():
         if int(num) == total:
             break
         # 15次都没成功，重启一下master服务
-        if i == 15:
+        if i == 30:
             execute(service_master, dowhat = 'restart')
         time.sleep(3)
     pass
@@ -1015,15 +1038,6 @@ def init_k8s_system():
 ##########################[初始化k8s系统]############################
 
 
-##########################[k8s系统报错]############################
-@parallel
-@roles('publish', 'etcd', 'master', 'node', 'newetcd', 'newmaster', 'newnode', 'lvs', 'pridocker')
-def error():
-    run('tail -f /var/log/messages')
-    pass
-##########################[k8s系统报错]############################
-
-
 ##########################[初始化web_test]############################
 def init_web_test():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
@@ -1035,3 +1049,11 @@ def init_web_test():
     pass
 ##########################[初始化web_test]############################
 
+
+##########################[k8s系统报错]############################
+@parallel
+@roles('publish', 'etcd', 'master', 'node', 'newetcd', 'newmaster', 'newnode', 'lvs', 'pridocker')
+def error():
+    run('tail -f /var/log/messages')
+    pass
+##########################[k8s系统报错]############################

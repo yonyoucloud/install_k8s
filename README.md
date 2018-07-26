@@ -72,6 +72,11 @@ env.port = 22<br>
 env.abort_on_prompts = True<br>
 env.colors = True<br>
 <br>
+# 如果在阿里云、华为云部署等云IaaS部署，请设置为False，env.roledefs['lvs']['hosts']置为空，<br>
+# 并且配置env.roledefs['etcd']['vip']及env.roledefs['master']['vip']分别为etcd、master<br>
+# 负载均衡地址，并且事先将端口及虚机设置好<br>
+env.use_lvs = True<br>
+<br>
 env.roledefs = {<br>
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用<br>
     'publish': {<br>
