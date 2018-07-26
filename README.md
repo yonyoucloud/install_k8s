@@ -15,7 +15,7 @@
 =============
 最新版本安装方法（v1.11.1）:<br>
 此项目包含大文件，故需先下载ls-files.gz包：<br>
-链接: https://pan.baidu.com/s/1fCKenipryqfb_2LhA59YWw 密码: q2wq<br>
+链接: https://pan.baidu.com/s/1wyvC9y3BtfF2sez8QMDP3A 密码: n762<br>
 git clone https://github.com/yonyoucloud/install_k8s<br>
 cd install_k8s<br>
 mv ls-files.gz .<br>
