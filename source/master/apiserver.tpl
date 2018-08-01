@@ -1,5 +1,5 @@
 KUBE_API_ADDRESS="--bind-address=0.0.0.0"
 KUBE_ETCD_SERVERS="--etcd-servers=https://ETCD_LVS_HOST:2379"
 KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=192.168.0.0/16"
-KUBE_ADMISSION_CONTROL="--enable-admission-plugins=NamespaceLifecycle,NamespaceExists,LimitRanger,ServiceAccount,PersistentVolumeLabel,ResourceQuota,DefaultStorageClass,DefaultTolerationSeconds"
+KUBE_ADMISSION_CONTROL="--enable-admission-plugins=NamespaceLifecycle,NamespaceExists,LimitRanger,ServiceAccount,PersistentVolumeLabel,ResourceQuota,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook"
 KUBE_API_ARGS="--etcd-cafile=/etc/kubernetes/pki/etcd/ca.pem --etcd-certfile=/etc/kubernetes/pki/etcd/etcd.pem --etcd-keyfile=/etc/kubernetes/pki/etcd/etcd-key.pem --tls-cert-file=/etc/kubernetes/pki/apiserver.pem --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem --client-ca-file=/etc/kubernetes/pki/ca.pem --service-account-key-file=/etc/kubernetes/pki/ca-key.pem --enable-bootstrap-token-auth=true --authorization-mode=Node,RBAC --kubelet-certificate-authority=/etc/kubernetes/pki/ca.pem --kubelet-client-certificate=/etc/kubernetes/pki/admin.pem --kubelet-client-key=/etc/kubernetes/pki/admin-key.pem"
