@@ -160,7 +160,7 @@ do
     if [ $? -eq 0 ]; then
         kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: https://"$7":30000\033[0m"}'
         echo -e "\033[32m用下面输出的token登录kubernetes-dashboard\033[0m"
-        kubectl describe secret $(kubectl get secret -n kube-system | grep admin-token | awk '{print $1}') -n kube-system | grep token:
+        kubectl describe secret $(kubectl get secret -n kube-system | grep admin-token | awk '{print $1}') -n kube-system | grep token: | awk '{print $2}'
         break
     fi
 done
