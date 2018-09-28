@@ -13,13 +13,16 @@
 <br>
 下面是安装方法（安装过程有疑问可以加我微信：bsh888）
 =============
-最新版本安装方法（v1.11.1）:<br>
-此项目包含大文件，故需先下载ls-files.gz包：<br>
-链接: https://pan.baidu.com/s/1wyvC9y3BtfF2sez8QMDP3A 密码: n762<br>
+此项目包含大文件，故需先下载大文件二进制包：<br>
+v1.11.3版本下载地址（ls-files-v1.11.3.gz）：<br>
+链接: https://pan.baidu.com/s/1gCBY6YgG1McnDUen6egfMg 提取码: r7rs<br>
+<br>
+v1.11.1版本下载地址（ls-files-v1.11.1.gz）：<br>
+链接: https://pan.baidu.com/s/1lEcIrMIUPdQopC2oVEHFPQ 提取码: 5hs3<br>
 git clone https://github.com/yonyoucloud/install_k8s<br>
 cd install_k8s<br>
-mv ls-files.gz .<br>
-tar zxvf ls-files.gz<br>
+mv ls-files-<version code>.gz .<br>
+tar zxvf ls-files-<version code>.gz<br>
 <br>
 <br>
 本安装包，运行在centos7上，包含的服务有:<br>
