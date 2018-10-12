@@ -358,9 +358,9 @@ def newmaster_install_base():
     pass
 
 def _install_base():
-    run('yum install -y telnet net-tools')
+    run('yum install -y telnet net-tools openssl')
     run('mkdir /data > /dev/null 2>&1;if [ $? == 0 ];then useradd -d /data/www esn && useradd -d /data/www www && usermod -G esn www && chmod 750 /data/www && mkdir -p /data/log/php && mkdir -p /data/log/nginx && mkdir -p /data/yy_log && chown -R www:www /data/log /data/yy_log && chmod 750 /data/log /data/yy_log;fi')
-    run('systemctl stop firewalld && systemctl disable firewalld')
+    run('systemctl stop firewalld && systemctl disable firewalld ; echo "" > /dev/null')
     run('sed -i "s#SELINUX=enforcing#SELINUX=disabled#g" /etc/selinux/config && setenforce 0 ; echo "" > /dev/null')
     #run('sed -i "s#umask 022#umask 027#g" /etc/profile')
     run('cat /etc/sysctl.conf | grep net.ipv4.ip_forward > /dev/null 2>&1 ; if [ $? -ne 0 ];then echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf && sysctl -p;fi')
