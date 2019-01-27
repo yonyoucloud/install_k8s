@@ -14,6 +14,9 @@
 下面是安装方法（安装过程有疑问可以加我微信：bsh888）
 =============
 此项目包含大文件，故需先下载大文件二进制包：<br>
+v1.13.2版本下载地址（ls-files-v1.13.2.gz）：<br>
+链接: https://pan.baidu.com/s/16IkcdY_t8G3NyhG-NFuCgA 提取码: eim3<br>
+<br>
 v1.11.3版本下载地址（ls-files-v1.11.3.gz）：<br>
 链接: https://pan.baidu.com/s/1gCBY6YgG1McnDUen6egfMg 提取码: r7rs<br>
 <br>

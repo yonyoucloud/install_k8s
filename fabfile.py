@@ -60,57 +60,54 @@ env.colors = True
 # 如果在阿里云、华为云部署等云IaaS部署，请设置为False，env.roledefs['lvs']['hosts']置为空，
 # 并且配置env.roledefs['etcd']['vip']及env.roledefs['master']['vip']分别为etcd、master
 # 负载均衡地址，并且事先将端口及虚机设置好
-env.use_lvs = True
+env.use_lvs = False
 
 env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
-            '10.211.55.53:22',
+            '10.211.55.10:22',
         ],
     },
     # etcd节点安装主机(支持集群)
     'etcd': {
         'hosts': [
-            '10.211.55.54:22',
-            '10.211.55.55:22',
+            '10.211.55.10:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
-        'vip': '10.211.55.201'
+        'vip': '10.211.55.10'
     },
     # master节点安装主机(支持集群)
     'master': {
         'hosts': [
-            '10.211.55.54:22',
-            '10.211.55.55:22',
+            '10.211.55.10:22',
         ],
         # 负载均衡master入口ip(虚ip)
-        'vip': '10.211.55.202'
+        'vip': '10.211.55.10'
     },
     # node节点安装主机(支持集群)
     'node': {
         'hosts': [
-            '10.211.55.54:22',
-            '10.211.55.55:22',
+            '10.211.55.10:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
     # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，且不要和发布机在一起，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口），其实最好lvs单独部署，因为在其上面是无法访问其负载均衡的节点的，为了节省资源，上面可以放私有镜像仓库、私有dns服务
     'lvs': {
         'hosts': [
-            '10.211.55.56:22',
+            '10.211.55.10:22',
         ]
     },
     # 私有docker镜像仓库安装主机(暂不支持集群)
     'pridocker': {
         'hosts': [
-            '10.211.55.56:22',
+            '10.211.55.10:22',
         ]
     },
     # 私有dns服务器安装主机(暂不支持集群)
     'pridns': {
         'hosts': [
-            '10.211.55.53:22',
+            '10.211.55.10:22',
         ]
     },
     # 新加Node节点(支持集群)
@@ -941,13 +938,9 @@ def init_images():
 
     local('docker images | grep "pause-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google-containers~pause-amd64:3.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google-containers/pause-amd64:3.1 && docker push ' + pridocker + ':5000/google-containers/pause-amd64:3.1)')
 
-    local('docker images | grep "kubernetes-dashboard-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~kubernetes-dashboard-amd64:v1.8.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/kubernetes-dashboard-amd64:v1.8.3 && docker push ' + pridocker + ':5000/google_containers/kubernetes-dashboard-amd64:v1.8.3)')
+    local('docker images | grep "kubernetes-dashboard-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~kubernetes-dashboard-amd64:v1.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1 && docker push ' + pridocker + ':5000/k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1)')
 
-    local('docker images | grep "k8s-dns-sidecar-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-sidecar-amd64:1.14.10.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-sidecar-amd64:1.14.10 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-sidecar-amd64:1.14.10)')
-
-    local('docker images | grep "k8s-dns-kube-dns-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-kube-dns-amd64:1.14.10.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-kube-dns-amd64:1.14.10 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-kube-dns-amd64:1.14.10)')
-
-    local('docker images | grep "k8s-dns-dnsmasq-nanny-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~k8s-dns-dnsmasq-nanny-amd64:1.14.10.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.10 && docker push ' + pridocker + ':5000/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.10)')
+    local('docker images | grep "coredns" || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~coredns:1.2.6.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/coredns:1.2.6 && docker push ' + pridocker + ':5000/k8s.gcr.io/coredns:1.2.6)')
 
     local('docker images | grep "heapster-influxdb-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-influxdb-amd64:v1.3.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.3.3 && docker push ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.3.3)')
 
@@ -1024,12 +1017,12 @@ def init_k8s_system():
     pridns = env.roledefs['pridns']['hosts'][0].split(':')[0]
 
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dashboard/dashboard-controller.yaml.tpl > source/dashboard/dashboard-controller.yaml')
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dns/kubedns-controller.yaml.tpl > source/dns/kubedns-controller.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dns/coredns.yaml.tpl > source/dns/coredns.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/grafana.yaml.tpl > source/heapster/grafana.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/heapster.yaml.tpl > source/heapster/heapster.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/influxdb.yaml.tpl > source/heapster/influxdb.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/Dockerfile.tpl > source/heapster/Dockerfile')
-    local('sed "s#HOST#' + pridns + '#g" source/dns/kubedns-cm.yaml.tpl > source/dns/kubedns-cm.yaml')
+    local('sed -i "s#HOST#' + pridns + '#g" source/dns/coredns.yaml')
 
     local('kubectl apply -f source/dashboard')
     local('kubectl apply -f source/dns')

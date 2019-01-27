@@ -31,7 +31,7 @@ spec:
       containers:
       - name: kubernetes-dashboard
         #image: k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.3
-        image: PRI_DOCKER_HOST:5000/google_containers/kubernetes-dashboard-amd64:v1.8.3
+        image: PRI_DOCKER_HOST:5000/k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1
         resources:
           limits:
             cpu: 100m
