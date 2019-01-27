@@ -195,3 +195,4 @@ echo -e "\033[31m您可以进入到容器中执行: ping t.test.com 看是否解
 POD=`kubectl -n esn-system get pods | grep web-test | awk '{print $1}'`
 kubectl -n esn-system exec $POD -- ping -c 5 t.test.com
 echo -e "\033[32m{`date`}[结束]需要您验证测试以下说明\033[0m\033[31m[祝您好运，安全稳定的k8s集群安装完毕！]\033[0m\033[32m.............................\n\n\n\n\n\n\033[0m"
+
