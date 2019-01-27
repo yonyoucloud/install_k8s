@@ -367,10 +367,15 @@ def _install_base():
 
 
 ##########################[安装docker]############################
+def install_docker():
+    local('cd source/docker && tar zcvf conf.gz etc usr')
+    execute(_install_docker)
+    pass
+
 @parallel
 @roles('publish', 'pridocker', 'master', 'node')
-def install_docker():
-    execute(_install_docker)
+def _install_docker():
+    execute(__install_docker)
     pass
 
 @parallel
@@ -378,10 +383,10 @@ def install_docker():
 def newnode_install_docker():
     if not len(env.roledefs['newnode']['hosts']):
         return
-    execute(_install_docker)
+    execute(__install_docker)
     pass
 
-def _install_docker():
+def __install_docker():
     put('source/docker/docker_engine_packages.gz', '/tmp', mode=0640)
     run('cd /tmp && tar zxvf docker_engine_packages.gz && cd docker_engine_packages && yum -y localinstall * && rm -rf /tmp/docker_engine_packages.gz /tmp/docker_engine_packages')
     put('source/docker/conf.gz', '/tmp', mode=0640)
