@@ -397,7 +397,8 @@ def __install_docker():
 @roles('publish', 'pridocker', 'master', 'node')
 def uninstall_docker():
     run('systemctl disable docker ; echo "" > /dev/null')
-    run('yum remove -y docker-engine')
+    #run('yum remove -y docker-engine')
+    run('rm -rf /usr/bin/ctr /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/runc')
     run('rm -rf /data/docker /etc/docker')
     pass
 ##########################[安装docker]############################
