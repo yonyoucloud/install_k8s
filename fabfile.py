@@ -66,48 +66,48 @@ env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ],
     },
     # etcd节点安装主机(支持集群)
     'etcd': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
-        'vip': '10.211.55.10'
+        'vip': '10.211.55.11'
     },
     # master节点安装主机(支持集群)
     'master': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ],
         # 负载均衡master入口ip(虚ip)
-        'vip': '10.211.55.10'
+        'vip': '10.211.55.11'
     },
     # node节点安装主机(支持集群)
     'node': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
     # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，且不要和发布机在一起，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口），其实最好lvs单独部署，因为在其上面是无法访问其负载均衡的节点的，为了节省资源，上面可以放私有镜像仓库、私有dns服务
     'lvs': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ]
     },
     # 私有docker镜像仓库安装主机(暂不支持集群)
     'pridocker': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ]
     },
     # 私有dns服务器安装主机(暂不支持集群)
     'pridns': {
         'hosts': [
-            '10.211.55.10:22',
+            '10.211.55.11:22',
         ]
     },
     # 新加Node节点(支持集群)
@@ -368,7 +368,7 @@ def _install_base():
 
 ##########################[安装docker]############################
 def install_docker():
-    local('cd source/docker && tar zcvf conf.gz etc usr')
+    local('cd source/docker && tar zcvf conf_bin.gz etc usr')
     execute(_install_docker)
     pass
 
@@ -387,10 +387,10 @@ def newnode_install_docker():
     pass
 
 def __install_docker():
-    put('source/docker/docker_engine_packages.gz', '/tmp', mode=0640)
-    run('cd /tmp && tar zxvf docker_engine_packages.gz && cd docker_engine_packages && yum -y localinstall * && rm -rf /tmp/docker_engine_packages.gz /tmp/docker_engine_packages')
-    put('source/docker/conf.gz', '/tmp', mode=0640)
-    run('tar zxvf /tmp/conf.gz -C / && rm -rf /tmp/conf.gz && mkdir -p /data/docker && systemctl daemon-reload && systemctl enable docker')
+    #put('source/docker/docker_engine_packages.gz', '/tmp', mode=0640)
+    #run('cd /tmp && tar zxvf docker_engine_packages.gz && cd docker_engine_packages && yum -y localinstall * && rm -rf /tmp/docker_engine_packages.gz /tmp/docker_engine_packages')
+    put('source/docker/conf_bin.gz', '/tmp', mode=0640)
+    run('tar zxvf /tmp/conf_bin.gz -C / && rm -rf /tmp/conf_bin.gz && mkdir -p /data/docker && systemctl daemon-reload && systemctl enable docker')
     pass
 
 @parallel

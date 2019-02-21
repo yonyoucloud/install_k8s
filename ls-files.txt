@@ -15,4 +15,12 @@ source/master/usr/bin/kube-controller-manager
 source/master/usr/bin/kube-scheduler
 source/node/usr/bin/kube-proxy
 source/node/usr/bin/kubelet
+source/docker/usr/bin/containerd
+source/docker/usr/bin/containerd-shim
+source/docker/usr/bin/ctr
+source/docker/usr/bin/docker
+source/docker/usr/bin/dockerd
+source/docker/usr/bin/docker-init
+source/docker/usr/bin/docker-proxy
+source/docker/usr/bin/runc
 source/needbin.gz
