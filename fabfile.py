@@ -214,8 +214,8 @@ def newmaster_service_master_start():
 ##########################[node控制]############################
 @parallel
 @roles('node')
-def service_node(dowhat = 'start'):
-    execute(_service_node, dowhat)
+def service_node(dowhat = 'start', docker = True):
+    execute(_service_node, dowhat, docker)
     pass
 
 @parallel
