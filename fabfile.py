@@ -215,6 +215,7 @@ def newmaster_service_master_start():
 @parallel
 @roles('node')
 def service_node(dowhat = 'start', docker = True):
+    docker = docker == str(True)
     execute(_service_node, dowhat, docker)
     pass
 
