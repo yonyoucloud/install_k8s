@@ -332,6 +332,25 @@ def install_base():
     pass
 
 @parallel
+@roles('publish')
+def install_needbin():
+    put('source/needbin.gz', '/tmp', mode=0640)
+    run('tar zxvf /tmp/needbin.gz -C / && rm -rf /tmp/needbin.gz && mkdir -p /etc/calico')
+    etcdlvs = env.roledefs['etcd']['vip']
+    calicoctl_conf = '''
+apiVersion: projectcalico.org/v3
+kind: CalicoAPIConfig
+metadata:
+spec:
+  etcdEndpoints: "https://{0}:2379"
+  etcdKeyFile: "/etc/cni/net.d/calico-tls/etcd-key"
+  etcdCertFile: "/etc/cni/net.d/calico-tls/etcd-cert"
+  etcdCACertFile: "/etc/cni/net.d/calico-tls/etcd-ca"
+'''
+    run('echo "' + calicoctl_conf.format(etcdlvs) + '" > /etc/calico/calicoctl.cfg')
+    pass
+
+@parallel
 @roles('newnode')
 def newnode_install_base():
     if not len(env.roledefs['newnode']['hosts']):
