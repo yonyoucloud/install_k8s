@@ -66,48 +66,48 @@ env.roledefs = {
     # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用
     'publish': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ],
     },
     # etcd节点安装主机(支持集群)
     'etcd': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ],
         # 负载均衡etcd入口ip(虚ip)
-        'vip': '10.211.55.11'
+        'vip': '10.211.55.12'
     },
     # master节点安装主机(支持集群)
     'master': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ],
         # 负载均衡master入口ip(虚ip)
-        'vip': '10.211.55.11'
+        'vip': '10.211.55.12'
     },
     # node节点安装主机(支持集群)
     'node': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ]
     },
     # lvs负载均衡安装主机(暂不支持集群)
     # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，且不要和发布机在一起，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口），其实最好lvs单独部署，因为在其上面是无法访问其负载均衡的节点的，为了节省资源，上面可以放私有镜像仓库、私有dns服务
     'lvs': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ]
     },
     # 私有docker镜像仓库安装主机(暂不支持集群)
     'pridocker': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ]
     },
     # 私有dns服务器安装主机(暂不支持集群)
     'pridns': {
         'hosts': [
-            '10.211.55.11:22',
+            '10.211.55.12:22',
         ]
     },
     # 新加Node节点(支持集群)
@@ -596,7 +596,7 @@ def _remote_install_etcd(addnew = False):
 
     local('cd source/etcd && tar zcvf etcd.gz etc usr')
 
-    run('yum -y install etcd')
+    # run('yum -y install etcd')
     put('source/etcd/etcd.gz', '/etcd.gz', mode=0640)
     run('tar zxvf /etcd.gz -C / && rm -rf /etcd.gz && chown -R etcd:etcd /etc/etcd/ssl && mkdir -p /data/etcd && chown -R etcd:etcd /data/etcd && chmod 750 /data/etcd')
     local('rm -rf source/etcd/etcd.gz')
@@ -626,7 +626,7 @@ def create_ssl_etcd(addnew = False):
 @roles('etcd')
 def uninstall_etcd():
     run('systemctl disable etcd ; echo "" > /dev/null')
-    run('yum -y remove etcd')
+    # run('yum -y remove etcd')
     run('rm -rf /data/etcd /etc/etcd')
     pass
 

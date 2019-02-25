@@ -23,4 +23,5 @@ source/docker/usr/bin/dockerd
 source/docker/usr/bin/docker-init
 source/docker/usr/bin/docker-proxy
 source/docker/usr/bin/runc
+source/etcd/usr/bin/etcd
 source/needbin.gz
