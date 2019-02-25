@@ -627,6 +627,7 @@ def create_ssl_etcd(addnew = False):
 def uninstall_etcd():
     run('systemctl disable etcd ; echo "" > /dev/null')
     # run('yum -y remove etcd')
+    run('rm -rf /usr/bin/etcd')
     run('rm -rf /data/etcd /etc/etcd')
     pass
 
