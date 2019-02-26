@@ -11,14 +11,14 @@
 访问微服务例子:<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
 <br>
-下面是安装方法（安装过程有疑问可以加我微信：bsh888）
+下面是安装方法（安装过程有疑问可以加我微信：bsh888）<br>
 =============
-第一步，克隆安装脚本，并进入目录：<br>
+第一步，克隆安装程序，并进入目录：<br>
 git clone https://github.com/yonyoucloud/install_k8s<br>
 cd install_k8s<br>
 <br>
 第二步，下载大文件二进制包（里面是x86_64下编译好的k8s二进制文件）：<br>
-注意：下面的包可选，但要对应到响应的安装源码版本。<br>
+注意：下面的包可选，但要对应到相应的安装源码版本。<br>
 v1.13.3版本下载地址（ls-files-v1.13.3.gz）：<br>
 链接: https://pan.baidu.com/s/1nNrfjA8fFqlkFa442jW47w 提取码: y69k<br>
 <br>
@@ -163,5 +163,3 @@ env.roledefs = {<br>
         ]<br>
     },<br>
 }<br>
-<br>
-<br>
