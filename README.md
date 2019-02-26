@@ -13,24 +13,31 @@
 <br>
 下面是安装方法（安装过程有疑问可以加我微信：bsh888）
 =============
-此项目包含大文件，故需先下载大文件二进制包：<br>
+第一步，克隆安装脚本，并进入目录：<br>
+git clone https://github.com/yonyoucloud/install_k8s<br>
+cd install_k8s<br>
+<br>
+第二步，下载大文件二进制包（里面是x86_64下编译好的k8s二进制文件）：<br>
+注意：下面的包可选，但要对应到响应的安装源码版本。<br>
 v1.13.3版本下载地址（ls-files-v1.13.3.gz）：<br>
 链接: https://pan.baidu.com/s/1nNrfjA8fFqlkFa442jW47w 提取码: y69k<br>
-<br>
-v1.13.2版本下载地址（ls-files-v1.13.2.gz）：<br>
-链接: https://pan.baidu.com/s/16IkcdY_t8G3NyhG-NFuCgA 提取码: eim3<br>
 <br>
 v1.11.3版本下载地址（ls-files-v1.11.3.gz）：<br>
 链接: https://pan.baidu.com/s/1gCBY6YgG1McnDUen6egfMg 提取码: r7rs<br>
 <br>
-v1.11.1版本下载地址（ls-files-v1.11.1.gz）：<br>
-链接: https://pan.baidu.com/s/1lEcIrMIUPdQopC2oVEHFPQ 提取码: 5hs3<br>
-git clone https://github.com/yonyoucloud/install_k8s<br>
+mv ls-files-v1.13.3.gz install_k8s<br>
 cd install_k8s<br>
-mv ls-files-<version code>.gz .<br>
-tar zxvf ls-files-<version code>.gz<br>
+tar zxvf ls-files-v1.13.3.gz<br>
+<br>
+第三步，修改fabfile.py文件中主机登录密码及安装目的主机地址，并执行安装脚本：<br>
+建议：开始先测试一下单机部署，只需要替换一下fabfile.py中的ip地址及登录密码即可。<br>
+执行安装脚本：<br>
+cd install_k8s<br>
+./install.sh<br>
 <br>
 <br>
+下面是更详细的一些说明:<br>
+=============
 本安装包，运行在centos7上，包含的服务有:<br>
 etcd集群<br>
 kubernets master集群<br>
@@ -48,7 +55,7 @@ heapster 监控<br>
 测试例子微服务(golang写的一个小的输出服务):<br>
 web_test<br>
 <br>
-第一步, 说明:<br>
+安装脚本目录说明:<br>
 └── install_k8s        安装包<br>
     ├── fabfile.py     基于fabric实现自动化安装k8s集群脚本<br>
     ├── install.sh     安装shell脚本，里面会调用fabfile.py中函数<br>
@@ -60,7 +67,7 @@ web_test<br>
     └── add_etcd.sh    修改fabric.py中newetcd配置，执行此脚本可以添加etcd节点，支持一次添加多个，执行完把newetcd合并到etcd配置中，便于集中控制<br>
     └── add_master.sh    修改fabric.py中newmaster配置，执行此脚本可以添加master节点，支持一次添加多个，执行完把newmaster合并到master配置中，便于集中控制<br>
 <br>
-第二步, 修改fabfile.py文件中主机登录密码及安装目的主机地址:<br>
+fabfile.py说明:<br>
 注意: <br>
 1、整个集群支持安装到一台主机上面, 需要注意vip要在同一网段, 且etcd和master的vip必须不同<br>
 2、如果采用LVS方式，机器重启时需要执行相应的虚ip挂载（这个不一定是必须执行）<br>
@@ -157,7 +164,4 @@ env.roledefs = {<br>
     },<br>
 }<br>
 <br>
-第三步:<br>
-只需执行install.sh文件<br>
-cd install_k8s<br>
-./install.sh<br>
+<br>
