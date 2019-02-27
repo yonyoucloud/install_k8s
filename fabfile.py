@@ -616,6 +616,7 @@ def _remote_install_etcd(addnew = False):
 
     # run('yum -y install etcd')
     put('source/etcd/etcd.gz', '/etcd.gz', mode=0640)
+    run('id etcd >& /dev/null || groupadd etcd && useradd -c "etcd user" -g etcd -s /sbin/nologin -d /var/lib/etcd -r etcd')
     run('tar zxvf /etcd.gz -C / && rm -rf /etcd.gz && chown -R etcd:etcd /etc/etcd/ssl && mkdir -p /data/etcd && chown -R etcd:etcd /data/etcd && chmod 750 /data/etcd')
     local('rm -rf source/etcd/etcd.gz')
     run('systemctl daemon-reload && systemctl enable etcd')
