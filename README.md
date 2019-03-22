@@ -19,6 +19,8 @@ cd install_k8s<br>
 <br>
 第二步，下载大文件二进制包（里面是x86_64下编译好的k8s二进制文件）：<br>
 注意：下面的包可选，但要对应到相应的安装源码版本。<br>
+v1.13.3.1版本下载地址（ls-files-v1.13.3.1.gz，建议用次版本，对k8s和runc做了禁止kmem特性，否则可能容器中进程被内核频繁oomkill）：<br>
+链接: https://pan.baidu.com/s/1aFEUKxNFwilsRdeCcswKoA 提取码: 56m8<br>
 v1.13.3版本下载地址（ls-files-v1.13.3.gz）：<br>
 链接: https://pan.baidu.com/s/1nNrfjA8fFqlkFa442jW47w 提取码: y69k<br>
 <br>
