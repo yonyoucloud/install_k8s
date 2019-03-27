@@ -21,7 +21,7 @@ cd install_k8s<br>
 注意：下面的包可选，但要对应到相应的安装源码版本。<br>
 <br>
 v1.13.3.1版本下载地址（ls-files-v1.13.3.1.gz，建议用此版本，对k8s和runc做了禁止kmem特性，否则可能容器中进程被内核频繁oomkill）：<br>
-链接: https://pan.baidu.com/s/17qBtZ8zanKNjXX4hnx48Zw 提取码: 8krp<br>
+链接: https://pan.baidu.com/s/16p196bCWeZFYvWnjZEsCcw 提取码: azb9<br>
 <br>
 v1.13.3版本下载地址（ls-files-v1.13.3.gz）：<br>
 链接: https://pan.baidu.com/s/1nNrfjA8fFqlkFa442jW47w 提取码: y69k<br>

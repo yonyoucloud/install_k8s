@@ -409,13 +409,13 @@ def __install_docker():
     #put('source/docker/docker_engine_packages.gz', '/tmp', mode=0640)
     #run('cd /tmp && tar zxvf docker_engine_packages.gz && cd docker_engine_packages && yum -y localinstall * && rm -rf /tmp/docker_engine_packages.gz /tmp/docker_engine_packages')
     put('source/docker/conf_bin.gz', '/tmp', mode=0640)
-    run('tar zxvf /tmp/conf_bin.gz -C / && rm -rf /tmp/conf_bin.gz && mkdir -p /data/docker && systemctl daemon-reload && systemctl enable docker')
+    run('yum install -y libseccomp && tar zxvf /tmp/conf_bin.gz -C / && rm -rf /tmp/conf_bin.gz && mkdir -p /data/docker && systemctl daemon-reload && systemctl enable docker')
     pass
 
 @parallel
 @roles('publish', 'pridocker', 'master', 'node')
 def uninstall_docker():
-    run('systemctl disable docker ; echo "" > /dev/null')
+    run('yum remove -y libseccomp && systemctl disable docker ; echo "" > /dev/null')
     #run('yum remove -y docker-engine')
     run('rm -rf /usr/bin/ctr /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/runc')
     run('rm -rf /data/docker /etc/docker')
