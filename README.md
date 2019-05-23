@@ -83,6 +83,7 @@ fab service_lvs_master #启动master<br>
 1、修改脚本中的主机密码信息<br>
 2、修改脚本中的主机地址信息<br>
 3、确保系统是centos7，并且网卡名字是eth0<br>
+4、如果遇到calico-node无法启动，可能是因为hostname不满足要求，不能存在大写字母及_（regex: [a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)）<br>
 <br>
 编辑脚本配置信息, vim fabfile.py:<br>
 env.user = 'root'<br>
