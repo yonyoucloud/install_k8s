@@ -331,10 +331,15 @@ def install_base():
     execute(_install_base)
     pass
 
+def install_needbin():
+    local('cd source/needbin && tar zcvf needbin.gz usr')
+    execute(_install_needbin)
+    pass
+
 @parallel
 @roles('publish')
-def install_needbin():
-    put('source/needbin.gz', '/tmp', mode=0640)
+def _install_needbin():
+    put('source/needbin/needbin.gz', '/tmp', mode=0640)
     run('tar zxvf /tmp/needbin.gz -C / && rm -rf /tmp/needbin.gz && mkdir -p /etc/calico')
     etcdlvs = env.roledefs['etcd']['vip']
     calicoctl_conf = '''apiVersion: projectcalico.org/v3
@@ -965,21 +970,37 @@ def init_images():
 
     local('docker images | grep "pause-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google-containers~pause-amd64:3.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google-containers/pause-amd64:3.1 && docker push ' + pridocker + ':5000/google-containers/pause-amd64:3.1)')
 
-    local('docker images | grep "kubernetes-dashboard-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~kubernetes-dashboard-amd64:v1.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1 && docker push ' + pridocker + ':5000/k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1)')
+    local('docker images | grep "kubernetesui/dashboard" || (cd source/images && sha256=`docker load -i HOST:PORT~kubernetesui~dashboard:v2.0.0-beta6.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/kubernetesui/dashboard:v2.0.0-beta6 && docker push ' + pridocker + ':5000/kubernetesui/dashboard:v2.0.0-beta6)')
 
-    local('docker images | grep "coredns" || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~coredns:1.2.6.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/coredns:1.2.6 && docker push ' + pridocker + ':5000/k8s.gcr.io/coredns:1.2.6)')
+    local('docker images | grep "kubernetesui/metrics-scraper" || (cd source/images && sha256=`docker load -i HOST:PORT~kubernetesui~metrics-scraper:v1.0.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/kubernetesui/metrics-scraper:v1.0.1 && docker push ' + pridocker + ':5000/kubernetesui/metrics-scraper:v1.0.1)')
 
-    local('docker images | grep "heapster-influxdb-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-influxdb-amd64:v1.3.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.3.3 && docker push ' + pridocker + ':5000/google_containers/heapster-influxdb-amd64:v1.3.3)')
+    local('docker images | grep "busybox" | grep node || (cd source/images && sha256=`docker load -i HOST:PORT~busybox:latest.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/busybox:latest && docker push ' + pridocker + ':5000/busybox:latest)')
 
-    local('docker images | grep "heapster-grafana-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-grafana-amd64:v4.4.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-grafana-amd64:v4.4.3 && docker push ' + pridocker + ':5000/google_containers/heapster-grafana-amd64:v4.4.3)')
+    local('docker images | grep "grafana" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~grafana~grafana:6.4.4.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/grafana/grafana:6.4.4.1 && docker push ' + pridocker + ':5000/grafana/grafana:6.4.4.1)')
 
-    local('docker images | grep "heapster-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google_containers~heapster-amd64:v1.5.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google_containers/heapster-amd64:v1.5.3 && docker push ' + pridocker + ':5000/google_containers/heapster-amd64:v1.5.3)')
+    local('docker images | grep "jimmidyson/configmap-reload" | grep kube-controllers || (cd source/images && sha256=`docker load -i HOST:PORT~jimmidyson~configmap-reload:v0.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/jimmidyson/configmap-reload:v0.1 && docker push ' + pridocker + ':5000/jimmidyson/configmap-reload:v0.1)')
 
-    local('docker images | grep "calico" | grep node || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~calico~node:v3.1.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/calico/node:v3.1.3 && docker push ' + pridocker + ':5000/quay.io/calico/node:v3.1.3)')
+    local('docker images | grep "addon-resizer" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~addon-resizer:1.8.5.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/addon-resizer:1.8.5 && docker push ' + pridocker + ':5000/k8s.gcr.io/addon-resizer:1.8.5)')
 
-    local('docker images | grep "calico" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~calico~cni:v3.1.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/calico/cni:v3.1.3 && docker push ' + pridocker + ':5000/quay.io/calico/cni:v3.1.3)')
+    local('docker images | grep "prom/alertmanager" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~alertmanager:v0.14.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/prom/alertmanager:v0.14.0 && docker push ' + pridocker + ':5000/prom/alertmanager:v0.14.0)')
 
-    local('docker images | grep "calico" | grep kube-controllers || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~calico~kube-controllers:v3.1.3.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/calico/kube-controllers:v3.1.3 && docker push ' + pridocker + ':5000/quay.io/calico/kube-controllers:v3.1.3)')
+    local('docker images | grep "prom/node-exporter" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~node-exporter:v0.18.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/prom/node-exporter:v0.18.1 && docker push ' + pridocker + ':5000/prom/node-exporter:v0.18.1)')
+
+    local('docker images | grep "prom/prometheus" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~prometheus:v2.2.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/prom/prometheus:v2.2.1 && docker push ' + pridocker + ':5000/prom/prometheus:v2.2.1)')
+
+    local('docker images | grep "kube-state-metrics" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~coreos~kube-state-metrics:v1.3.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/coreos/kube-state-metrics:v1.3.0 && docker push ' + pridocker + ':5000/quay.io/coreos/kube-state-metrics:v1.3.0)')
+
+    local('docker images | grep "metrics-server-amd64" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~metrics-server-amd64:v0.3.6.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/metrics-server-amd64:v0.3.6 && docker push ' + pridocker + ':5000/k8s.gcr.io/metrics-server-amd64:v0.3.6)')
+
+    local('docker images | grep "calico/cni" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~cni:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/cni:v3.10.1 && docker push ' + pridocker + ':5000/calico/cni:v3.10.1)')
+
+    local('docker images | grep "calico/kube-controllers" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~kube-controllers:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/kube-controllers:v3.10.1 && docker push ' + pridocker + ':5000/calico/kube-controllers:v3.10.1)')
+
+    local('docker images | grep "calico/node" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~node:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/node:v3.10.1 && docker push ' + pridocker + ':5000/calico/node:v3.10.1)')
+
+    local('docker images | grep "calico/pod2daemon-flexvol" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~pod2daemon-flexvol:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/pod2daemon-flexvol:v3.10.1 && docker push ' + pridocker + ':5000/calico/pod2daemon-flexvol:v3.10.1)')
+
+    local('docker images | grep "coredns" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~coredns:1.6.2.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/coredns:1.6.2 && docker push ' + pridocker + ':5000/k8s.gcr.io/coredns:1.6.2)')
     pass
 ##########################[初始化镜像]############################
 
@@ -1043,17 +1064,20 @@ def init_k8s_system():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
     pridns = env.roledefs['pridns']['hosts'][0].split(':')[0]
 
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dashboard/dashboard-controller.yaml.tpl > source/dashboard/dashboard-controller.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dashboard/recommended.yaml.tpl > source/dashboard/recommended.yaml')
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/dns/coredns.yaml.tpl > source/dns/coredns.yaml')
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/grafana.yaml.tpl > source/heapster/grafana.yaml')
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/heapster.yaml.tpl > source/heapster/heapster.yaml')
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/influxdb.yaml.tpl > source/heapster/influxdb.yaml')
-    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/heapster/Dockerfile.tpl > source/heapster/Dockerfile')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/metrics-server/metrics-server-deployment.yaml.tpl > source/metrics-server/metrics-server-deployment.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/prometheus/alertmanager-deployment.yaml.tpl > source/prometheus/alertmanager-deployment.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/prometheus/grafana.yaml.tpl > source/prometheus/grafana.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/prometheus/kube-state-metrics-deployment.yaml.tpl > source/prometheus/kube-state-metrics-deployment.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/prometheus/node-exporter-ds.yaml.tpl > source/prometheus/node-exporter-ds.yaml')
+    local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/prometheus/prometheus-statefulset.yaml.tpl > source/prometheus/prometheus-statefulset.yaml')
     local('sed -i "s#HOST#' + pridns + '#g" source/dns/coredns.yaml')
 
     local('kubectl apply -f source/dashboard')
     local('kubectl apply -f source/dns')
-    local('kubectl apply -f source/heapster')
+    local('kubectl apply -f source/metrics-server')
+    local('kubectl apply -f source/prometheus')
     pass
 ##########################[初始化k8s系统]############################
 

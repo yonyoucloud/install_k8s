@@ -1,0 +1,38 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume-prometheus
+spec:
+  storageClassName: prometheus
+  capacity:
+    storage: 16Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/persistentvolume_prometheus"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume-alertmanager
+spec:
+  storageClassName: alertmanager
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/persistentvolume_alertmanager"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-volume-grafana
+spec:
+  storageClassName: grafana
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/persistentvolume_grafana"

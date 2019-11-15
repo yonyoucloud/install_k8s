@@ -183,6 +183,19 @@ while true
 do
     sleep 1
     ((i++))
+    echo -e "\033[32m等待prometheus running($i)s...\033[0m"
+    kubectl -n kube-system get pods -o wide | grep prometheus | grep Running
+    if [ $? -eq 0 ]; then
+        kubectl -n kube-system get pods -o wide | grep prometheus | grep Running | awk '{print "\033[31m您可以访问prometheus: http://"$7":30002\033[0m"}'
+        break
+    fi
+done
+
+i=0
+while true
+do
+    sleep 1
+    ((i++))
     echo -e "\033[32m等待web-test running($i)s...\033[0m"
     kubectl -n esn-system get pods -o wide | grep web-test | grep Running
     if [ $? -eq 0 ]; then
