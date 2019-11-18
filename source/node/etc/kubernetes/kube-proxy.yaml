@@ -1,5 +1,5 @@
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
-bindAddress: 0.0.0.0
+bindAddress: 127.0.0.1
 clientConnection:
   acceptContentTypes: ""
   burst: 10
@@ -15,7 +15,7 @@ conntrack:
   tcpCloseWaitTimeout: 1h0m0s
   tcpEstablishedTimeout: 24h0m0s
 enableProfiling: false
-healthzBindAddress: 0.0.0.0:10256
+healthzBindAddress: 127.0.0.1:10256
 hostnameOverride: ""
 iptables:
   masqueradeAll: false

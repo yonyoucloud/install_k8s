@@ -53,7 +53,7 @@ spec:
         - name: GF_SECURITY_ADMIN_USER
           value: admin
         - name: GF_SECURITY_ADMIN_PASSWORD
-          value: sMkJslfjHDSF19AG
+          value: 123456
         - name: INFLUXDB_HOST
           value: monitoring-influxdb
         - name: GF_SERVER_HTTP_PORT

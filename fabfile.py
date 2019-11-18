@@ -580,7 +580,7 @@ def newetcd_remote_install_etcd():
 def newetcd_remote_modify_etcd_conf():
     if not len(env.roledefs['newetcd']['hosts']):
         return
-    run('sed -i \'s#ETCD_INITIAL_CLUSTER_STATE="new"#ETCD_INITIAL_CLUSTER_STATE="existing"#g\' /etc/etcd/etcd.conf')
+    run('sed -i \'s#"new"#"existing"#g\' /usr/lib/systemd/system/etcd.service')
     pass
 
 def newetcd_cluster_addnew():
@@ -613,9 +613,10 @@ def _remote_install_etcd(addnew = False):
         cluster_hosts += tmpstr + ('etcd' + str(index + 1)) + '=https://' + host.split(':')[0]  + ':2380'
         tmpstr = ','
 
-    local('cd source/etcd && sed "s#CLUSTER_HOSTS#' + cluster_hosts + '#g" etcd.conf.tpl > etc/etcd/etcd.conf')
-    local('cd source/etcd && sed -i "s#ETCD_HOST#' + curhost + '#g" etc/etcd/etcd.conf')
-    local('cd source/etcd && sed -i "s#CONFIG_ETCD_NAME#' + etcdname + '#g" etc/etcd/etcd.conf')
+    local('cd source/etcd && sed "s#ETCD_INITIAL_CLUSTER_STATE#new#g" etcd.service.tpl > usr/lib/systemd/system/etcd.service')
+    local('cd source/etcd && sed -i "s#ETCD_HOST#' + curhost + '#g" usr/lib/systemd/system/etcd.service')
+    local('cd source/etcd && sed -i "s#ETCD_NAME#' + etcdname + '#g" usr/lib/systemd/system/etcd.service')
+    local('cd source/etcd && sed -i "s#ETCD_INITIAL_CLUSTER#' + cluster_hosts + '#g" usr/lib/systemd/system/etcd.service')
 
     local('cd source/etcd && tar zcvf etcd.gz etc usr')
 
@@ -964,43 +965,43 @@ def uninstall_dns():
 def init_images():
     pridocker = env.roledefs['pridocker']['hosts'][0].split(':')[0]
 
-    local('docker images | grep "alpine" || (cd source/images && sha256=`docker load -i esn-containers~alpine:latest.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/esn-containers/alpine:latest)')
+    local('docker images | grep "alpine" || (cd source/images && sha256=`docker load -i esn-containers~alpine:latest.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/esn-containers/alpine:latest)')
 
-    local('docker images | grep "esn_base" || (cd source/images && sha256=`docker load -i esn-containers~esn_base:1.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/esn-containers/esn_base:1.0)')
+    local('docker images | grep "esn_base" || (cd source/images && sha256=`docker load -i esn-containers~esn_base:1.0.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/esn-containers/esn_base:1.0)')
 
-    local('docker images | grep "pause-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google-containers~pause-amd64:3.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/google-containers/pause-amd64:3.1 && docker push ' + pridocker + ':5000/google-containers/pause-amd64:3.1)')
+    local('docker images | grep "pause-amd64" || (cd source/images && sha256=`docker load -i HOST:PORT~google-containers~pause-amd64:3.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/google-containers/pause-amd64:3.1 && docker push ' + pridocker + ':5000/google-containers/pause-amd64:3.1)')
 
-    local('docker images | grep "kubernetesui/dashboard" || (cd source/images && sha256=`docker load -i HOST:PORT~kubernetesui~dashboard:v2.0.0-beta6.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/kubernetesui/dashboard:v2.0.0-beta6 && docker push ' + pridocker + ':5000/kubernetesui/dashboard:v2.0.0-beta6)')
+    local('docker images | grep "kubernetesui/dashboard" || (cd source/images && sha256=`docker load -i HOST:PORT~kubernetesui~dashboard:v2.0.0-beta6.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/kubernetesui/dashboard:v2.0.0-beta6 && docker push ' + pridocker + ':5000/kubernetesui/dashboard:v2.0.0-beta6)')
 
-    local('docker images | grep "kubernetesui/metrics-scraper" || (cd source/images && sha256=`docker load -i HOST:PORT~kubernetesui~metrics-scraper:v1.0.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/kubernetesui/metrics-scraper:v1.0.1 && docker push ' + pridocker + ':5000/kubernetesui/metrics-scraper:v1.0.1)')
+    local('docker images | grep "kubernetesui/metrics-scraper" || (cd source/images && sha256=`docker load -i HOST:PORT~kubernetesui~metrics-scraper:v1.0.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/kubernetesui/metrics-scraper:v1.0.1 && docker push ' + pridocker + ':5000/kubernetesui/metrics-scraper:v1.0.1)')
 
-    local('docker images | grep "busybox" | grep node || (cd source/images && sha256=`docker load -i HOST:PORT~busybox:latest.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/busybox:latest && docker push ' + pridocker + ':5000/busybox:latest)')
+    local('docker images | grep "busybox" | grep node || (cd source/images && sha256=`docker load -i HOST:PORT~busybox:latest.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/busybox:latest && docker push ' + pridocker + ':5000/busybox:latest)')
 
-    local('docker images | grep "grafana" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~grafana~grafana:6.4.4.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/grafana/grafana:6.4.4.1 && docker push ' + pridocker + ':5000/grafana/grafana:6.4.4.1)')
+    local('docker images | grep "grafana" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~grafana~grafana:6.4.4.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/grafana/grafana:6.4.4.1 && docker push ' + pridocker + ':5000/grafana/grafana:6.4.4.1)')
 
-    local('docker images | grep "jimmidyson/configmap-reload" | grep kube-controllers || (cd source/images && sha256=`docker load -i HOST:PORT~jimmidyson~configmap-reload:v0.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/jimmidyson/configmap-reload:v0.1 && docker push ' + pridocker + ':5000/jimmidyson/configmap-reload:v0.1)')
+    local('docker images | grep "jimmidyson/configmap-reload" | grep kube-controllers || (cd source/images && sha256=`docker load -i HOST:PORT~jimmidyson~configmap-reload:v0.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/jimmidyson/configmap-reload:v0.1 && docker push ' + pridocker + ':5000/jimmidyson/configmap-reload:v0.1)')
 
-    local('docker images | grep "addon-resizer" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~addon-resizer:1.8.5.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/addon-resizer:1.8.5 && docker push ' + pridocker + ':5000/k8s.gcr.io/addon-resizer:1.8.5)')
+    local('docker images | grep "addon-resizer" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~addon-resizer:1.8.5.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/addon-resizer:1.8.5 && docker push ' + pridocker + ':5000/k8s.gcr.io/addon-resizer:1.8.5)')
 
-    local('docker images | grep "prom/alertmanager" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~alertmanager:v0.14.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/prom/alertmanager:v0.14.0 && docker push ' + pridocker + ':5000/prom/alertmanager:v0.14.0)')
+    local('docker images | grep "prom/alertmanager" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~alertmanager:v0.14.0.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/prom/alertmanager:v0.14.0 && docker push ' + pridocker + ':5000/prom/alertmanager:v0.14.0)')
 
-    local('docker images | grep "prom/node-exporter" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~node-exporter:v0.18.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/prom/node-exporter:v0.18.1 && docker push ' + pridocker + ':5000/prom/node-exporter:v0.18.1)')
+    local('docker images | grep "prom/node-exporter" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~node-exporter:v0.18.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/prom/node-exporter:v0.18.1 && docker push ' + pridocker + ':5000/prom/node-exporter:v0.18.1)')
 
-    local('docker images | grep "prom/prometheus" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~prometheus:v2.2.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/prom/prometheus:v2.2.1 && docker push ' + pridocker + ':5000/prom/prometheus:v2.2.1)')
+    local('docker images | grep "prom/prometheus" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~prom~prometheus:v2.2.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/prom/prometheus:v2.2.1 && docker push ' + pridocker + ':5000/prom/prometheus:v2.2.1)')
 
-    local('docker images | grep "kube-state-metrics" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~coreos~kube-state-metrics:v1.3.0.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/coreos/kube-state-metrics:v1.3.0 && docker push ' + pridocker + ':5000/quay.io/coreos/kube-state-metrics:v1.3.0)')
+    local('docker images | grep "kube-state-metrics" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~quay.io~coreos~kube-state-metrics:v1.3.0.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/quay.io/coreos/kube-state-metrics:v1.3.0 && docker push ' + pridocker + ':5000/quay.io/coreos/kube-state-metrics:v1.3.0)')
 
-    local('docker images | grep "metrics-server-amd64" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~metrics-server-amd64:v0.3.6.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/metrics-server-amd64:v0.3.6 && docker push ' + pridocker + ':5000/k8s.gcr.io/metrics-server-amd64:v0.3.6)')
+    local('docker images | grep "metrics-server-amd64" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~metrics-server-amd64:v0.3.6.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/metrics-server-amd64:v0.3.6 && docker push ' + pridocker + ':5000/k8s.gcr.io/metrics-server-amd64:v0.3.6)')
 
-    local('docker images | grep "calico/cni" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~cni:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/cni:v3.10.1 && docker push ' + pridocker + ':5000/calico/cni:v3.10.1)')
+    local('docker images | grep "calico/cni" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~cni:v3.10.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/calico/cni:v3.10.1 && docker push ' + pridocker + ':5000/calico/cni:v3.10.1)')
 
-    local('docker images | grep "calico/kube-controllers" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~kube-controllers:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/kube-controllers:v3.10.1 && docker push ' + pridocker + ':5000/calico/kube-controllers:v3.10.1)')
+    local('docker images | grep "calico/kube-controllers" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~kube-controllers:v3.10.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/calico/kube-controllers:v3.10.1 && docker push ' + pridocker + ':5000/calico/kube-controllers:v3.10.1)')
 
-    local('docker images | grep "calico/node" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~node:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/node:v3.10.1 && docker push ' + pridocker + ':5000/calico/node:v3.10.1)')
+    local('docker images | grep "calico/node" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~node:v3.10.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/calico/node:v3.10.1 && docker push ' + pridocker + ':5000/calico/node:v3.10.1)')
 
-    local('docker images | grep "calico/pod2daemon-flexvol" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~pod2daemon-flexvol:v3.10.1.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/calico/pod2daemon-flexvol:v3.10.1 && docker push ' + pridocker + ':5000/calico/pod2daemon-flexvol:v3.10.1)')
+    local('docker images | grep "calico/pod2daemon-flexvol" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~calico~pod2daemon-flexvol:v3.10.1.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/calico/pod2daemon-flexvol:v3.10.1 && docker push ' + pridocker + ':5000/calico/pod2daemon-flexvol:v3.10.1)')
 
-    local('docker images | grep "coredns" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~coredns:1.6.2.tar | grep Loaded | awk \'{print $4}\' | awk -F \':\' \'{print $2}\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/coredns:1.6.2 && docker push ' + pridocker + ':5000/k8s.gcr.io/coredns:1.6.2)')
+    local('docker images | grep "coredns" | grep cni || (cd source/images && sha256=`docker load -i HOST:PORT~k8s.gcr.io~coredns:1.6.2.tar | grep Loaded | cut -f 3,4 -d \' \' | cut -f 2 -d \' \' | sed \'s/sha256://g\'` && docker tag $sha256 ' + pridocker + ':5000/k8s.gcr.io/coredns:1.6.2 && docker push ' + pridocker + ':5000/k8s.gcr.io/coredns:1.6.2)')
     pass
 ##########################[初始化镜像]############################
 
@@ -1074,6 +1075,11 @@ def init_k8s_system():
     local('sed "s#PRI_DOCKER_HOST#' + pridocker + '#g" source/prometheus/prometheus-statefulset.yaml.tpl > source/prometheus/prometheus-statefulset.yaml')
     local('sed -i "s#HOST#' + pridns + '#g" source/dns/coredns.yaml')
 
+    local('mkdir -p /tmp/dashboard_certs')
+    local('openssl req -nodes -newkey rsa:2048 -keyout /tmp/dashboard_certs/dashboard.key -out /tmp/dashboard_certs/dashboard.csr -subj "/C=/ST=/L=/O=/OU=/CN=kubernetes-dashboard"')
+    local('openssl x509 -req -in /tmp/dashboard_certs/dashboard.csr -CA source/master/etc/kubernetes/pki/ca.pem -CAkey source/master/etc/kubernetes/pki/ca-key.pem -CAcreateserial -out /tmp/dashboard_certs/dashboard.crt -days 3650')
+    local('kubectl create namespace kubernetes-dashboard ; echo "" > /dev/null')
+    local('kubectl create secret generic kubernetes-dashboard-certs --from-file=/tmp/dashboard_certs -n kubernetes-dashboard && rm -rf /tmp/dashboard_certs ; echo "" > /dev/null')
     local('kubectl apply -f source/dashboard')
     local('kubectl apply -f source/dns')
     local('kubectl apply -f source/metrics-server')

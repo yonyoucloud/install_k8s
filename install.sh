@@ -156,9 +156,9 @@ do
     sleep 1
     ((i++))
     echo -e "\033[32m等待kubernetes-dashboard running($i)s...\033[0m"
-    kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running
+    kubectl -n kubernetes-dashboard get pods -o wide | grep kubernetes-dashboard | grep Running
     if [ $? -eq 0 ]; then
-        kubectl -n kube-system get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: https://"$7":30000\033[0m"}'
+        kubectl -n kubernetes-dashboard get pods -o wide | grep kubernetes-dashboard | grep Running | awk '{print "\033[31m您可以访问kubernetes-dashboard: https://"$7":30000\033[0m"}'
         echo -e "\033[32m用下面输出的token登录kubernetes-dashboard\033[0m"
         kubectl describe secret $(kubectl get secret -n kube-system | grep admin-token | awk '{print $1}') -n kube-system | grep token: | awk '{print $2}'
         break
@@ -174,6 +174,7 @@ do
     kubectl -n kube-system get pods -o wide | grep monitoring-grafana | grep Running
     if [ $? -eq 0 ]; then
         kubectl -n kube-system get pods -o wide | grep monitoring-grafana | grep Running | awk '{print "\033[31m您可以访问monitoring-grafana: http://"$7":30001\033[0m"}'
+        echo -e "\033[32m账号密码为：admin/123456\033[0m"
         break
     fi
 done

@@ -37,7 +37,12 @@ data:
       relabel_configs:
       - action: labelmap
         regex: __meta_kubernetes_node_label_(.+)
-      scheme: https
+      - source_labels: [__address__]
+        action: replace
+        regex: '(.*):10250'
+        replacement: '${1}:10255'
+        target_label: __address__
+      scheme: http
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         insecure_skip_verify: true
@@ -51,7 +56,12 @@ data:
         regex: __meta_kubernetes_node_label_(.+)
       - target_label: __metrics_path__
         replacement: /metrics/cadvisor
-      scheme: https
+      - source_labels: [__address__]
+        action: replace
+        regex: '(.*):10250'
+        replacement: '${1}:10255'
+        target_label: __address__
+      scheme: http
       tls_config:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         insecure_skip_verify: true
