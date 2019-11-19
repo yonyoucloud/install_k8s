@@ -48,7 +48,7 @@ spec:
       serviceAccountName: metrics-server
       containers:
       - name: metrics-server
-        image: k8s.gcr.io/metrics-server-amd64:v0.3.6
+        image: PRI_DOCKER_HOST:5000/k8s.gcr.io/metrics-server-amd64:v0.3.6
         command:
         - /metrics-server
         - --metric-resolution=30s
@@ -64,7 +64,7 @@ spec:
           name: https
           protocol: TCP
       - name: metrics-server-nanny
-        image: k8s.gcr.io/addon-resizer:1.8.5
+        image: PRI_DOCKER_HOST:5000/k8s.gcr.io/addon-resizer:1.8.5
         resources:
           limits:
             cpu: 100m
