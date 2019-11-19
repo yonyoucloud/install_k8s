@@ -1,0 +1,42 @@
+<div class="podnav-wrapper">
+  <div class="podnav-tags-wrapper">
+    <h4>Filter Pods By Kubernetes Tag</h4>
+    <div class="chosen-tags-container" style="overflow: hidden">
+      <span class="search-result-tag label label-tag" style="margin-right: 10px; float: left" ng-repeat="(tag, value) in ctrl.chosenTags" tag-color-from-name="tag" ng-click="ctrl.removeTag(tag)">
+          <i class="fa fa-tag"></i>
+          <span>{{tag}}={{value}}</span>
+          <i class="fa fa-remove"></i>
+        </span>
+    </div>
+    <div class="podnav-tags gf-form-group">
+      <div class="gf-form-inline" ng-repeat="(label, values) in ctrl.currentTags">
+        <div class="gf-form max-width-28">
+          <label class="gf-form-label template-variable width-16">
+            {{label}}
+          </label>
+          <div class="gf-form-select-wrapper">
+            <select class="gf-form-input width-10" ng-model="ctrl.chosenTags[label]" ng-options="value as value for value in values" ng-change="ctrl.onTagSelect()">
+              <option name="All" value="">All</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="podnav-pods">
+    <h4>Filter by Pod Name</h4>
+    <div class="chosen-tags-container">
+      <span class="search-result-tag label label-tag" style="margin-right: 10px; float: left" ng-repeat="podTag in ctrl.selectedPods" tag-color-from-name="podTag" ng-click="ctrl.removePodTag(podTag)">
+        <i class="fa fa-tag"></i>
+        <span>{{podTag}}</span>
+        <i class="fa fa-remove"></i>
+      </span>
+    </div>
+    <div class="podnav-results">
+      <span class="podnav-result" ng-repeat="pod in ctrl.currentPods">
+        <button type="button" class="btn btn-success" ng-click="ctrl.selectPod(pod)">Select</button>
+        {{pod}}
+      </span>
+    </div>
+  </div>
+</div>

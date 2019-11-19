@@ -1,0 +1,140 @@
+<div class="page-header">
+	<h1>Overview</h1>
+  <h3 class="pointer" style="float: right; margin-top: 0.5rem; font-style: italic;" ng-click="ctrl.goToClusterDashboard()">
+     <i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Cluster Overview dashboard'"></i> Cluster: {{ctrl.cluster.name}}
+  </h3>
+</div>
+<br>
+
+<section class="card-section card-list-layout-grid main-dash-links">
+  <ol class="card-list">
+    <li class="card-item-wrapper">
+      <div class="card-item card-item--main-dash-link pointer" ng-click="ctrl.goToClusterDashboard()">
+        <div class="card-item-body">
+          <div class="card-item-details">
+            <div class="card-item-name">
+              <h2 class="page-heading pointer" ><i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Cluster Overview dashboard'"></i> <span>Cluster Dashboard</span></h2>
+            </div>
+            <div class="card-item-sub-name">
+              A high level view of cluster health metrics.
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="card-item-wrapper">
+      <div class="card-item main-dash-link pointer" ng-click="ctrl.goToNodeDashboard('All', $event)">
+        <div class="card-item-body">
+          <div class="card-item-details">
+            <div class="card-item-name">
+              <h2 class="page-heading pointer"><i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Node Metrics dashboard'"></i> <span>Nodes Dashboard</span></h2>
+            </div>
+            <div class="card-item-sub-name">
+              CPU, Memory, Disk Usage and Network metrics per node.
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="card-item-wrapper">
+      <div class="card-item main-dash-link pointer" ng-click="ctrl.goToPodDashboard()">
+        <div class="card-item-body">
+          <div class="card-item-details">
+            <div class="card-item-name">
+              <h2 class="page-heading pointer"><i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Pod Metrics dashboard'"></i> <span>Pod/Container Dashboard</span></h2>
+            </div>
+            <div class="card-item-sub-name">
+              Pod/Container metrics - CPU, Memory or Network stats.
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<h2>Browse Details from the Kubernetes API</h2>
+<section class="card-section card-list-layout-grid">
+
+	<h3 class="page-heading">
+		Namespaces <span class="muted small">(click on a namespace to see its pods and deployments)</span>
+	</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="ns in ctrl.namespaces">
+			<div class="card-item card-item--alert pointer" ng-click="ctrl.goToWorkloads(ns, $event)">
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%">{{ns.metadata.name}}</span>
+						</div>
+						<div class="card-item-sub-name">
+							<span style="font-size: 80%">{{ns.status.phase}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>
+
+<section class="card-section card-list-layout-list">
+	<h3 class="page-heading">
+		Component Statuses
+	</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="component in ctrl.componentStatuses">
+			<div class="card-item card-item--alert">
+				<div class="card-item-header card-item-header-action">
+					<div style="display:inline-block; font-size: 80%;">
+            <span ng-if="component.healthState.text !== 'OK'">{{component.healthState.message}}</span>
+						<span class="alert-list-item-state {{component.healthState.stateClass}}">
+							<i class="{{component.healthState.iconClass}}"></i>
+							{{component.healthState.text}}
+						</span>
+					</div>
+				</div>
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%">{{component.metadata.name}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>
+
+<section class="card-section card-list-layout-list">
+	<h3 class="page-heading">
+		Nodes <span class="muted small">(click to see node details)</span>
+	</h3>
+	<ol class="card-list" >
+		<li class="card-item-wrapper" ng-repeat="node in ctrl.nodes">
+			<div class="card-item card-item--alert pointer" ng-click="ctrl.goToNodeInfo(node, $event)">
+				<div class="card-item-header card-item-header-action"
+					style="padding-top: 14px;">
+					<div style="display:inline-block;"
+						ng-click="ctrl.goToNodeDashboard(node, $event)">
+						<i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Node dashboard'"></i>
+            <span class="muted">Node Stats Dashboard</span>
+					</div>
+				</div>
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span class="small">{{node.metadata.name}}</span>
+						</div>
+						<div class="card-item-sub-name">
+              <span ng-if="node.healthState.text !== 'OK'">{{node.healthState.message}}</span>
+							<span class="alert-list-item-state {{node.healthState.stateClass}}">
+								<i class="{{node.healthState.iconClass}}"></i>
+								{{node.healthState.text}}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>

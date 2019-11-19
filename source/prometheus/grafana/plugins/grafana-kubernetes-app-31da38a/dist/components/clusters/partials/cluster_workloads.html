@@ -1,0 +1,108 @@
+<div class="page-header">
+	<h1>Workloads</h1>
+	<h3 style="float: right; margin-top: 0.5rem; font-style: italic;">Cluster: {{ctrl.cluster.name}}</h3>
+</div>
+<br>
+
+<section>
+	<div class="gf-form-group">
+		<div class="gf-form">
+			<span class="gf-form-label width-7">Namespace:</span>
+			<div class="gf-form-select-wrapper">
+				<select class="gf-form-input gf-size-auto" ng-model="ctrl.namespace" ng-options="ns.metadata.name as ns.metadata.name for ns in ctrl.namespaces" ng-change="ctrl.getWorkloads()">
+					<option name="All" value="">All</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</section>
+
+<section class="card-section card-list-layout-list">
+	<h3 class="page-heading">
+		Daemon Sets
+	</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="ds in ctrl.daemonSets">
+			<div class="card-item card-item--alert">
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%">{{ds.metadata.name}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>
+
+<section class="card-section card-list-layout-list" ng-show="ctrl.replicationControllers.length > 0">
+	<h3 class="page-heading">
+		Replication Controllers
+	</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="rc in ctrl.replicationControllers">
+			<div class="card-item card-item--alert">
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%">{{rc.metadata.name}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>
+
+<section class="card-section card-list-layout-list" ng-show="ctrl.deployments.length > 0">
+	<h3 class="page-heading">
+		Deployments
+	</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="deploy in ctrl.deployments">
+			<div class="card-item card-item--alert pointer">
+        <div class="card-item-header card-item-header-action">
+					<div style="display:inline-block;"
+						ng-click="ctrl.goToDeploymentDashboard(deploy, $event)">
+						<i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Deployments dashboard'"></i>
+						<span class="muted">Deployment Stats Dashboard</span>
+					</div>
+				</div>
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%">{{deploy.metadata.name}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>
+
+<section class="card-section card-list-layout-list" ng-show="ctrl.pods.length > 0">
+	<h3 class="page-heading">
+		Pods
+	</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="pod in ctrl.pods">
+			<div class="card-item card-item--alert pointer" ng-click="ctrl.goToPodInfo(pod, $event)">
+				<div class="card-item-header card-item-header-action">
+					<div style="display:inline-block;"
+						ng-click="ctrl.goToPodDashboard(pod, $event)">
+						<i ng-class="icon" class="icon-gf icon-gf-dashboard" bs-tooltip="'Pod dashboard'"></i>
+						<span class="muted">Pod/Container Stats Dashboard</span>
+					</div>
+				</div>
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%">{{pod.metadata.name}}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>

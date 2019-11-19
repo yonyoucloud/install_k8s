@@ -175,6 +175,9 @@ do
     if [ $? -eq 0 ]; then
         kubectl -n kube-system get pods -o wide | grep monitoring-grafana | grep Running | awk '{print "\033[31m您可以访问monitoring-grafana: http://"$7":30001\033[0m"}'
         echo -e "\033[32m账号密码为：admin/123456\033[0m"
+        kubectl -n kube-system cp source/prometheus/grafana monitoring-grafana-0:/var/lib
+        kubectl -n kube-system delete pod monitoring-grafana-0
+        echo -e "\033[32m注意：需要配置一下grafana的k8s插件中的URL地址及三个认证证书（base64解码~/.kube/config中的相应证书）\033[0m"
         break
     fi
 done

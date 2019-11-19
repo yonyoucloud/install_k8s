@@ -1,0 +1,37 @@
+{
+  "name": "Kubernetes",
+  "id": "grafana-kubernetes-datasource",
+  "type": "datasource",
+
+  "staticRoot": ".",
+
+  "partials": {
+    "config": "public/app/plugins/grafana-kubernetes-app/datasource/partials/config.html"
+  },
+
+  "metrics": true,
+  "annotations": false,
+
+  "info": {
+    "description": "Kubernetes datasource",
+    "author": {
+      "name": "Grafana Labs",
+      "url": "https://grafana.com/"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {"name": "GitHub", "url": "https://github.com/grafana/kubernetes-app"},
+      {"name": "License", "url": "https://github.com/grafana/kubernetes-app/blob/master/LICENSE"}
+    ],
+    "version": "0.0.1",
+    "updated": "2018-01-18"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "5.x.x",
+    "plugins": [ ]
+  }
+}

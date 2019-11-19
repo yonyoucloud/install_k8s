@@ -6,8 +6,12 @@
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/getpods.jpeg)<br>
 访问dashboard:<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
-访问grafana:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana.jpeg)<br>
+访问grafana(节点):<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_container.jpeg)<br>
+访问grafana(容器):<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_node.jpeg)<br>
+访问prometheus:<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/prometheus.jpeg)<br>
 访问微服务例子:<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
 <br>
@@ -19,6 +23,9 @@ cd install_k8s<br>
 <br>
 第二步，下载大文件二进制包（里面是x86_64下编译好的k8s二进制文件）：<br>
 注意：下面的包可选，但要对应到相应的安装源码版本。<br>
+<br>
+v1.16.3.1版本下载地址（ls-files-v1.16.3.1.gz，建议用此版本，对k8s和runc做了禁止kmem特性，否则可能容器中进程被内核频繁oomkill）：<br>
+链接: https://pan.baidu.com/s/18Tq8RqxCKa8EBpXznOwBGg 提取码: p8f6<br>
 <br>
 v1.13.3.1版本下载地址（ls-files-v1.13.3.1.gz，建议用此版本，对k8s和runc做了禁止kmem特性，否则可能容器中进程被内核频繁oomkill）：<br>
 链接: https://pan.baidu.com/s/1mU3ykUaV5x5VNoh6tWuhCw 提取码: 4p7h<br>

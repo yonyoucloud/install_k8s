@@ -1,0 +1,96 @@
+<div class="page-header">
+	<h1>{{ctrl.pod.metadata.name}}
+	</h1>
+	<div style="float: right; padding-top: 1em; font-style: italic;">
+		<h5>
+			<a ng-click="ctrl.goToPodDashboard(ctrl.pod)">
+				<i ng-class="icon" class="icon-gf icon-gf-dashboard"></i> Pod Dashboard
+			</a>
+		</h5>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<h3 class="page-heading playlist-column-header">Node</h3>
+		<div class="gf-form">
+			<span class="muted">
+				{{ctrl.pod.spec.nodeName}}
+			</span>
+		</div>
+		<div class="gf-form">
+			<span class="muted">
+				IP: {{ctrl.pod.status.hostIP}}
+			</span>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<h3 class="page-heading playlist-column-header">Status</h3>
+		<div class="gf-form">
+			<span class="muted">
+				Status: {{ctrl.pod.status.phase}}
+			</span>
+		</div>
+		<div class="gf-form">
+			<span class="muted">
+				Start time: {{ctrl.formatTime(ctrl.pod.status.startTime)}}
+			</span>
+		</div>
+	</div>
+</div>
+<br>
+
+<div class="row">
+	<div class="col-md-6">
+		<h3 class="page-heading playlist-column-header">Conditions</h3>
+		<table class="grafana-options-table" style="font-size: 90%;">
+			<tr class="muted">
+				<th>Status</th>
+				<th>Type</th>
+				<th>Last Change</th>
+			</tr>
+			<tr ng-repeat="condition in ctrl.pod.status.conditions" class="alert-state-pending">
+				<td>
+					<i class="icon-gf"
+						ng-class="{
+							'icon-gf-critical alert-state-critical': !ctrl.isConditionOk(condition),
+							'icon-gf-online alert-state-ok': ctrl.isConditionOk(condition)
+						}">
+					</i>
+					{{ctrl.conditionStatus(condition).text}}
+				</td>
+				<td>{{condition.type}}</td>
+				<td>{{ctrl.formatTime(condition.lastTransitionTime)}}</td>
+			</tr>
+		</table>
+	</div>
+	<div class="col-md-6">
+		<h3 class="page-heading playlist-column-header">Labels</h3>
+		<div class="gf-form" ng-repeat="(k, v) in ctrl.pod.metadata.labels">
+			<span class="label label-tag" style="background-color: rgb(30, 51, 51); border-color: #555555; color: lightgray; font-weight: 300; font-size: 95%;">
+				{{k}}: {{v}}
+			</span>
+		</div>
+	</div>
+</div>
+<br>
+
+<section class="card-section card-list-layout-list">
+	<h3 class="page-heading">Containers</h3>
+	<ol class="card-list">
+		<li class="card-item-wrapper" ng-repeat="container in ctrl.pod.spec.containers">
+			<div class="card-item card-item--alert">
+				<div class="card-item-body">
+					<div class="card-item-details">
+						<div class="card-item-name">
+							<span style="font-size: 80%;">{{container.name}}</span>
+						</div>
+						<div class="card-item-sub-name">
+							image: {{container.image}}
+						</div>
+					</div>
+				</div>
+			</div>
+		</li>
+	</ol>
+</section>

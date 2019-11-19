@@ -1,0 +1,83 @@
+tr.dashlist-item:hover {
+  background-color: #333;
+  cursor: pointer;
+}
+
+/* pod nav panel */
+.podnav-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.podnav-tags-wrapper {
+  width: 60%;
+}
+
+.chosen-tags-container {
+  display: block;
+}
+
+.chosen-tags-container .label-tag {
+  line-height: 20px;
+  margin-bottom: 10px;
+}
+
+.podnav-tags {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.podnav-pods {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+}
+
+.podnav-results {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  max-height: 300px;
+}
+
+.podnav-result {
+  display: block;
+  padding: 3px 10px;
+  background-color: #292929;
+  margin-bottom: 4px;
+}
+
+.podnav-result:hover {
+  background-color: #333;
+  cursor: pointer;
+}
+
+.podnav-result button {
+  margin-right: 15px;
+}
+
+/* plugin config */
+
+.pluginconfig-message {
+  margin: 20px;
+}
+
+.k8s-icon-success {
+  color: #10a345;
+  font-size: 24px;
+  text-decoration: none;
+  vertical-align: sub;
+}
+
+/* cluster info */
+.main-dash-links {
+  margin-bottom: 40px;
+}
+.card-item--main-dash-link {
+  padding: 20px;
+}

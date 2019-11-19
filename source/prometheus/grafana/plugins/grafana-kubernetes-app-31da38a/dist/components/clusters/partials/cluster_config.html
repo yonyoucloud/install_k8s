@@ -1,0 +1,91 @@
+<div class="page-header">
+  <h1>Add a new cluster</h1>
+</div>
+
+<form name="clusterForm">
+  <div class="gf-form-group">
+    <div class="gf-form-inline">
+      <div class="gf-form">
+        <span class="gf-form-label width-7">Name</span>
+        <input class="gf-form-input max-width-21" type="text" ng-model="ctrl.cluster.name" placeholder="My cluster name" required=""
+        />
+      </div>
+    </div>
+  </div>
+  <datasource-http-settings current="ctrl.cluster" suggest-url="http://localhost:8001">
+  </datasource-http-settings>
+  <div class="row">
+    <div class="col-lg-8">
+      <h3 class="page-headering playlist-column-header">Data Source Settings</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-8">
+      <section class="card-section card-list-layout-grid" ng-hide="ctrl.hostedMetricsDS.length > 0">
+        <a class="card-item" target="_blank" href="https://grafana.net/hosted-metrics/preview">
+          <div class="card-item-body">
+            <figure class="card-item-figure" style="height:2.6rem;">
+              <img ng-src="https://grafana.net/img/icon_hosted_metrics.svg" height="48">
+            </figure>
+            <div class="card-item-details">
+              <div class="card-item-sub-name">
+                Grafana Labs is now offering stealth access to our 100% Prometheus compatible hosted metrics to select customers.
+                <span class="pluginlist-message--enable">Learn More</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </section>
+      <h4 class="page-heading">Prometheus Read</h4>
+      <div class="gf-form-group">
+        <div class="gf-form-inline">
+          <div class="gf-form">
+            <span class="gf-form-label width-7">Datasource</span>
+            <select class="gf-form-input" ng-model="ctrl.cluster.jsonData.ds" ng-options="f.name as f.name for f in ctrl.datasources"
+              required></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<p>The Deploy button will deploy the following: (1) A promtheus configmap which contains the prometheus jobs that collect metrics
+  used by the dashboards in the kubernetes app (2) a
+  <a class="pointer highlight-word" href="https://github.com/prometheus/node_exporter">Node Exporter</a> deployment, and (3) a
+  <a class="pointer highlight-word" href="https://github.com/kubernetes/kube-state-metrics">Kube-State Metrics</a> deployment</p>
+<div class="gf-form-group" ng-show="ctrl.isOrgEditor">
+  <button type="submit" class="btn btn-success" ng-click="ctrl.save()" ng-enabled="clusterform.$valid">Save</button>
+  <button type="submit" class="btn btn-success" ng-click="ctrl.deploy()" ng-enabled="clusterform.$valid">{{ctrl.prometheusDeployed ? 'Update and Deploy' : 'Deploy'}}</button>
+  <button type="submit" class="btn btn-secondary" ng-click="ctrl.undeploy()" ng-show="ctrl.prometheusDeployed" ng-enabled="clusterform.$valid">Undeploy</button>
+  <a class="btn btn-link" ng-click="ctrl.cancel();">Cancel</a>
+</div>
+
+
+<span class="gf-form-label width-16">
+  <a ng-click="ctrl.togglePrometheusExample()" bs-tooltip="'click here to show required prometheus job'" data-placement="bottom">
+    <i class="fa fa-info-circle"></i> Configuring Prometheus
+  </a>
+</span>
+
+<div class="grafana-info-box span10" ng-if="ctrl.showPrometheusExample">
+  <h5>Example Prometheus Configuration File</h5>
+  <p>The below file is meant to be run on a Prometheus node inside a kubernetes cluster. If the required exporters are present
+    in the cluster the jobs should gather the metrics required for the dashboards present in this plugin. When altering this
+    configuration please be sure to maintain the same label names as they are required to for this appplication to perform
+    correctly.
+  </p>
+  <code ng-bind="ctrl.generatePrometheusConfig()" style="display:block;white-space:pre-wrap"></code>
+</div>
+
+<span class="gf-form-label width-16">
+  <a ng-click="ctrl.toggleHelp()" bs-tooltip="'click to show instructions and download links'" data-placement="bottom">
+    <i class="fa fa-info-circle"></i> Manual Deploy Instructions
+  </a>
+</span>
+
+<div class="grafana-info-box span10" ng-if="ctrl.showHelp">
+  <h5>Manual Deploy</h5>
+  <p>If you want to deploy manually or to automate the deployment to Kubernetes, the following files are needed.</p>
+  <button type="button" class="btn btn-success" ng-click="ctrl.saveKubeStateDeployToFile()">Download KubeState Deploy</button>
+  <button type="button" class="btn btn-success" ng-click="ctrl.saveNodeExporterDSToFile()">Download Node Exporter Daemon Set</button>
+</div>

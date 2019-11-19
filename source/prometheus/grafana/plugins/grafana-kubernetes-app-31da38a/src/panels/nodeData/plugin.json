@@ -1,0 +1,5 @@
+{
+  "type": "panel",
+  "name": "Kubernetes Node Info",
+  "id": "prometheus-kubernetes-nodeinfo-panel"
+}

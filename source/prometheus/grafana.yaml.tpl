@@ -34,7 +34,7 @@ spec:
         volumeMounts:
         - name: grafana-data
           mountPath: /var/lib/grafana
-          subPath: "grafana"
+          subPath: ""
       containers:
       - name: grafana
         image: PRI_DOCKER_HOST:5000/grafana/grafana:6.4.4.1
@@ -48,12 +48,12 @@ spec:
           readOnly: true
         - name: grafana-data
           mountPath: "/var/lib/grafana"
-          subPath: "grafana"
+          subPath: ""
         env:
         - name: GF_SECURITY_ADMIN_USER
           value: admin
         - name: GF_SECURITY_ADMIN_PASSWORD
-          value: 123456
+          value: "123456"
         - name: INFLUXDB_HOST
           value: monitoring-influxdb
         - name: GF_SERVER_HTTP_PORT
@@ -76,9 +76,6 @@ spec:
       - name: ca-certificates
         hostPath:
           path: /etc/ssl/certs
-      - name: grafana-data
-        persistentVolumeClaim:
-          claimName: grafana
       #securityContext:
       #  fsGroup: 472
       #  runAsUser: 472

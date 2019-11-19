@@ -1,0 +1,51 @@
+<div class="page-header">
+	<h1 >Kubernetes Clusters</h1>
+	<a class="btn btn-success" href="plugins/grafana-kubernetes-app/page/cluster-config" ng-show="ctrl.isOrgEditor">
+		<i class="fa fa-plus"></i>
+		New Cluster
+	</a>
+</div>
+
+<div ng-if="!ctrl.pageReady">
+	...loading
+</div>
+
+<div ng-if="ctrl.pageReady">
+	<div ng-if="ctrl.clusters.length === 0">
+		<div style="text-align: center; padding-top: 90px; min-height: 220px; min-width: 400px;  margin: 0 auto;">
+			<i ng-class="icon" class="icon-gf icon-gf-endpoint no-endpoints"></i>
+			<p ng-if="ctrl.isOrgEditor">Looks like you don’t have any clulsters yet.<br>
+				<a class="highlight-word" href="plugins/grafana-kubernetes-app/page/cluster-config">Add a new cluster</a>
+			</p>
+			<p ng-if="!ctrl.isOrgEditor">Your org does not have any clusters configured. Contact your org admin.
+			</p>
+		</div>
+	</div>
+
+  <table class="filter-table form-inline">
+		<thead>
+			<tr>
+				<th style="width: 80%">Name</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="dashlist-item" ng-repeat="cluster in ctrl.clusters">
+        <td style="font-size: 1.3rem; padding: 0">
+          <a style="display: block; padding-left: 15px; height: 100%;" href="#" ng-click="ctrl.clusterInfo(cluster)">
+            {{cluster.name}} Overview
+          </a>
+        </td>
+        <td class="text-right">
+          <a style="margin-left: 15px; vertical-align: sub;" href="plugins/grafana-kubernetes-app/page/cluster-config?cluster={{cluster.id}}">
+            <i ng-class="icon" class="icon-gf icon-gf-settings" bs-tooltip="'Cluster Config'"></i> Cluster Config
+          </a>
+          &nbsp;&nbsp;
+          <a ng-click="ctrl.deleteCluster(cluster)" class="btn btn-danger btn-mini">
+            <i class="fa fa-remove"></i>
+          </a>
+        </td>
+      </tr>
+		</tbody>
+	</table>
+</div>

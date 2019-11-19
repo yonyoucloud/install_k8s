@@ -1,0 +1,86 @@
+{
+  "type": "app",
+  "name": "kubernetes",
+  "id": "grafana-kubernetes-app",
+
+  "routes": [
+  ],
+
+  "info": {
+    "description": "Kubernetes app. shows data collected by Prometheus.",
+    "author": {
+      "name": "Grafana Labs",
+      "url": "https://grafana.com/"
+    },
+    "keywords": ["raintank", "kubernetes", "Prometheus"],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {"name": "Grafana Labs", "url": "https://grafana.com/"},
+      {"name": "GitHub", "url": "https://github.com/grafana/kubernetes-app"},
+      {"name": "License", "url": "https://github.com/grafana/kubernetes-app/blob/master/LICENSE"}
+    ],
+    "screenshots": [
+      {"name": "Cluster Dashboard", "path": "img/cluster-dashboard-screenshot.png"},
+      {"name": "Container Dashboard", "path": "img/container-dashboard-screenshot.png"},
+      {"name": "Node Dashboard", "path": "img/node-dashboard-screenshot.png"},
+      {"name": "Overview Page", "path": "img/overview-screenshot.png"},
+      {"name": "Pod Details Page", "path": "img/pod-details-screenshot.png"},
+      {"name": "Namespace Details Page", "path": "img/namespace-details-screenshot.png"}
+    ],
+    "version": "1.0.1",
+    "updated": "2018-01-18"
+  },
+
+  "includes": [
+    { "type": "page", "name": "Clusters", "component": "ClustersCtrl", "role": "Viewer", "addToNav": true, "defaultNav": true},
+    { "type": "page", "name": "Cluster Config", "component": "ClusterConfigCtrl", "role": "Editor", "addToNav": false},
+    { "type": "page", "name": "Cluster Info", "component": "ClusterInfoCtrl", "role": "Viewer", "addToNav": false},
+    { "type": "page", "name": "Cluster Workloads", "component": "ClusterWorkloadsCtrl", "role": "Viewer", "addToNav": false},
+    { "type": "page", "name": "Node Info", "component": "NodeInfoCtrl", "role": "Viewer", "addToNav": false},
+    { "type": "page", "name": "Pod Info", "component": "PodInfoCtrl", "role": "Viewer", "addToNav": false},
+    {
+      "type": "datasource",
+      "name": "kubernetes DS"
+    },
+    {
+      "type": "dashboard",
+      "name": "K8s Node",
+      "path": "dashboards/k8s-node.json",
+      "addToNav": false
+    },
+    {
+      "type": "dashboard",
+      "name": "K8s Container",
+      "path": "dashboards/k8s-container.json",
+      "addToNav": false
+    },
+    {
+      "type": "dashboard",
+      "name": "K8s Cluster",
+      "path": "dashboards/k8s-cluster.json",
+      "addToNav": false
+    },
+    {
+      "type": "dashboard",
+      "name": "K8s Deployments",
+      "path": "dashboards/k8s-deployments.json",
+      "addToNav": false
+    },
+    {
+      "type": "panel",
+      "name": "Kubernetes Node Info"
+    },
+    {
+      "type": "panel",
+      "name": "Kubernetes Pod Nav"
+    }
+  ],
+
+  "dependencies": {
+    "grafanaVersion": "5.0+",
+    "plugins": []
+  }
+}
