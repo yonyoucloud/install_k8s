@@ -7,9 +7,9 @@
 访问dashboard:<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
 访问grafana(节点):<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_container.jpeg)<br>
-访问grafana(容器):<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_node.jpeg)<br>
+访问grafana(容器):<br>
+![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_container.jpeg)<br>
 访问prometheus:<br>
 ![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/prometheus.jpeg)<br>
 访问微服务例子:<br>
