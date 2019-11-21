@@ -39,7 +39,7 @@ data:
   calico_backend: "bird"
 
   # Configure the MTU to use
-  veth_mtu: "1500"
+  veth_mtu: "1440"
 
   # The CNI network configuration to install on each node.  The special
   # values in this config will be automatically populated.
