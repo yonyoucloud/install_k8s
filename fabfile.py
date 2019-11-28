@@ -236,7 +236,7 @@ def newnode_service_node_start():
         for host in env.roledefs['newnode']['hosts']:
             hosts += split + host.split(':')[0]
             split = '|'
-        num = local('kubectl get nodes | grep -E "' + hosts + '" | grep Ready | wc -l', capture = True)
+        num = local('kubectl get nodes | grep -wE "' + hosts + '" | grep Ready | wc -l', capture = True)
         total = len(env.roledefs['newnode']['hosts'])
         print '等待所有节点运行状态变为Ready(%ds)(%d = %s)' % (i, total, num)
         if int(num) == total:
@@ -246,7 +246,7 @@ def newnode_service_node_start():
     i = 0
     while True:
         i = i + 1
-        num = local('kubectl get pods -o wide -n kube-system | grep -E "' + hosts + '" | grep calico-node | grep Running | wc -l', capture = True)
+        num = local('kubectl get pods -o wide -n kube-system | grep -wE "' + hosts + '" | grep calico-node | grep Running | wc -l', capture = True)
         total = len(env.roledefs['newnode']['hosts'])
         print '等待所有节点calico-node容器正常运行(%ds)(%d = %s)' % (i, total, num)
         if int(num) == total:
