@@ -110,3 +110,4 @@ spec:
       tolerations:
         - key: "CriticalAddonsOnly"
           operator: "Exists"
+      hostNetwork: true
