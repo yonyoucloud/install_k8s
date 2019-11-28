@@ -2,9 +2,7 @@
 Description=Kubernetes Scheduler
 Documentation=https://github.com/kubernetes
 After=kube-apiserver.service
-#After=etcd.service
 Requires=kube-apiserver.service
-#Requires=etcd.service
 
 [Service]
 EnvironmentFile=-/etc/kubernetes/config

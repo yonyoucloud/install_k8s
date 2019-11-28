@@ -1,8 +1,6 @@
 [Unit]
 Description=Kubernetes API Server
 Documentation=https://github.com/kubernetes
-After=etcd.service
-Wants=etcd.service
 
 [Service]
 EnvironmentFile=-/etc/kubernetes/config
