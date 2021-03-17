@@ -1,3 +1,9 @@
+安装最新稳定版：
+===============
+kubernetes-v1.20.4、istio-v1.9.1
+[安装说明](/images/install_readme.pdf)<br>
+注意：新的安装工具采用golang编写，可以运行在linux、mac、windows系统，添加机器操作界面化，安装逻辑和python脚本基本一致，做了一些优化。
+
 先展示一下结果
 ===============
 安装后最终输出下图样子即为成功:<br>
