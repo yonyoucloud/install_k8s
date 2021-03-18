@@ -1,7 +1,7 @@
 安装最新稳定版：
 ===============
-kubernetes-v1.20.4、istio-v1.9.1
-[安装说明](/images/install_readme.pdf)<br>
+kubernetes-v1.20.4、istio-v1.9.1 [安装说明](/images/install_readme.pdf)<br>
+[安装包下载地址](https://pan.baidu.com/s/1DsoPwRFjvCc2P6Epa1Hc5Q "提取码: bntu")提取码: bntu<br>
 注意：新安装工具采用golang编写，可以运行在linux、mac、windows系统，添加机器操作界面化，安装逻辑和python脚本基本一致，做了一些优化，特别支持了istio安装。
 
 先展示一下结果
