@@ -23,6 +23,10 @@ func init() {
 	waitOutput = &waitoutput.WaitOutput{}
 }
 
+func (ikh *InstallK8sHandler) InstallTest(c *gin.Context) {
+	ikh.call(c, "InstallTest")
+}
+
 func (ikh *InstallK8sHandler) InstallAll(c *gin.Context) {
 	ikh.call(c, "InstallAll")
 }
@@ -121,6 +125,7 @@ func (ikh *InstallK8sHandler) UpdateSslNode(c *gin.Context) {
 
 func (ikh *InstallK8sHandler) call(c *gin.Context, callFunc string) {
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
 
 	id := strings.TrimSpace(c.Query("k8s_cluster_id"))
 	doWhat := strings.TrimSpace(c.Query("do_what"))
@@ -163,7 +168,8 @@ func (ikh *InstallK8sHandler) call(c *gin.Context, callFunc string) {
 
 	c.Stream(func(w io.Writer) bool {
 		if msg, ok := <-stdout; ok {
-			// fmt.Fprint(w, msg)
+			msg = strings.Replace(msg, "\r", "", -1)
+			// fmt.Printf("%#v\n", msg)
 			c.SSEvent("message", msg)
 			return true
 		}

@@ -156,27 +156,28 @@
       </div>
       <div class="install-k8s-button">
         <font style="font-size:30px;">安装K8s集群：</font><br />
-        <el-button type="danger" @click="installAll()">一键安装</el-button>
-        <el-button type="primary" @click="installBase()">1.基础安装</el-button>
-        <el-button type="primary" @click="updateKernel()">2.升级内核</el-button>
-        <el-button type="primary" @click="installBin()">3.安装可执行文件</el-button>
-        <el-button type="primary" @click="installDocker()">4.安装Docker</el-button>
-        <el-button type="primary" @click="installPriDocker()">5.安装私有镜像库</el-button>
-        <el-button type="primary" @click="installEtcd()">6.安装Etcd集群</el-button>
-        <el-button type="primary" @click="installMaster()">7.安装Master集群</el-button>
-        <el-button type="primary" @click="installNode()">8.安装Node集群</el-button>
-        <el-button type="primary" @click="installDockerCrt()">9.安装Docker证书</el-button>
-        <el-button type="primary" @click="installLvs()">10.安装Lvs</el-button>
-        <el-button type="primary" @click="installDns()">11.安装Dns</el-button>
-        <el-button type="primary" @click="finishInstall()">12.完成安装</el-button>
+        <el-button type="danger" @click="install('test')">测试</el-button>
+        <el-button type="danger" @click="install('all')">一键安装</el-button>
+        <el-button type="primary" @click="install('base')">1.基础安装</el-button>
+        <el-button type="primary" @click="install('kernel')">2.升级内核</el-button>
+        <el-button type="primary" @click="install('bin')">3.安装可执行文件</el-button>
+        <el-button type="primary" @click="install('docker')">4.安装Docker</el-button>
+        <el-button type="primary" @click="install('pridocker')">5.安装私有镜像库</el-button>
+        <el-button type="primary" @click="install('etcd')">6.安装Etcd集群</el-button>
+        <el-button type="primary" @click="install('master')">7.安装Master集群</el-button>
+        <el-button type="primary" @click="install('node')">8.安装Node集群</el-button>
+        <el-button type="primary" @click="install('dockercrt')">9.安装Docker证书</el-button>
+        <el-button type="primary" @click="install('lvs')">10.安装Lvs</el-button>
+        <el-button type="primary" @click="install('dns')">11.安装Dns</el-button>
+        <el-button type="primary" @click="install('finish')">12.完成安装</el-button>
         <br />
-        <el-button type="primary" @click="newnodeInstall()">1.安装新节点</el-button>
-        <el-button type="primary" @click="newetcdInstall()">2.安装新Etcd</el-button>
-        <el-button type="primary" @click="newmasterInstall()">3.安装新Master</el-button>
+        <el-button type="primary" @click="install('newnode')">1.安装新节点</el-button>
+        <el-button type="primary" @click="install('newetcd')">2.安装新Etcd</el-button>
+        <el-button type="primary" @click="install('newmaster')">3.安装新Master</el-button>
         <br />
-        <el-button type="primary" @click="updateSslMaster()">1.更新Master证书</el-button>
-        <el-button type="primary" @click="updateSslEtcd()">2.更新Etcd证书</el-button>
-        <el-button type="primary" @click="updateSslNode()">3.更新Node证书</el-button>
+        <el-button type="primary" @click="install('sslmaster')">1.更新Master证书</el-button>
+        <el-button type="primary" @click="install('ssletcd')">2.更新Etcd证书</el-button>
+        <el-button type="primary" @click="install('sslnode')">3.更新Node证书</el-button>
       </div>
       <div class="install-k8s-button" style="margin-top:10px;">
         <font style="font-size:30px;">服务管理：</font><br />
@@ -188,25 +189,38 @@
           <el-radio label="true">包括Docker</el-radio>
           <el-radio label="false">不包括Docker</el-radio>
         </el-radio-group>
-        <el-button type="primary" @click="serviceStart()">启动</el-button>
-        <el-button type="primary" @click="serviceReStart()">重启</el-button>
-        <el-button type="danger" @click="serviceStop()">停止</el-button>
+        <el-button type="primary" @click="install('start')">启动</el-button>
+        <el-button type="primary" @click="install('restart')">重启</el-button>
+        <el-button type="danger" @click="install('stop')">停止</el-button>
       </div>
     </el-dialog>
     <el-dialog
       :title="(name?name:'')+'-K8S集群安装-'+installLogDesc"
       :visible.sync="installLogDialog"
       :close-on-click-modal=false
+      @opened="openedInstallLogDialog"
       width="85%">
-      <div class="infinite-list-wrapper" style="overflow:auto">
+      <div id="terminal" class="infinite-list-wrapper" style="overflow:auto;">
+      <!-- <div class="infinite-list-wrapper" style="overflow:auto">
         <ul class="list"
           infinite-scroll-disabled="disabled">
           <li v-for="(item, index) in installLog" :key="index" class="list-item">{{ item }}</li>
+          <li id="terminal" class="list-item"></li>
           <li class="loading">
             <span v-if="loading" style="color:goldenrod">正在安装...<i class="el-icon-loading"></i></span>
             <span v-if="installLog.length > 0 && !loading" style="color:green">安装完成<i class="el-icon-success"></i></span>
           </li>
         </ul>
+      </div> -->
+        <!-- <ul class="list"
+          infinite-scroll-disabled="disabled">
+          <li v-for="(item, index) in installLog" :key="index" class="list-item">{{ item }}</li>
+          <li id="terminal" class="list-item"></li>
+          <li class="loading">
+            <span v-if="loading" style="color:goldenrod">正在安装...<i class="el-icon-loading"></i></span>
+            <span v-if="installLog.length > 0 && !loading" style="color:green">安装完成<i class="el-icon-success"></i></span>
+          </li>
+        </ul> -->
       </div>
     </el-dialog>
   </div>
@@ -216,6 +230,9 @@
 import request from '@/tools/request'
 import { stream } from '@/tools/stream'
 import moment from 'moment'
+import 'xterm/css/xterm.css'
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
 
 export default {
   name: 'K8sCluster',
@@ -225,6 +242,8 @@ export default {
 
   data() {
     return {
+      term: null,
+      socket: null,
       k8sClusterForm: {},
       k8sClusterFormInit: {
         Name: '',
@@ -254,6 +273,65 @@ export default {
   },
 
   methods: {
+    initXterm() {
+      this.term = new Terminal({
+        fontSize: 14,
+        rendererType: 'canvas', //渲染类型
+        rows: 35, //行数
+        convertEol: true, //启用时，光标将设置为下一行的开头
+        // scrollback: 10, //终端中的回滚量
+        disableStdin: true, //是否应禁用输入
+        cursorStyle: 'underline', //光标样式
+        cursorBlink: false, //光标闪烁
+        theme: {
+          // foreground: 'yellow', //字体
+          // background: '#060101', //背景色
+          cursor: 'help' //设置光标
+        }
+      })
+
+      this.term.open(document.getElementById('terminal'))
+      const fitAddon = new FitAddon()
+      this.term.loadAddon(fitAddon)
+      fitAddon.fit()
+
+      // 支持输入与粘贴方法
+      let _this = this; //一定要重新定义一个this，不然this指向会出问题
+      this.term.onData(function(key) {
+        let order = ['stdin', key] //这里key值是你输入的值，数据格式一定要找后端要！！！！
+        _this.socket.onsend(JSON.stringify(order)) //转换为字符串
+      })
+    },
+    init(url) {
+      // 实例化socket
+      this.socket = new WebSocket(url)
+      // 监听socket连接
+      this.socket.onopen = this.open
+      // 监听socket错误信息
+      this.socket.onerror = this.error
+      // 监听socket消息
+      this.socket.onmessage = this.getMessage
+      // 发送socket消息
+      this.socket.onsend = this.send
+    },
+    open: function() {
+      console.log("socket连接成功")
+      this.initXterm()
+    },
+    error: function() {
+      console.log("连接错误")
+    },
+    close: function() {
+      this.socket.close()
+      console.log("socket已经关闭")
+    },
+    getMessage: function(msg) {
+      this.term.write(JSON.parse(msg.data)[1])
+    },
+    send: function(order) {
+      this.socket.send(order)
+    },
+
     createK8sCluster(id) {
       if (id) {
         this.editK8sCluster(id)
@@ -429,136 +507,110 @@ export default {
       })
     },
 
-    installAll() {
-      this.initInstallLog('一键安装')
-      let obj = stream('api/v1/installK8s/installAll?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installBase() {
-      this.initInstallLog('基础安装')
-      let obj = stream('api/v1/installK8s/installBase?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    updateKernel() {
-      this.initInstallLog('升级内核')
-      let obj = stream('api/v1/installK8s/updateKernel?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installBin() {
-      this.initInstallLog('安装可执行文件')
-      let obj = stream('api/v1/installK8s/installBin?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installDocker() {
-      this.initInstallLog('安装Docker')
-      let obj = stream('api/v1/installK8s/installDocker?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installPriDocker() {
-      this.initInstallLog('安装私有镜像库')
-      let obj = stream('api/v1/installK8s/installPriDocker?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installEtcd() {
-      this.initInstallLog('安装Etcd集群')
-      let obj = stream('api/v1/installK8s/installEtcd?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installMaster() {
-      this.initInstallLog('安装Master集群')
-      let obj = stream('api/v1/installK8s/installMaster?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installNode() {
-      this.initInstallLog('安装Node集群')
-      let obj = stream('api/v1/installK8s/installNode?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installDockerCrt() {
-      this.initInstallLog('安装Docker证书')
-      let obj = stream('api/v1/installK8s/installDockerCrt?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installLvs() {
-      this.initInstallLog('安装Lvs')
-      let obj = stream('api/v1/installK8s/installLvs?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    installDns() {
-      this.initInstallLog('安装Dns')
-      let obj = stream('api/v1/installK8s/installDns?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    finishInstall() {
-      this.initInstallLog('完成安装')
-      let obj = stream('api/v1/installK8s/finishInstall?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    newnodeInstall() {
-      this.initInstallLog('安装新节点')
-      let obj = stream('api/v1/installK8s/newnodeInstall?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    newetcdInstall() {
-      this.initInstallLog('安装新Etcd')
-      let obj = stream('api/v1/installK8s/newetcdInstall?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    newmasterInstall() {
-      this.initInstallLog('安装新Master')
-      let obj = stream('api/v1/installK8s/newmasterInstall?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    updateSslMaster() {
-      this.initInstallLog('更新Master证书')
-      let obj = stream('api/v1/installK8s/updateSslMaster?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    updateSslEtcd() {
-      this.initInstallLog('更新Etcd证书')
-      let obj = stream('api/v1/installK8s/updateSslEtcd?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    updateSslNode() {
-      this.initInstallLog('更新Node证书')
-      let obj = stream('api/v1/installK8s/updateSslNode?k8s_cluster_id=' + this.id)
-      this.addEventListener(obj)
-    },
-
-    serviceStart() {
-      this.initInstallLog(this.serviceData[this.service])
-      let obj = stream('api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=start&do_docker=' + this.doDocker)
-      this.addEventListener(obj)
-    },
-
-    serviceReStart() {
-      this.initInstallLog(this.serviceData[this.service])
-      let obj = stream('api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=restart&do_docker=' + this.doDocker)
-      this.addEventListener(obj)
-    },
-
-    serviceStop() {
-      this.initInstallLog(this.serviceData[this.service])
-      let obj = stream('api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=stop&do_docker=' + this.doDocker)
-      this.addEventListener(obj)
+    install(doWhat) {
+      let url = '',
+          title = ''
+      switch(doWhat) {
+        case 'test':
+          title = '测试'
+          url = 'api/v1/installK8s/installTest?k8s_cluster_id=' + this.id
+          break
+        case 'all':
+          title = '一键安装'
+          url = 'api/v1/installK8s/installAll?k8s_cluster_id=' + this.id
+          break
+        case 'base':
+          title = '基础安装'
+          url = 'api/v1/installK8s/installBase?k8s_cluster_id=' + this.id
+          break
+        case 'kernel':
+          title = '升级内核'
+          url = 'api/v1/installK8s/updateKernel?k8s_cluster_id=' + this.id
+          break
+        case 'bin':
+          title = '安装可执行文件'
+          url = 'api/v1/installK8s/installBin?k8s_cluster_id=' + this.id
+          break
+        case 'docker':
+          title = '安装Docker'
+          url = 'api/v1/installK8s/installDocker?k8s_cluster_id=' + this.id
+          break
+        case 'pridocker':
+          title = '安装私有镜像库'
+          url = 'api/v1/installK8s/installPriDocker?k8s_cluster_id=' + this.id
+          break
+        case 'etcd':
+          title = '安装Etcd集群'
+          url = 'api/v1/installK8s/installEtcd?k8s_cluster_id=' + this.id
+          break
+        case 'master':
+          title = '安装Master集群'
+          url = 'api/v1/installK8s/installMaster?k8s_cluster_id=' + this.id
+          break
+        case 'node':
+          title = '安装Node集群'
+          url = 'api/v1/installK8s/installNode?k8s_cluster_id=' + this.id
+          break
+        case 'dockercrt':
+          title = '安装Docker证书'
+          url = 'api/v1/installK8s/installDockerCrt?k8s_cluster_id=' + this.id
+          break
+        case 'lvs':
+          title = '安装Lvs'
+          url = 'api/v1/installK8s/installLvs?k8s_cluster_id=' + this.id
+          break
+        case 'dns':
+          title = '安装Dns'
+          url = 'api/v1/installK8s/installDns?k8s_cluster_id=' + this.id
+          break
+        case 'finish':
+          title = '完成安装'
+          url = 'api/v1/installK8s/finishInstall?k8s_cluster_id=' + this.id
+          break
+        case 'newnode':
+          title = '安装新节点'
+          url = 'api/v1/installK8s/newnodeInstall?k8s_cluster_id=' + this.id
+          break
+        case 'newetcd':
+          title = '安装新Etcd'
+          url = 'api/v1/installK8s/newetcdInstall?k8s_cluster_id=' + this.id
+          break
+        case 'newmaster':
+          title = '安装新Master'
+          url = 'api/v1/installK8s/newmasterInstall?k8s_cluster_id=' + this.id
+          break
+        case 'sslmaster':
+          title = '更新Master证书'
+          url = 'api/v1/installK8s/updateSslMaster?k8s_cluster_id=' + this.id
+          break
+        case 'ssletcd':
+          title = '更新Etcd证书'
+          url = 'api/v1/installK8s/updateSslEtcd?k8s_cluster_id=' + this.id
+          break
+        case 'sslnode':
+          title = '更新Node证书'
+          url = 'api/v1/installK8s/updateSslNode?k8s_cluster_id=' + this.id
+          break
+        case 'start':
+          title = this.serviceData[this.service]
+          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=start&do_docker=' + this.doDocker
+          break
+        case 'restart':
+          title = this.serviceData[this.service]
+          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=restart&do_docker=' + this.doDocker
+          break
+        case 'stop':
+          title = this.serviceData[this.service]
+          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=stop&do_docker=' + this.doDocker
+          break
+        default:
+          return
+      }
+      this.initInstallLog(title)
+      setTimeout(() => {
+        let obj = stream(url)
+        this.addEventListener(obj)
+      }, 500)
     },
 
     initInstallLog(desc) {
@@ -568,10 +620,24 @@ export default {
       this.installLogDesc = desc
     },
 
+    openedInstallLogDialog() {
+      if (this.term === null) {
+        this.initXterm()
+      } else {
+        this.term.clear()
+      }
+    },
+
     addEventListener(obj) {
       obj.addEventListener('message', (event) => {
         this.loading = true
-        this.installLog.push(event.data)
+        // console.log(JSON.stringify(event.data))
+        if (event.data.endsWith("\n")) {
+          this.term.write(event.data)
+        } else {
+          this.term.writeln(event.data)
+        }
+        // this.installLog.push(event.data)
       })
       obj.addEventListener('close', () => {
         this.loading = false
@@ -583,6 +649,8 @@ export default {
 
   mounted() {
     this.listK8sCluster()
+    // let url = 'ws://***********'
+    // this.init(url)
   },
 }
 </script>

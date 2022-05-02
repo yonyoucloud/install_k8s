@@ -40,16 +40,10 @@ func (ik *InstallK8s) newnodeUpdateScope() {
 
 	publishRole.WaitOutput = true
 	ik.er.SetRole(publishRole)
-	res := ik.er.Run(`kubectl get node | grep -v NAME | awk '{print $1}'`)
-	var hosts []string
-	substr := "-> "
-	for _, h := range res {
-		if strings.Contains(h, substr) {
-			hosts = append(hosts, strings.Trim(strings.Split(h, substr)[1], "\n"))
-		}
-	}
+	ik.er.Run(`kubectl get node | grep -v NAME | awk '{print $1}'`)
+	hosts := ik.er.GetCmdReturn()
 
-	substr = ":"
+	substr := ":"
 	num := 0
 	var noAdded []string
 	for _, h := range newnodeRole.Hosts {
@@ -230,10 +224,8 @@ func (ik *InstallK8s) newnodeServiceNodeStart() {
 	i := 0
 	for {
 		i++
-		res := ik.er.Run(fmt.Sprintf(`kubectl get nodes | grep -wE "%s" | grep Ready | wc -l`, strings.Join(hosts, "|")))
-		resArr := strings.Split(strings.Join(res, ""), "-> ")
-		numStr := strings.Trim(resArr[1], "\n")
-		num, _ := strconv.Atoi(numStr)
+		ik.er.Run(fmt.Sprintf(`kubectl get nodes | grep -wE "%s" | grep Ready | wc -l`, strings.Join(hosts, "|")))
+		num, _ := strconv.Atoi(ik.er.GetCmdReturn()[0])
 		ik.Stdout <- fmt.Sprintf("等待所有节点运行状态变为Ready(%ds)(%d = %d)", i, total, num)
 		if num == total {
 			break
@@ -244,10 +236,8 @@ func (ik *InstallK8s) newnodeServiceNodeStart() {
 	i = 0
 	for {
 		i++
-		res := ik.er.Run(fmt.Sprintf(`kubectl get pods -o wide -n kube-system | grep -wE "%s" | grep calico-node | grep Running | wc -l`, strings.Join(hosts, "|")))
-		resArr := strings.Split(strings.Join(res, ""), "-> ")
-		numStr := strings.Trim(resArr[1], "\n")
-		num, _ := strconv.Atoi(numStr)
+		ik.er.Run(fmt.Sprintf(`kubectl get pods -o wide -n kube-system | grep -wE "%s" | grep calico-node | grep Running | wc -l`, strings.Join(hosts, "|")))
+		num, _ := strconv.Atoi(ik.er.GetCmdReturn()[0])
 		ik.Stdout <- fmt.Sprintf("等待所有节点calico-node容器正常运行(%ds)(%d = %d)", i, total, num)
 		if num == total {
 			break

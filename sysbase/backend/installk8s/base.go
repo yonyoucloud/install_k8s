@@ -40,6 +40,9 @@ func (ik *InstallK8s) Call(funcName string) {
 	ik.Stdout <- "开始执行..."
 
 	switch funcName {
+	case "InstallTest":
+		ik.InstallTest()
+		break
 	case "InstallAll":
 		ik.InstallAll()
 		break
@@ -145,6 +148,30 @@ func (ik *InstallK8s) GetResources() {
 
 	timeout := 3 * time.Second
 	ik.er = execremote.New(user, password, timeout, ik.Stdout)
+}
+
+func (ik *InstallK8s) InstallTest() {
+	publishRole, ok := ik.resources["default"]
+	if !ok {
+		ik.Stdout <- "没有publish资源"
+		return
+	}
+
+	publishRole.WaitOutput = true
+	ik.er.SetRole(publishRole)
+	ik.er.Run(`cat /root/1.sh`)
+	fmt.Printf("%#v\n", ik.er.GetCmdReturn())
+
+	ik.er.Run(`uname -a | grep 4.19.94 > /dev/null ; echo $?`)
+	fmt.Printf("%#v\n", ik.er.GetCmdReturn())
+	return
+
+	cmds := []string{
+		`ls -la`,
+		`date`,
+		`for i in {1..10};do echo "你好${i}";sleep 1;done`,
+	}
+	ik.er.Run(cmds...)
 }
 
 func (ik *InstallK8s) InstallAll() {
@@ -258,8 +285,8 @@ func (ik *InstallK8s) checkHostsKernel(hosts []string) []string {
 			WaitOutput: true,
 		}
 		ik.er.SetRole(oneHostRole)
-		res := ik.er.Run(`uname -a | grep 4.19.94 > /dev/null ; echo $?`)
-		if strings.Contains(strings.Join(res, ""), "-> 1") {
+		ik.er.Run(`uname -a | grep 4.19.94 > /dev/null ; echo $?`)
+		if ik.er.GetCmdReturn()[0] == "1" {
 			oneHostRole.WaitOutput = false
 			needUpdateHosts = append(needUpdateHosts, host)
 		}

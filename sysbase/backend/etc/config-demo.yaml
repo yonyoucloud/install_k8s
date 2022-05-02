@@ -1,0 +1,19 @@
+static: static
+mysql:
+  master-dsn: sysbase:123456@tcp(127.0.0.1:3306)/sysbase?parseTime=True&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci
+  sources-dsn: [
+    "sysbase:123456@tcp(127.0.0.1:3306)/sysbase?parseTime=True&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci"
+  ]
+  replicas-dsn: [
+    "sysbase:123456@tcp(127.0.0.1:3306)/sysbase?parseTime=True&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci",
+    "sysbase:123456@tcp(127.0.0.1:3306)/sysbase?parseTime=True&loc=Local&charset=utf8mb4&collation=utf8mb4_unicode_ci",
+  ]
+  # 空闲连接池中连接的最大数量
+  max-idle-conns: 10
+  # 打开数据库连接的最大数量
+  max-open-conns: 100
+  # 连接可复用的最大时间
+  conn-max-lifetime: 1h
+
+install-k8s:
+  source-dir: /data/installk8s

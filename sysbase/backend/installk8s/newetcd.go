@@ -79,8 +79,8 @@ func (ik *InstallK8s) newetcdUpdateScope() {
 	ik.er.SetRole(publishRole)
 
 	for _, r := range resource {
-		res := ik.er.Run(fmt.Sprintf(`etcdctl --cacert=%s/etcd/etc/etcd/ssl/ca.pem --cert=%s/etcd/etc/etcd/ssl/etcd.pem --key=%s/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://%s:2379 member list | grep %s > /dev/null ; echo $?`, ik.SourceDir, ik.SourceDir, ik.SourceDir, etcdLbHost, r.Host))
-		if strings.Contains(strings.Join(res, ""), "-> 0") {
+		ik.er.Run(fmt.Sprintf(`etcdctl --cacert=%s/etcd/etc/etcd/ssl/ca.pem --cert=%s/etcd/etc/etcd/ssl/etcd.pem --key=%s/etcd/etc/etcd/ssl/etcd-key.pem --endpoints=https://%s:2379 member list | grep %s > /dev/null ; echo $?`, ik.SourceDir, ik.SourceDir, ik.SourceDir, etcdLbHost, r.Host))
+		if ik.er.GetCmdReturn()[0] == "0" {
 			model.Resource{
 				ID: r.ID,
 			}.Edit(model.Resource{

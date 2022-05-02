@@ -1,0 +1,103 @@
+images:
+calico~cni:v3.22.2.tar
+calico~kube-controllers:v3.22.2.tar
+calico~node:v3.22.2.tar
+calico~pod2daemon-flexvol:v3.22.2.tar
+gcr.io~google_containers~pause-amd64:3.2.tar
+gcr.io~k8s-staging-metrics-server~metrics-server:v0.6.1.tar
+grafana~grafana:8.4.7.tar
+istio~pilot:1.13.3.tar
+istio~proxyv2:1.13.3.tar
+jaegertracing~all-in-one:1.29.tar
+jimmidyson~configmap-reload:v0.7.1.tar
+k8s.gcr.io~coredns~coredns:v1.8.6.tar
+k8s.gcr.io~kube-state-metrics~kube-state-metrics:v2.4.2.tar
+k8s.gcr.io~metrics-server~metrics-server:v0.6.1.tar
+kubernetesui~dashboard:v2.0.1.tar
+kubernetesui~metrics-scraper:v1.0.4.tar
+prom~alertmanager:v0.24.0.tar
+prom~node-exporter:v1.3.1.tar
+prom~prometheus:v2.34.0.tar
+quay.io~kiali~kiali:v1.45.tar
+registry:2.7.1.tar
+test-containers~test-base:1.0.tar
+
+bin:
+master/usr/bin/kube-apiserver
+master/usr/bin/kube-controller-manager
+master/usr/bin/kube-scheduler
+node/usr/bin/kube-proxy
+node/usr/bin/kubelet
+docker/usr/bin/containerd
+docker/usr/bin/containerd-shim
+docker/usr/bin/containerd-shim-runc-v2
+docker/usr/bin/ctr
+docker/usr/bin/docker
+docker/usr/bin/dockerd
+docker/usr/bin/docker-init
+docker/usr/bin/docker-proxy
+docker/usr/bin/runc
+etcd/usr/bin/etcd
+
+bin.gz:
+/usr/local/bin/calicoctl
+/usr/local/bin/cfssl-scan
+/usr/local/bin/cfssl-certinfo
+/usr/local/bin/etcdctl
+/usr/local/bin/kubemark
+/usr/local/bin/cfssl-bundle
+/usr/local/bin/cfssl
+/usr/local/bin/cfssl-newkey
+/usr/local/bin/kubeadm
+/usr/local/bin/cfssljson
+/usr/local/bin/kubectl
+/usr/local/bin/helm
+/usr/local/bin/istioctl
+/usr/local/bin/updatesecret
+
+
+编译二进制：
+cfssl:
+git clone https://github.com/cloudflare/cfssl.git && git checkout v1.6.1 && make
+/data/go/src/github.com/cloudflare/cfssl/bin
+
+etcd:
+git clone https://github.com/etcd-io/etcd.git && git checkout v3.5.3 && make build
+/data/go/src/github.com/etcd-io/etcd/bin
+
+docker-cli:
+git clone https://github.com/docker/cli.git && git checkout v20.10.14 && make -f docker.Makefile binary
+/data/go/src/github.com/docker/cli/build
+
+docker-engine:
+git clone https://github.com/moby/moby.git && git checkout v20.10.14 && make BIND_DIR=. shell
+/data/go/src/github.com/moby/moby/bundles/binary-daemon
+
+编译docker太麻烦了，可以直接从这里下载:
+https://download.docker.com/linux/static/stable/x86_64
+
+kubernetes:
+git clone https://github.com/kubernetes/kubernetes.git && git checkout v1.23.6 && make
+/data/go/src/github.com/kubernetes/kubernetes/_output/bin
+
+coredns配置:
+https://github.com/coredns/deployment/blob/master/kubernetes/coredns.yaml.sed
+
+metrics-server:
+https://github.com/kubernetes-sigs/metrics-server/tree/v0.6.1/manifests/base
+delete autoscaling/addon-resizer:1.8.14
+
+kube-state-metrics:
+https://github.com/kubernetes/kube-state-metrics/blob/v2.4.2/examples/standard
+
+
+单机测试时可以这样粗暴的删除安装（慎用，会清理全部数据）：
+ps aux | grep kube-apiserver | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
+ps aux | grep kube-controller-manager | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
+ps aux | grep kube-scheduler | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
+ps aux | grep kubelet | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
+ps aux | grep kube-proxy | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
+systemctl stop etcd
+systemctl stop docker
+rm -rf /data/docker/*
+rm -rf /data/etcd/*

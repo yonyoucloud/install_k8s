@@ -14,6 +14,7 @@ import (
 	scp "github.com/hnakamur/go-scp"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type (
@@ -33,6 +34,7 @@ type (
 		role      Role
 		sshConfig *ssh.ClientConfig
 		clients   map[string]*ssh.Client
+		cmdReturn []string
 	}
 )
 
@@ -164,8 +166,8 @@ func (er *ExecRemote) Local(cmd string) ([]string, error) {
 	return res, nil
 }
 
-func (er *ExecRemote) Run(cmds ...string) []string {
-	var res []string
+func (er *ExecRemote) Run(cmds ...string) {
+	er.cmdReturn = []string{}
 	var wg sync.WaitGroup
 
 	for _, host := range er.role.Hosts {
@@ -176,7 +178,7 @@ func (er *ExecRemote) Run(cmds ...string) []string {
 
 		if er.role.WaitOutput {
 			content, _ := er.runCmd(client, host, cmds...)
-			res = append(res, content...)
+			er.cmdReturn = append(er.cmdReturn, content...)
 		} else {
 			wg.Add(1)
 			if er.role.Parallel {
@@ -194,8 +196,21 @@ func (er *ExecRemote) Run(cmds ...string) []string {
 	if !er.role.WaitOutput {
 		wg.Wait()
 	}
+}
 
-	return res
+func (er *ExecRemote) GetCmdReturn() []string {
+	var resArr []string
+	substr := "-> "
+	n := len(er.cmdReturn)
+	for i := 0; i < n; i++ {
+		if i < 4 || i > n-3 {
+			continue
+		}
+		if strings.Contains(er.cmdReturn[i], substr) {
+			resArr = append(resArr, strings.Trim(strings.Split(er.cmdReturn[i], substr)[1], "\r\n"))
+		}
+	}
+	return resArr
 }
 
 func (er *ExecRemote) Put(localPath, remotePath string) {
@@ -256,6 +271,40 @@ func (er *ExecRemote) runCmd(client *ssh.Client, host string, cmds ...string) ([
 
 	// Create sesssion
 	session, err := client.NewSession()
+
+	// Request pseudo terminal
+	fileDescriptor := int(os.Stdin.Fd())
+	if terminal.IsTerminal(fileDescriptor) {
+		originalState, err := terminal.MakeRaw(fileDescriptor)
+		if err != nil {
+			content := fmt.Sprintf("Terminal MakeRaw Failed:%s Host:%s\n", err.Error(), host)
+			res = append(res, content)
+			writeChan(er.stdout, content)
+		}
+		defer terminal.Restore(fileDescriptor, originalState)
+
+		termWidth, termHeight, err := terminal.GetSize(fileDescriptor)
+		if err != nil {
+			content := fmt.Sprintf("Terminal GetSize Failed:%s Host:%s\n", err.Error(), host)
+			res = append(res, content)
+			writeChan(er.stdout, content)
+		}
+
+		// Set up terminal modes
+		modes := ssh.TerminalModes{
+			ssh.ECHO:          1, // enable echoing
+			ssh.ECHOCTL:       1,
+			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+		}
+		err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
+		if err != nil {
+			content := fmt.Sprintf("Request for pseudo terminal failed:%s Host:%s\n", err.Error(), host)
+			res = append(res, content)
+			writeChan(er.stdout, content)
+		}
+	}
+
 	if err != nil {
 		content := fmt.Sprintf("Client Session Error:%s Host:%s\n", err.Error(), host)
 		res = append(res, content)
@@ -291,9 +340,9 @@ func (er *ExecRemote) runCmd(client *ssh.Client, host string, cmds ...string) ([
 		return res, err
 	}
 
-	//Section 3: Send the commands to the remotehost one by one.
+	// Section 3: Send the commands to the remotehost one by one.
 	for _, cmd := range cmds {
-		n, err := stdin.Write([]byte(cmd + "\n"))
+		n, err := stdin.Write([]byte(cmd + "\r"))
 		if err != nil {
 			content := fmt.Sprintf("Stdin Write Error:%s Host:%s Cmd:%s\n", err.Error(), host, cmd)
 			res = append(res, content)
@@ -309,7 +358,7 @@ func (er *ExecRemote) runCmd(client *ssh.Client, host string, cmds ...string) ([
 		}
 	}
 	// 命令执行完成退出
-	stdin.Write([]byte("exit\n"))
+	stdin.Write([]byte("exit\r"))
 
 	var b bytes.Buffer
 	session.Stdout = &b
@@ -328,7 +377,7 @@ func (er *ExecRemote) runCmd(client *ssh.Client, host string, cmds ...string) ([
 			writeChan(er.stdout, content)
 			b.Reset()
 		}
-		//  通过 scanner.Err(); 我们可以捕捉到 扫描中的错误信息,这对单行文件超过 MaxScanTokenSize 时特别有用
+		// 通过 scanner.Err(); 我们可以捕捉到 扫描中的错误信息,这对单行文件超过 MaxScanTokenSize 时特别有用
 		if err := scanner.Err(); err != nil {
 			content := fmt.Sprintf("Scanner reading standard input:%s Host:%s\n", err.Error(), host)
 			res = append(res, content)

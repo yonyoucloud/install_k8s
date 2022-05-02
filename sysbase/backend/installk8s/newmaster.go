@@ -2,7 +2,6 @@ package installk8s
 
 import (
 	"fmt"
-	"strings"
 
 	"git.yonyou.com/sysbase/backend/model"
 	"git.yonyou.com/sysbase/backend/tool/execremote"
@@ -74,8 +73,8 @@ func (ik *InstallK8s) newmasterUpdateScope() {
 		}
 		ik.er.SetRole(oneHostRole)
 
-		res := ik.er.Run(`ps aux | grep kube-apiserver | grep -v grep > /dev/null ; echo $?`)
-		if strings.Contains(strings.Join(res, ""), "-> 0") {
+		ik.er.Run(`ps aux | grep kube-apiserver | grep -v grep > /dev/null ; echo $?`)
+		if ik.er.GetCmdReturn()[0] == "0" {
 			model.Resource{
 				ID: r.ID,
 			}.Edit(model.Resource{

@@ -78,6 +78,7 @@ func InitRouter(c *config.Config) *gin.Engine {
 		installK8sHandler := &handler.InstallK8sHandler{
 			Config: c.InstallK8s,
 		}
+		installK8sGroup.GET("/installTest", installK8sHandler.InstallTest)
 		installK8sGroup.GET("/installAll", installK8sHandler.InstallAll)
 		installK8sGroup.GET("/installBase", installK8sHandler.InstallBase)
 		installK8sGroup.GET("/updateKernel", installK8sHandler.UpdateKernel)

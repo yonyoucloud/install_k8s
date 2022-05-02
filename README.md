@@ -1,7 +1,24 @@
 安装最新稳定版：
 ===============
-kubernetes-v1.20.4、istio-v1.9.1 [安装说明](/images/install_readme.pdf)<br>
-[安装包下载地址](https://pan.baidu.com/s/1DsoPwRFjvCc2P6Epa1Hc5Q "提取码: bntu")提取码: bntu<br>
+#### 版本说明
+
+|             service           |     version     |
+|-------------------------------|-----------------|
+| `kubernetes`                  | v1.23.6         |
+| `istio`                       | 1.13.3          |
+| `docker`                      | 20.10.14        |
+| `calico`                      | v3.22.2         |
+| `coredns`                     | v1.8.6          |
+| `dashboard`                   | v2.0.1          |
+| `metrics-server`              | v0.6.1          |
+| `prometheus`                  | v2.34.0         |
+| `alertmanager`                | v0.24.0         |
+| `grafana`                     | 8.4.7           |
+| `kube-state-metrics`          | v2.4.2          |
+| `node-exporter`               | v1.3.1          |
+
+[安装说明](/images/install_readme.jpeg)<br>
+[安装包下载地址](https://pan.baidu.com/s/1cPW0qwAA-6KtZ4U0aZg1iQ?pwd=rcvb "提取码: rcvb")提取码: rcvb<br>
 注意：新安装工具采用golang编写，可以运行在linux、mac、windows系统，添加机器操作界面化，安装逻辑和python脚本基本一致，做了一些优化，特别支持了istio安装。
 
 先展示一下结果
