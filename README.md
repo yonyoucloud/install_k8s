@@ -20,9 +20,11 @@
 | `helm`                        | v3.8.2          |
 | `cfssl`                       | v1.6.1          |
 
-[安装说明.pdf](/images/install_readme.pdf)    [安装说明.jpg](/images/install_readme.jpeg)<br>
+[安装说明(pdf)](/images/install_readme.pdf)<br>
+[安装说明(jpg)](/images/install_readme.jpeg)<br>
 [静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a "提取码: hc3a") 提取码: hc3a<br>
-注意：新安装工具采用Golang编写，可以运行在Linux、Mac、Windows系统，添加机器操作界面化，安装逻辑和Python脚本基本一致，做了一些优化，特别支持了Istio安装。特别注意K8s必须安装在CentOS下（建议用CentOS7版本，没验证过CentOS8，应该问题不大，因为极少了量的用了Yum远程资源，基本全是本地静态文件）。
+注意：新安装工具采用Golang编写，可以运行在Linux、Mac、Windows系统，添加机器操作界面化，安装逻辑和Python脚本基本一致，做了一些优化，特别支持了Istio安装。<br>
+**特别注意：K8s必须安装在CentOS下（建议用CentOS7版本，没验证过CentOS8，应该问题不大，因为极少了量的用了Yum远程资源，基本全是本地静态文件）。**
 
 先展示一下结果
 ===============
