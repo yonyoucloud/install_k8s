@@ -393,9 +393,9 @@ func (ik *InstallK8s) installIstio() {
 	cmds := []string{
 		// install istio
 		fmt.Sprintf(`cd %s/istio/manifests/profiles && sed "s#PRI_DOCKER_HOST#%s#g" default.yaml.tpl > default.yaml`, ik.SourceDir, priDockerHost),
-		fmt.Sprintf(`istioctl manifest generate > %s/istio/generated-manifest.yaml`, ik.SourceDir),
 		fmt.Sprintf(`istioctl install --manifests=%s/istio/manifests -y`, ik.SourceDir),
-		fmt.Sprintf(`istioctl verify-install -f %s/istio/generated-manifest.yaml`, ik.SourceDir),
+		fmt.Sprintf(`istioctl manifest generate > %s/addons/istio/generated-manifest.yaml`, ik.SourceDir),
+		fmt.Sprintf(`istioctl verify-install -f %s/addons/istio/generated-manifest.yaml`, ik.SourceDir),
 
 		fmt.Sprintf(`cd %s/addons/istio && sed "s#PRI_DOCKER_HOST#%s#g" kiali.yaml.tpl > kiali.yaml`, ik.SourceDir, priDockerHost),
 		fmt.Sprintf(`cd %s/addons/istio && sed "s#PRI_DOCKER_HOST#%s#g" jaeger.yaml.tpl > jaeger.yaml`, ik.SourceDir, priDockerHost),

@@ -631,13 +631,11 @@ export default {
     addEventListener(obj) {
       obj.addEventListener('message', (event) => {
         this.loading = true
-        // console.log(JSON.stringify(event.data))
-        if (event.data.endsWith("\n")) {
-          this.term.write(event.data)
-        } else {
-          this.term.writeln(event.data)
-        }
-        // this.installLog.push(event.data)
+        let msg = event.data
+        // 参考 gin sse-encode.go 处理
+        msg = msg.replaceAll("\\r", "\r").replaceAll("\ndata:", "\n")
+        // console.log(JSON.stringify(msg))
+        this.term.writeln(msg)
       })
       obj.addEventListener('close', () => {
         this.loading = false

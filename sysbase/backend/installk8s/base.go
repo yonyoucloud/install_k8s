@@ -151,26 +151,19 @@ func (ik *InstallK8s) GetResources() {
 }
 
 func (ik *InstallK8s) InstallTest() {
-	publishRole, ok := ik.resources["default"]
+	publishRole, ok := ik.resources["publish"]
 	if !ok {
 		ik.Stdout <- "没有publish资源"
 		return
 	}
 
-	publishRole.WaitOutput = true
 	ik.er.SetRole(publishRole)
-	ik.er.Run(`cat /root/1.sh`)
-	fmt.Printf("%#v\n", ik.er.GetCmdReturn())
-
-	ik.er.Run(`uname -a | grep 4.19.94 > /dev/null ; echo $?`)
-	fmt.Printf("%#v\n", ik.er.GetCmdReturn())
-	return
 
 	cmds := []string{
-		`ls -la`,
-		`date`,
-		`for i in {1..10};do echo "你好${i}";sleep 1;done`,
+		`yum install git -y`,
+		`yum remove git -y`,
 	}
+
 	ik.er.Run(cmds...)
 }
 

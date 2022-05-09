@@ -168,7 +168,7 @@ func (ikh *InstallK8sHandler) call(c *gin.Context, callFunc string) {
 
 	c.Stream(func(w io.Writer) bool {
 		if msg, ok := <-stdout; ok {
-			msg = strings.Replace(msg, "\r", "", -1)
+			// msg = strings.Replace(msg, "\r", "", -1)
 			// fmt.Printf("%#v\n", msg)
 			c.SSEvent("message", msg)
 			return true

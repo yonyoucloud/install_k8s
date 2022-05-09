@@ -1,10 +1,10 @@
 images:
+busybox:latest.tar
 calico~cni:v3.22.2.tar
 calico~kube-controllers:v3.22.2.tar
 calico~node:v3.22.2.tar
 calico~pod2daemon-flexvol:v3.22.2.tar
 gcr.io~google_containers~pause-amd64:3.2.tar
-gcr.io~k8s-staging-metrics-server~metrics-server:v0.6.1.tar
 grafana~grafana:8.4.7.tar
 istio~pilot:1.13.3.tar
 istio~proxyv2:1.13.3.tar
@@ -92,6 +92,7 @@ https://github.com/kubernetes/kube-state-metrics/blob/v2.4.2/examples/standard
 
 
 单机测试时可以这样粗暴的删除安装（慎用，会清理全部数据）：
+istioctl x uninstall --purge
 ps aux | grep kube-apiserver | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
 ps aux | grep kube-controller-manager | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'
 ps aux | grep kube-scheduler | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'

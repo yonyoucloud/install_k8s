@@ -5,6 +5,7 @@
 |             service           |     version     |
 |-------------------------------|-----------------|
 | `kubernetes`                  | v1.23.6         |
+| `etcd`                        | 3.5.3           |
 | `istio`                       | 1.13.3          |
 | `docker`                      | 20.10.14        |
 | `calico`                      | v3.22.2         |
@@ -16,9 +17,11 @@
 | `grafana`                     | 8.4.7           |
 | `kube-state-metrics`          | v2.4.2          |
 | `node-exporter`               | v1.3.1          |
+| `helm`                        | v3.8.2          |
+| `cfssl`                       | v1.6.1          |
 
-[安装说明](/images/install_readme.jpeg)<br>
-[安装包下载地址](https://pan.baidu.com/s/1cPW0qwAA-6KtZ4U0aZg1iQ?pwd=rcvb "提取码: rcvb")提取码: rcvb<br>
+[安装说明.pdf](/images/install_readme.pdf) [安装说明.jpg](/images/install_readme.jpeg)<br>
+[安装包下载地址](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a "提取码: hc3a")提取码: hc3a<br>
 注意：新安装工具采用golang编写，可以运行在linux、mac、windows系统，添加机器操作界面化，安装逻辑和python脚本基本一致，做了一些优化，特别支持了istio安装。
 
 先展示一下结果

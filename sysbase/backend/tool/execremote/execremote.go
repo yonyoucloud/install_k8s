@@ -207,7 +207,7 @@ func (er *ExecRemote) GetCmdReturn() []string {
 			continue
 		}
 		if strings.Contains(er.cmdReturn[i], substr) {
-			resArr = append(resArr, strings.Trim(strings.Split(er.cmdReturn[i], substr)[1], "\r\n"))
+			resArr = append(resArr, strings.Trim(strings.Split(er.cmdReturn[i], substr)[1], "\r"))
 		}
 	}
 	return resArr
@@ -372,7 +372,7 @@ func (er *ExecRemote) runCmd(client *ssh.Client, host string, cmds ...string) ([
 		if s != "\n" {
 			b.WriteString(s)
 		} else {
-			content := fmt.Sprintf("[%s]-> %s\n", host, b.String())
+			content := fmt.Sprintf("[%s]-> %s", host, b.String())
 			res = append(res, content)
 			writeChan(er.stdout, content)
 			b.Reset()
