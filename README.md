@@ -24,6 +24,7 @@
 
 ##### 1、下载并解压缩二进制安装文件(installk8s-v1.26.4-20230420.gz):
 [v1.26.4版本静态安装包下载](https://pan.baidu.com/s/1Q5XaSDyCKzkT_mtJcOV5dA?pwd=mv7n)
+
 [v1.23.6版本静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a)
 ```
 cd /data/ && tar zxvf installk8s-v1.26.4-20230420.gz
