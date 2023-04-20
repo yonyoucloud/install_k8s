@@ -23,7 +23,8 @@
 #### 安装说明
 
 ##### 1、下载并解压缩二进制安装文件(installk8s-v1.26.4-20230420.gz):
-[静态安装包下载](https://pan.baidu.com/s/1Q5XaSDyCKzkT_mtJcOV5dA?pwd=mv7n)
+[v1.26.4版本静态安装包下载](https://pan.baidu.com/s/1Q5XaSDyCKzkT_mtJcOV5dA?pwd=mv7n)
+[v1.23.6版本静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a)
 ```
 cd /data/ && tar zxvf installk8s-v1.26.4-20230420.gz
 
@@ -64,7 +65,8 @@ cd /data/installk8s/sysbase
 
 ##### 3、添加资源:
 ```
-资源类型选择 vps，特定描述这些都是必须的，其中 etcd、master、node 可以配置多台机器，其他几个确保唯一， 另外，支持这些全配置一台机器，即单机也可以运行，建议单台最低配置 8 核 16G，其实 4 核 8G 也可以运行起来
+资源类型选择 vps，特定描述这些都是必须的，其中 etcd、master、node 可以配置多台机器，其他几个确保唯一， 另外，
+支持这些全配置一台机器，即单机也可以运行，建议单台最低配置 8 核 16G，其实 4 核 8G 也可以运行起来。
 ```
 ![image](/images/install_resource.jpeg)
 
