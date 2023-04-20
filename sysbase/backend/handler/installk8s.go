@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"git.yonyou.com/sysbase/backend/config"
-	"git.yonyou.com/sysbase/backend/installk8s"
-	"git.yonyou.com/sysbase/backend/tool/waitoutput"
+	"sysbase/config"
+	"sysbase/installk8s"
+	"sysbase/tool/waitoutput"
 )
 
 type InstallK8sHandler struct {
@@ -39,16 +39,16 @@ func (ikh *InstallK8sHandler) UpdateKernel(c *gin.Context) {
 	ikh.call(c, "UpdateKernel")
 }
 
-func (ikh *InstallK8sHandler) InstallBin(c *gin.Context) {
-	ikh.call(c, "InstallBin")
+func (ikh *InstallK8sHandler) InstallBaseBin(c *gin.Context) {
+	ikh.call(c, "InstallBaseBin")
 }
 
-func (ikh *InstallK8sHandler) InstallDocker(c *gin.Context) {
-	ikh.call(c, "InstallDocker")
+func (ikh *InstallK8sHandler) InstallContainerd(c *gin.Context) {
+	ikh.call(c, "InstallContainerd")
 }
 
-func (ikh *InstallK8sHandler) InstallPriDocker(c *gin.Context) {
-	ikh.call(c, "InstallPriDocker")
+func (ikh *InstallK8sHandler) InstallRegistry(c *gin.Context) {
+	ikh.call(c, "InstallRegistry")
 }
 
 func (ikh *InstallK8sHandler) InstallEtcd(c *gin.Context) {
@@ -63,8 +63,8 @@ func (ikh *InstallK8sHandler) InstallNode(c *gin.Context) {
 	ikh.call(c, "InstallNode")
 }
 
-func (ikh *InstallK8sHandler) InstallDockerCrt(c *gin.Context) {
-	ikh.call(c, "InstallDockerCrt")
+func (ikh *InstallK8sHandler) InstallContainerdCrt(c *gin.Context) {
+	ikh.call(c, "InstallContainerdCrt")
 }
 
 func (ikh *InstallK8sHandler) InstallLvs(c *gin.Context) {
@@ -129,9 +129,9 @@ func (ikh *InstallK8sHandler) call(c *gin.Context, callFunc string) {
 
 	id := strings.TrimSpace(c.Query("k8s_cluster_id"))
 	doWhat := strings.TrimSpace(c.Query("do_what"))
-	doDocker := strings.TrimSpace(c.Query("do_docker"))
+	doContainerd := strings.TrimSpace(c.Query("do_containerd"))
 	idInt, _ := strconv.Atoi(id)
-	doDockerBool := doDocker == "true"
+	doContainerdBool := doContainerd == "true"
 
 	installCmd := fmt.Sprintf("InstallK8sHandler.%s.%s", callFunc, id)
 	running := waitOutput.IsRunning(installCmd)
@@ -155,7 +155,7 @@ func (ikh *InstallK8sHandler) call(c *gin.Context, callFunc string) {
 			Params: installk8s.Params{
 				K8sClusterID: uint(idInt),
 				DoWhat:       doWhat,
-				DoDocker:     doDockerBool,
+				DoContainerd: doContainerdBool,
 			},
 			Stdout: stdout,
 			Defer: func() {

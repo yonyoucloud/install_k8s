@@ -3,7 +3,7 @@ package installk8s
 import (
 	"fmt"
 
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/tool/execremote"
 )
 
 func (ik *InstallK8s) ServicePublish() {
@@ -24,7 +24,7 @@ func (ik *InstallK8s) ServicePublish() {
 		ik.er.Run("iptables -P FORWARD ACCEPT ; systemctl daemon-reload")
 	}
 
-	ik.er.Run(fmt.Sprintf("systemctl %s docker", ik.Params.DoWhat))
+	ik.er.Run(fmt.Sprintf("systemctl %s containerd", ik.Params.DoWhat))
 }
 
 func (ik *InstallK8s) ServiceEtcd() {
@@ -129,8 +129,8 @@ func (ik *InstallK8s) serviceNode(nodeRole execremote.Role) {
 	}
 	ik.er.Run(cmds...)
 
-	if ik.Params.DoDocker {
-		ik.er.Run(fmt.Sprintf("systemctl %s docker", ik.Params.DoWhat))
+	if ik.Params.DoContainerd {
+		ik.er.Run(fmt.Sprintf("systemctl %s containerd", ik.Params.DoWhat))
 	}
 
 	if ik.Params.DoWhat == "stop" {
@@ -139,8 +139,8 @@ func (ik *InstallK8s) serviceNode(nodeRole execremote.Role) {
 			`ps aux | grep kube-proxy | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'`,
 		}
 		ik.er.Run(cmds...)
-		if ik.Params.DoDocker {
-			ik.er.Run(`ps aux | grep docker | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'`)
+		if ik.Params.DoContainerd {
+			ik.er.Run(`ps aux | grep containerd | grep -v grep | awk '{if($2 != ""){system("kill -9 "$2)}}'`)
 		}
 	}
 }

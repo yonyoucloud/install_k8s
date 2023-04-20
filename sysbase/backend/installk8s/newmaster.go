@@ -3,8 +3,8 @@ package installk8s
 import (
 	"fmt"
 
-	"git.yonyou.com/sysbase/backend/model"
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/model"
+	"sysbase/tool/execremote"
 )
 
 func (ik *InstallK8s) NewmasterInstall() {
@@ -35,7 +35,7 @@ func (ik *InstallK8s) NewmasterInstall() {
 
 	ik.Stdout <- "[开始]重启node服务"
 	ik.Params.DoWhat = "restart"
-	ik.Params.DoDocker = false
+	ik.Params.DoContainerd = false
 	if nodeRole, ok := ik.resources["node"]; ok {
 		ik.serviceNode(nodeRole)
 	}

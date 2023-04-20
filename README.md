@@ -4,202 +4,101 @@
 
 |             service           |     version     |
 |-------------------------------|-----------------|
-| `kubernetes`                  | v1.23.6         |
-| `etcd`                        | 3.5.3           |
-| `istio`                       | 1.13.3          |
-| `docker`                      | 20.10.14        |
-| `calico`                      | v3.22.2         |
-| `coredns`                     | v1.8.6          |
-| `dashboard`                   | v2.0.1          |
-| `metrics-server`              | v0.6.1          |
-| `prometheus`                  | v2.34.0         |
-| `alertmanager`                | v0.24.0         |
-| `grafana`                     | 8.4.7           |
-| `kube-state-metrics`          | v2.4.2          |
-| `node-exporter`               | v1.3.1          |
-| `helm`                        | v3.8.2          |
-| `cfssl`                       | v1.6.1          |
+| `kubernetes`                  | v1.26.4         |
+| `etcd`                        | 3.5.7           |
+| `istio`                       | 1.17.1          |
+| `containerd`                  | v1.6.20         |
+| `calico`                      | v3.25.1         |
+| `coredns`                     | v1.10.1         |
+| `dashboard`                   | v2.7.0          |
+| `metrics-server`              | v0.6.3          |
+| `prometheus`                  | v2.43.0         |
+| `alertmanager`                | v0.25.0         |
+| `grafana`                     | 9.4.7           |
+| `kube-state-metrics`          | v2.8.2          |
+| `node-exporter`               | v1.5.0          |
+| `helm`                        | v3.11.2         |
+| `cfssl`                       | v1.6.3          |
 
-[安装说明(pdf)](/images/install_readme.pdf)<br>
-[安装说明(jpg)](/images/install_readme.jpeg)<br>
-[静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a "提取码: hc3a") 提取码: hc3a<br>
-注意：新安装工具采用Golang编写，可以运行在Linux、Mac、Windows系统，添加机器操作界面化，安装逻辑和Python脚本基本一致，做了一些优化，特别支持了Istio安装。<br>
-**特别注意：K8s必须安装在CentOS下（建议用CentOS7版本，没验证过CentOS8，应该问题不大，因为极少了量的用了Yum远程资源，基本全是本地静态文件）。**
+#### 安装说明
 
-先展示一下结果
-===============
-安装后最终输出下图样子即为成功:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/finish-install.jpeg)<br>
-获取pods命令正常输出:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/getpods.jpeg)<br>
-访问dashboard:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/dashboard.jpeg)<br>
-访问grafana(节点):<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_node.jpeg)<br>
-访问grafana(容器):<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/grafana_container.jpeg)<br>
-访问prometheus:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/prometheus.jpeg)<br>
-访问微服务例子:<br>
-![image](https://github.com/yonyoucloud/install_k8s/blob/master/images/web-test.jpeg)<br>
-<br>
-下面是安装方法（安装过程有疑问可以加我微信：bsh888）<br>
-=============
-第一步，克隆安装程序，并进入目录：<br>
-git clone https://github.com/yonyoucloud/install_k8s<br>
-cd install_k8s<br>
-<br>
-第二步，下载大文件二进制包（里面是x86_64下编译好的k8s二进制文件）：<br>
-注意：下面的包可选，但要对应到相应的安装源码版本。<br>
-<br>
-v1.16.3.1版本下载地址（ls-files-v1.16.3.1.gz，建议用此版本，对k8s和runc做了禁止kmem特性，否则可能容器中进程被内核频繁oomkill）：<br>
-链接: https://pan.baidu.com/s/18Tq8RqxCKa8EBpXznOwBGg 提取码: p8f6<br>
-<br>
-v1.13.3.1版本下载地址（ls-files-v1.13.3.1.gz，建议用此版本，对k8s和runc做了禁止kmem特性，否则可能容器中进程被内核频繁oomkill）：<br>
-链接: https://pan.baidu.com/s/1mU3ykUaV5x5VNoh6tWuhCw 提取码: 4p7h<br>
-<br>
-v1.13.3版本下载地址（ls-files-v1.13.3.gz）：<br>
-链接: https://pan.baidu.com/s/1nNrfjA8fFqlkFa442jW47w 提取码: y69k<br>
-<br>
-v1.11.3版本下载地址（ls-files-v1.11.3.gz）：<br>
-链接: https://pan.baidu.com/s/1gCBY6YgG1McnDUen6egfMg 提取码: r7rs<br>
-<br>
-mv ls-files-v1.13.3.gz install_k8s<br>
-cd install_k8s<br>
-tar zxvf ls-files-v1.13.3.gz<br>
-<br>
-第三步，修改fabfile.py文件中主机登录密码及安装目的主机地址，并执行安装脚本：<br>
-建议：开始先测试一下单机部署，只需要替换一下fabfile.py中的ip地址及登录密码即可。<br>
-执行安装脚本：<br>
-cd install_k8s<br>
-./install.sh<br>
-<br>
-<br>
-下面是更详细的一些说明:<br>
-=============
-本安装包，运行在centos7上，包含的服务有:<br>
-etcd集群<br>
-kubernets master集群<br>
-kubernets node集群<br>
-calico 网络<br>
-docker 私有镜像仓库<br>
-ipvsadm(lvs) 负载均衡<br>
-bind 私有dns服务,方便内网域名拦截解析<br>
-<br>
-镜像服务包括:<br>
-kube-dns<br>
-kubernetes-dashboard k8s UI<br>
-heapster 监控<br>
-<br>
-测试例子微服务(golang写的一个小的输出服务):<br>
-web_test<br>
-<br>
-安装脚本目录说明:<br>
-└── install_k8s        安装包<br>
-    ├── fabfile.py     基于fabric实现自动化安装k8s集群脚本<br>
-    ├── install.sh     安装shell脚本，里面会调用fabfile.py中函数<br>
-    ├── README         说明文件<br>
-    ├── source         源文件目录，也包括配置<br>
-    └── ssh            直连容器需要的秘钥<br>
-    └── uninstall.sh   卸载脚本<br>
-    └── add_node.sh    修改fabric.py中newnode配置，执行此脚本可以添加node节点，支持一次添加多个，执行完把newnode合并到node配置中，便于集中控制<br>
-    └── add_etcd.sh    修改fabric.py中newetcd配置，执行此脚本可以添加etcd节点，支持一次添加多个，执行完把newetcd合并到etcd配置中，便于集中控制<br>
-    └── add_master.sh    修改fabric.py中newmaster配置，执行此脚本可以添加master节点，支持一次添加多个，执行完把newmaster合并到master配置中，便于集中控制<br>
-<br>
-fabfile.py说明:<br>
-注意: <br>
-1、整个集群支持安装到一台主机上面, 需要注意vip要在同一网段, 且etcd和master的vip必须不同<br>
-2、如果采用LVS方式，机器重启时需要执行相应的虚ip挂载（这个不一定是必须执行）<br>
-fab service_lvs_start #全部启动<br>
-fab service_lvs_etcd #启动etcd<br>
-fab service_lvs_master #启动master<br>
-<br>
-特别注意三项:<br>
-1、修改脚本中的主机密码信息<br>
-2、修改脚本中的主机地址信息<br>
-3、确保系统是centos7，并且网卡名字是eth0<br>
-4、如果遇到calico-node无法启动，可能是因为hostname不满足要求，不能存在大写字母及_（regex: [a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)）<br>
-<br>
-编辑脚本配置信息, vim fabfile.py:<br>
-env.user = 'root'<br>
-env.password = '123456' # 注意这里需要修改服务器密码，集群密码要统一，也可以用下面秘钥文件的方式<br>
-#env.key_filename = "~/.ssh/id_rsa"<br>
-env.port = 22<br>
-env.abort_on_prompts = True<br>
-env.colors = True<br>
-<br>
-# 如果在阿里云、华为云部署等云IaaS部署，请设置为False，env.roledefs['lvs']['hosts']置为空，<br>
-# 并且配置env.roledefs['etcd']['vip']及env.roledefs['master']['vip']分别为etcd、master<br>
-# 负载均衡地址，并且事先将端口及虚机设置好<br>
-env.use_lvs = True<br>
-<br>
-env.roledefs = {<br>
-    # 发布机，后面通过在此机器上执行kubectl命令控制k8s集群及部署应用<br>
-    'publish': {<br>
-        'hosts': [<br>
-            '10.211.55.53:22',<br>
-        ],<br>
-    },<br>
-    # etcd节点安装主机(支持集群)<br>
-    'etcd': {<br>
-        'hosts': [<br>
-            '10.211.55.54:22',<br>
-            '10.211.55.55:22',<br>
-        ],<br>
-        # 负载均衡etcd入口ip(虚ip)<br>
-        'vip': '10.211.55.201'<br>
-    },<br>
-    # master节点安装主机(支持集群)<br>
-    'master': {<br>
-        'hosts': [<br>
-            '10.211.55.54:22',<br>
-            '10.211.55.55:22',<br>
-        ],<br>
-        # 负载均衡master入口ip(虚ip)<br>
-        'vip': '10.211.55.202'<br>
-    },<br>
-    # node节点安装主机(支持集群)<br>
-    'node': {<br>
-        'hosts': [<br>
-            '10.211.55.54:22',<br>
-            '10.211.55.55:22',<br>
-        ]<br>
-    },<br>
-    # lvs负载均衡安装主机(暂不支持集群)<br>
-    # 特别要注意，如果etcd及master是多机部署，lvs上不要放etcd及master服务，且不要和发布机在一起，否则网络会有问题，如果是阿里云、华为云一定要换成对应的slb（需要提前配置好节点及端口），其实最好lvs单独部署，因为在其上面是无法访问其负载均衡的节点的，为了节省资源，上面可以放私有镜像仓库、私有dns服务<br>
-    'lvs': {<br>
-        'hosts': [<br>
-            '10.211.55.56:22',<br>
-        ]<br>
-    },<br>
-    # 私有docker镜像仓库安装主机(暂不支持集群)<br>
-    'pridocker': {<br>
-        'hosts': [<br>
-            '10.211.55.56:22',<br>
-        ]<br>
-    },<br>
-    # 私有dns服务器安装主机(暂不支持集群)<br>
-    'pridns': {<br>
-        'hosts': [<br>
-            '10.211.55.53:22',<br>
-        ]<br>
-    },<br>
-    # 新加Node节点(支持集群)<br>
-    'newnode': {<br>
-        'hosts': [<br>
-            #'10.211.55.57:22',<br>
-        ]<br>
-    },<br>
-    # 新加etcd节点(支持集群)<br>
-    'newetcd': {<br>
-        'hosts': [<br>
-            #'10.211.55.58:22',<br>
-        ]<br>
-    },<br>
-    # 新加master节点(支持集群)<br>
-    'newmaster': {<br>
-        'hosts': [<br>
-            #'10.211.55.59:22',<br>
-        ]<br>
-    },<br>
-}<br>
+##### 1、下载并解压缩二进制安装文件(installk8s-v1.26.4-20230420.gz):
+[静态安装包下载](https://pan.baidu.com/s/1Q5XaSDyCKzkT_mtJcOV5dA?pwd=mv7n)
+```
+cd /data/ && tar zxvf installk8s-v1.26.4-20230420.gz
+
+cd /data/installk8s/sysbase
+/data/installk8s/sysbase
+├── bin # 根据系统执行可执行文件，启动安装服务
+│   ├── sysbase-v1.0.0-darwin-arm64
+│   └── sysbase-v1.0.0-linux-amd64
+├── etc
+│   ├── config-demo.yaml
+│   ├── config.js
+│   └── config.yaml # 修改此配置文件，注意数据库配置及二进制安装文件路径（先创建 sysbase 数据库，程序启动会自动创建表）
+└── static
+    ├── config.js # 需要修改一下 apiHost，写成运行此程序的机器 ip，端口号保持和此服务运行端口一致
+    ├── css
+    │   ├── chunk-vendors.537be47b.css
+    │   └── index.d169f2ef.css
+    ├── favicon.ico
+    ├── fonts
+    │   ├── element-icons.535877f5.woff
+    │   └── element-icons.732389de.ttf
+    ├── index.html
+    └── js
+        ├── about.3c68e217.js
+        ├── about.3c68e217.js.map
+        ├── chunk-vendors.ccefee03.js
+        ├── chunk-vendors.ccefee03.js.map
+        ├── index.0ab2cb87.js
+        └── index.0ab2cb87.js.map
+```
+
+##### 2、运行安装服务：
+```
+cd /data/installk8s/sysbase
+./bin/sysbase-v1.0.0-linux-amd64 (这里不同平台选择不同可执行文件) 
+访问安装服务: http://192.168.58.2:8081/static/ (这里的 192.168.58.2 根据实际情况，是运行安装服务的 IP 地址)
+```
+
+##### 3、添加资源:
+```
+资源类型选择 vps，特定描述这些都是必须的，其中 etcd、master、node 可以配置多台机器，其他几个确保唯一， 另外，支持这些全配置一台机器，即单机也可以运行，建议单台最低配置 8 核 16G，其实 4 核 8G 也可以运行起来
+```
+![image](/images/install_resource.jpeg)
+
+
+##### 4、创建 K8sCluster:
+```
+一条记录代表一个 k8s 集群，一定要选择前面添加的资源列表
+```
+![image](/images/install_k8scluster.jpeg)
+
+##### 5、执行安装:
+```
+点击一键安装前，可以先点击内核升级，因为内核升级会重启机器，一键安装逻辑也会判断内核是否已升级，如果 未升级，也会触发升级、重启。
+```
+![image](/images/install_install.jpeg)
+
+##### 6、安装后重要目录说明:
+```
+/data/installk8s/addons/certs 安装过程中生成的 TLS 证书文件，可以将 k8s.com.crt 导入到系统并信任。
+/data/installk8s/addons/gateways Istio 网关及虚拟服务设置，这里是站点入口配置处。
+
+绑定Hosts，访问以下站点：
+192.168.58.2 dashboard.k8s.com grafana.k8s.com prometheus.k8s.com kiali.k8s.com test.k8s.com
+
+安装程序开源目录地址：
+./sysbase
+采用golang+vue编写
+```
+
+##### 7、安装后效果图:
+![image](/images/instsall_example1.jpeg)
+![image](/images/instsall_example2.jpeg)
+![image](/images/instsall_example3.jpeg)
+![image](/images/instsall_example4.jpeg)
+![image](/images/instsall_example5.jpeg)
+![image](/images/instsall_example6.jpeg)
+![image](/images/instsall_example7.jpeg)

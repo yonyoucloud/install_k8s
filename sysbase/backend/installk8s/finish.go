@@ -21,10 +21,15 @@ func (ik *InstallK8s) FinishInstall() {
 	}
 
 	ik.Stdout <- "[开始]启动所有服务"
-	ik.Stdout <- "启动Publish"
 
+	ik.Stdout <- "启动Dns"
 	ik.Params.DoWhat = "start"
-	ik.Params.DoDocker = true
+	ik.ServiceDns()
+	ik.wait(5, "等待...")
+
+	ik.Stdout <- "启动Publish"
+	ik.Params.DoWhat = "start"
+	ik.Params.DoContainerd = true
 	ik.ServicePublish()
 
 	ik.Stdout <- "启动Etcd集群"
@@ -46,11 +51,6 @@ func (ik *InstallK8s) FinishInstall() {
 	ik.Params.DoWhat = "restart"
 	ik.ServiceNode()
 	ik.wait(8, "等待...")
-
-	ik.Stdout <- "启动Dns"
-	ik.Params.DoWhat = "start"
-	ik.ServiceDns()
-	ik.wait(5, "等待...")
 
 	ik.Stdout <- "[结束]启动所有服务"
 
@@ -102,7 +102,8 @@ func (ik *InstallK8s) FinishInstall() {
 			ik.er.SetRole(publishRole)
 			ik.er.Run(`kubectl -n istio-system get pod -o wide | grep istio-ingressgateway | grep Running | awk '{print "设置Hosts: "$7" dashboard.k8s.com 然后您可以访问kubernetes-dashboard: https://dashboard.k8s.com:10443"}'`)
 			ik.Stdout <- "用下面输出的token登录kubernetes-dashboard"
-			ik.er.Run(`kubectl describe secret $(kubectl get secret -n kube-system | grep admin-token | awk '{print $1}') -n kube-system | grep token: | awk '{print $2}'`)
+			// ik.er.Run(`kubectl describe secret $(kubectl get secret -n kube-system | grep admin-token | awk '{print $1}') -n kube-system | grep token: | awk '{print $2}'`)
+			ik.er.Run(`kubectl -n kube-system get secret admin-user-token -oyaml | grep token: | awk -F 'token: ' '{print $2}' | base64 -d && echo`)
 			break
 		}
 		time.Sleep(1 * time.Second)
@@ -192,61 +193,8 @@ func (ik *InstallK8s) initImages() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
-
 	ik.er.SetRole(publishRole)
-	cmds := []string{
-		fmt.Sprintf("docker images | grep 'test-base' || (cd %s/images && sha256=`docker load -i test-containers~test-base:1.0.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/test-containers/test-base:1.0)", ik.SourceDir, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'pause-amd64' || (cd %s/images && sha256=`docker load -i gcr.io~google_containers~pause-amd64:3.2.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/gcr.io/google_containers/pause-amd64:3.2 && docker push %s:5000/gcr.io/google_containers/pause-amd64:3.2)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'busybox' || (cd %s/images && sha256=`docker load -i busybox:latest.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/busybox:latest && docker push %s:5000/busybox:latest)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'kubernetesui/dashboard' || (cd %s/images && sha256=`docker load -i kubernetesui~dashboard:v2.0.1.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/kubernetesui/dashboard:v2.0.1 && docker push %s:5000/kubernetesui/dashboard:v2.0.1)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'kubernetesui/metrics-scraper' || (cd %s/images && sha256=`docker load -i kubernetesui~metrics-scraper:v1.0.4.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/kubernetesui/metrics-scraper:v1.0.4 && docker push %s:5000/kubernetesui/metrics-scraper:v1.0.4)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'grafana' || (cd %s/images && sha256=`docker load -i grafana~grafana:8.4.7.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/grafana/grafana:8.4.7 && docker push %s:5000/grafana/grafana:8.4.7)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'jimmidyson/configmap-reload' || (cd %s/images && sha256=`docker load -i jimmidyson~configmap-reload:v0.7.1.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/jimmidyson/configmap-reload:v0.7.1 && docker push %s:5000/jimmidyson/configmap-reload:v0.7.1)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'prom/alertmanager' || (cd %s/images && sha256=`docker load -i prom~alertmanager:v0.24.0.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/prom/alertmanager:v0.24.0 && docker push %s:5000/prom/alertmanager:v0.24.0)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'prom/node-exporter' || (cd %s/images && sha256=`docker load -i prom~node-exporter:v1.3.1.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/prom/node-exporter:v1.3.1 && docker push %s:5000/prom/node-exporter:v1.3.1)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'prom/prometheus' || (cd %s/images && sha256=`docker load -i prom~prometheus:v2.34.0.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/prom/prometheus:v2.34.0 && docker push %s:5000/prom/prometheus:v2.34.0)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'kube-state-metrics' || (cd %s/images && sha256=`docker load -i k8s.gcr.io~kube-state-metrics~kube-state-metrics:v2.4.2.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.4.2 && docker push %s:5000/k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.4.2)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'metrics-server' || (cd %s/images && sha256=`docker load -i k8s.gcr.io~metrics-server~metrics-server:v0.6.1.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/k8s.gcr.io/metrics-server/metrics-server:v0.6.1 && docker push %s:5000/k8s.gcr.io/metrics-server/metrics-server:v0.6.1)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'calico/cni' || (cd %s/images && sha256=`docker load -i calico~cni:v3.22.2.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/calico/cni:v3.22.2 && docker push %s:5000/calico/cni:v3.22.2)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'calico/kube-controllers' || (cd %s/images && sha256=`docker load -i calico~kube-controllers:v3.22.2.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/calico/kube-controllers:v3.22.2 && docker push %s:5000/calico/kube-controllers:v3.22.2)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'calico/node' || (cd %s/images && sha256=`docker load -i calico~node:v3.22.2.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/calico/node:v3.22.2 && docker push %s:5000/calico/node:v3.22.2)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'calico/pod2daemon-flexvol' || (cd %s/images && sha256=`docker load -i calico~pod2daemon-flexvol:v3.22.2.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/calico/pod2daemon-flexvol:v3.22.2 && docker push %s:5000/calico/pod2daemon-flexvol:v3.22.2)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'coredns' || (cd %s/images && sha256=`docker load -i k8s.gcr.io~coredns~coredns:v1.8.6.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/k8s.gcr.io/coredns/coredns:v1.8.6 && docker push %s:5000/k8s.gcr.io/coredns/coredns:v1.8.6)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'istio/pilot' || (cd %s/images && sha256=`docker load -i istio~pilot:1.13.3.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/istio/pilot:1.13.3 && docker push %s:5000/istio/pilot:1.13.3)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'istio/proxyv2' || (cd %s/images && sha256=`docker load -i istio~proxyv2:1.13.3.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/istio/proxyv2:1.13.3 && docker push %s:5000/istio/proxyv2:1.13.3)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'quay.io/kiali/kiali' || (cd %s/images && sha256=`docker load -i quay.io~kiali~kiali:v1.45.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/quay.io/kiali/kiali:v1.45 && docker push %s:5000/quay.io/kiali/kiali:v1.45)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf("docker images | grep 'jaegertracing/all-in-one' || (cd %s/images && sha256=`docker load -i jaegertracing~all-in-one:1.29.tar | grep Loaded | cut -f 3,4 -d ' ' | cut -f 2 -d ' ' | sed 's/sha256://g'` && docker tag $sha256 %s:5000/jaegertracing/all-in-one:1.29 && docker push %s:5000/jaegertracing/all-in-one:1.29)", ik.SourceDir, priDockerHost, priDockerHost),
-
-		fmt.Sprintf(`docker images | grep %s:5000 | awk '{print "docker push "$1":"$2}' | sh`, priDockerHost),
-	}
-	ik.er.Run(cmds...)
+	ik.er.Run(fmt.Sprintf(`cd %s/images && for file in $(find . -type f); do file=${file/\.\/}; saveIFS=$IFS IFS="/" fileArr=($file) IFS=$saveIFS; count=${#fileArr[*]} repository=$(IFS="/"; echo "${fileArr[*]: 0: $count-1}") tag=${fileArr[*]: -1}; nerdctl -n k8s.io load -i $file && nerdctl -n k8s.io push "${repository}:${tag}";done`, ik.SourceDir))
 }
 
 func (ik *InstallK8s) initCalico() {
@@ -262,12 +210,6 @@ func (ik *InstallK8s) initCalico() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
 	nodeRole, ok := ik.resources["node"]
 	if !ok {
 		ik.Stdout <- "没有node资源"
@@ -275,13 +217,11 @@ func (ik *InstallK8s) initCalico() {
 	}
 
 	etcdLbHost := strings.Split(etcdLbRole.Hosts[0], ":")[0]
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
 
 	ik.er.SetRole(publishRole)
 	cmds := []string{
 		fmt.Sprintf("kubectl delete -f %s/calico", ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/calico/calico.yaml.tpl > %s/calico/calico.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed -i "s#ETCD_LVS_HOST#%s#g" %s/calico/calico.yaml`, etcdLbHost, ik.SourceDir),
+		fmt.Sprintf(`sed "s#ETCD_LVS_HOST#%s#g" %s/calico/calico.yaml.tpl > %s/calico/calico.yaml`, etcdLbHost, ik.SourceDir, ik.SourceDir),
 		fmt.Sprintf(`TLS_ETCD_KEY=$(cat %s/etcd/etc/etcd/ssl/etcd-key.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_KEY#$TLS_ETCD_KEY#g" %s/calico/calico.yaml`, ik.SourceDir, ik.SourceDir),
 		fmt.Sprintf(`TLS_ETCD_CERT=$(cat %s/etcd/etc/etcd/ssl/etcd.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_CERT#$TLS_ETCD_CERT#g" %s/calico/calico.yaml`, ik.SourceDir, ik.SourceDir),
 		fmt.Sprintf(`TLS_ETCD_CA=$(cat %s/etcd/etc/etcd/ssl/ca.pem | base64 | tr -d "\n") && sed -i "s#TLS_ETCD_CA#$TLS_ETCD_CA#g" %s/calico/calico.yaml`, ik.SourceDir, ik.SourceDir),
@@ -316,34 +256,17 @@ func (ik *InstallK8s) initK8sSystem() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
 	pridnsRole, ok := ik.resources["pridns"]
 	if !ok {
 		ik.Stdout <- "没有pridns资源"
 		return
 	}
 
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
 	pridnsHost := strings.Split(pridnsRole.Hosts[0], ":")[0]
 
 	ik.er.SetRole(publishRole)
 	cmds := []string{
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/dns/coredns.yaml.tpl > %s/dns/coredns.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed -i "s#HOST#%s#g" %s/dns/coredns.yaml`, pridnsHost, ik.SourceDir),
-
-		// addons
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/dashboard/dashboard.yaml.tpl > %s/addons/dashboard/dashboard.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/metrics-server/metrics-server.yaml.tpl > %s/addons/metrics-server/metrics-server.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/kube-state-metrics/deployment.yaml.tpl > %s/addons/kube-state-metrics/deployment.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/prometheus/alertmanager-deployment.yaml.tpl > %s/addons/prometheus/alertmanager-deployment.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/prometheus/grafana.yaml.tpl > %s/addons/prometheus/grafana.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/prometheus/node-exporter-ds.yaml.tpl > %s/addons/prometheus/node-exporter-ds.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
-		fmt.Sprintf(`sed "s#PRI_DOCKER_HOST#%s#g" %s/addons/prometheus/prometheus-statefulset.yaml.tpl > %s/addons/prometheus/prometheus-statefulset.yaml`, priDockerHost, ik.SourceDir, ik.SourceDir),
+		fmt.Sprintf(`sed "s#HOST#%s#g" %s/dns/coredns.yaml.tpl > %s/dns/coredns.yaml`, pridnsHost, ik.SourceDir, ik.SourceDir),
 
 		// 生成TLS证书
 		fmt.Sprintf(`rm -rf %s/addons/certs ; mkdir -p %s/addons/certs`, ik.SourceDir, ik.SourceDir),
@@ -381,24 +304,13 @@ func (ik *InstallK8s) installIstio() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
-
 	ik.er.SetRole(publishRole)
 	cmds := []string{
 		// install istio
-		fmt.Sprintf(`cd %s/istio/manifests/profiles && sed "s#PRI_DOCKER_HOST#%s#g" default.yaml.tpl > default.yaml`, ik.SourceDir, priDockerHost),
 		fmt.Sprintf(`istioctl install --manifests=%s/istio/manifests -y`, ik.SourceDir),
 		fmt.Sprintf(`istioctl manifest generate > %s/addons/istio/generated-manifest.yaml`, ik.SourceDir),
 		fmt.Sprintf(`istioctl verify-install -f %s/addons/istio/generated-manifest.yaml`, ik.SourceDir),
 
-		fmt.Sprintf(`cd %s/addons/istio && sed "s#PRI_DOCKER_HOST#%s#g" kiali.yaml.tpl > kiali.yaml`, ik.SourceDir, priDockerHost),
-		fmt.Sprintf(`cd %s/addons/istio && sed "s#PRI_DOCKER_HOST#%s#g" jaeger.yaml.tpl > jaeger.yaml`, ik.SourceDir, priDockerHost),
 		fmt.Sprintf(`kubectl apply -f %s/addons/istio`, ik.SourceDir),
 		`kubectl -n istio-system get deployment`,
 
@@ -418,20 +330,11 @@ func (ik *InstallK8s) initWebTest() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
-
 	ik.er.SetRole(publishRole)
 	cmds := []string{
 		`kubectl create namespace test-system ; kubectl label namespace test-system istio-injection=enabled`,
-		fmt.Sprintf(`cd %s/web-test && sed "s#PRI_DOCKER_HOST#%s#g" Dockerfile.tpl > Dockerfile`, ik.SourceDir, priDockerHost),
-		fmt.Sprintf(`cd %s/web-test && sed "s#PRI_DOCKER_HOST#%s#g" create.sh.tpl > create.sh && chmod 750 create.sh`, ik.SourceDir, priDockerHost),
-		fmt.Sprintf(`cd %s/web-test && ./create.sh`, ik.SourceDir),
+		fmt.Sprintf(`cd %s/web-test && kubectl create namespace test-system`, ik.SourceDir),
+		fmt.Sprintf(`cd %s/web-test && kubectl apply -f yaml`, ik.SourceDir),
 	}
 	ik.er.Run(cmds...)
 }

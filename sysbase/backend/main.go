@@ -9,15 +9,11 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"git.yonyou.com/sysbase/backend/args"
-	"git.yonyou.com/sysbase/backend/config"
-	"git.yonyou.com/sysbase/backend/server"
-	// "git.yonyou.com/sysbase/backend/hack"
+	"sysbase/args"
+	"sysbase/config"
+	"sysbase/server"
+	"sysbase/version"
 )
-
-const banner string = `
-sysbase
-`
 
 var (
 	argConfigFile = pflag.String("config", "etc/config.yaml", "sysbase config file.")
@@ -37,7 +33,11 @@ func init() {
 }
 
 func main() {
-	log.Print(banner)
+	if *argVersion {
+		log.Println(version.VersionInfo())
+		return
+	}
+	log.Println(version.VersionInfo())
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 

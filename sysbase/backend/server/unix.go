@@ -1,3 +1,4 @@
+//go:build darwin || freebsd || linux || netbsd || openbsd
 // +build darwin freebsd linux netbsd openbsd
 
 package server
@@ -11,10 +12,10 @@ import (
 
 	//"gopkg.in/gin-contrib/pprof.v1"
 
-	"git.yonyou.com/sysbase/backend/args"
-	"git.yonyou.com/sysbase/backend/config"
-	"git.yonyou.com/sysbase/backend/model"
-	"git.yonyou.com/sysbase/backend/router"
+	"sysbase/args"
+	"sysbase/config"
+	"sysbase/model"
+	"sysbase/router"
 )
 
 type Server struct {

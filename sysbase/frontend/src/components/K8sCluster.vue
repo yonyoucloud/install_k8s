@@ -160,15 +160,15 @@
         <el-button type="danger" @click="install('all')">一键安装</el-button>
         <el-button type="primary" @click="install('base')">1.基础安装</el-button>
         <el-button type="primary" @click="install('kernel')">2.升级内核</el-button>
-        <el-button type="primary" @click="install('bin')">3.安装可执行文件</el-button>
-        <el-button type="primary" @click="install('docker')">4.安装Docker</el-button>
-        <el-button type="primary" @click="install('pridocker')">5.安装私有镜像库</el-button>
-        <el-button type="primary" @click="install('etcd')">6.安装Etcd集群</el-button>
-        <el-button type="primary" @click="install('master')">7.安装Master集群</el-button>
-        <el-button type="primary" @click="install('node')">8.安装Node集群</el-button>
-        <el-button type="primary" @click="install('dockercrt')">9.安装Docker证书</el-button>
-        <el-button type="primary" @click="install('lvs')">10.安装Lvs</el-button>
-        <el-button type="primary" @click="install('dns')">11.安装Dns</el-button>
+        <el-button type="primary" @click="install('dns')">3.安装Dns</el-button>
+        <el-button type="primary" @click="install('basebin')">4.安装可执行文件</el-button>
+        <el-button type="primary" @click="install('containerd')">5.安装Containerd</el-button>
+        <el-button type="primary" @click="install('registry')">6.安装私有镜像仓库</el-button>
+        <el-button type="primary" @click="install('etcd')">7.安装Etcd集群</el-button>
+        <el-button type="primary" @click="install('master')">8.安装Master集群</el-button>
+        <el-button type="primary" @click="install('node')">9.安装Node集群</el-button>
+        <el-button type="primary" @click="install('registrycrt')">10.安装私有镜像仓库证书</el-button>
+        <el-button type="primary" @click="install('lvs')">11.安装Lvs</el-button>
         <el-button type="primary" @click="install('finish')">12.完成安装</el-button>
         <br />
         <el-button type="primary" @click="install('newnode')">1.安装新节点</el-button>
@@ -185,9 +185,9 @@
           <el-radio v-for="(item, key) in serviceData" :key="key" :label="key">{{item}}</el-radio>
         </el-radio-group>
         <font style="font-size:13px;font-weight: bolder;">只针对Node服务：</font>
-        <el-radio-group v-model="doDocker" style="margin-right:30px;">
-          <el-radio label="true">包括Docker</el-radio>
-          <el-radio label="false">不包括Docker</el-radio>
+        <el-radio-group v-model="doContainerd" style="margin-right:30px;">
+          <el-radio label="true">包括Containerd</el-radio>
+          <el-radio label="false">不包括Containerd</el-radio>
         </el-radio-group>
         <el-button type="primary" @click="install('start')">启动</el-button>
         <el-button type="primary" @click="install('restart')">重启</el-button>
@@ -268,7 +268,7 @@ export default {
         serviceNode: 'Node服务',
         serviceDns: 'Dns服务',
       },
-      doDocker: "true",
+      doContainerd: "true",
     }
   },
 
@@ -527,17 +527,21 @@ export default {
           title = '升级内核'
           url = 'api/v1/installK8s/updateKernel?k8s_cluster_id=' + this.id
           break
-        case 'bin':
+        case 'dns':
+          title = '安装Dns'
+          url = 'api/v1/installK8s/installDns?k8s_cluster_id=' + this.id
+          break
+        case 'basebin':
           title = '安装可执行文件'
-          url = 'api/v1/installK8s/installBin?k8s_cluster_id=' + this.id
+          url = 'api/v1/installK8s/InstallBaseBin?k8s_cluster_id=' + this.id
           break
-        case 'docker':
-          title = '安装Docker'
-          url = 'api/v1/installK8s/installDocker?k8s_cluster_id=' + this.id
+        case 'containerd':
+          title = '安装Containerd'
+          url = 'api/v1/installK8s/InstallContainerd?k8s_cluster_id=' + this.id
           break
-        case 'pridocker':
+        case 'registry':
           title = '安装私有镜像库'
-          url = 'api/v1/installK8s/installPriDocker?k8s_cluster_id=' + this.id
+          url = 'api/v1/installK8s/installRegistry?k8s_cluster_id=' + this.id
           break
         case 'etcd':
           title = '安装Etcd集群'
@@ -551,17 +555,13 @@ export default {
           title = '安装Node集群'
           url = 'api/v1/installK8s/installNode?k8s_cluster_id=' + this.id
           break
-        case 'dockercrt':
-          title = '安装Docker证书'
-          url = 'api/v1/installK8s/installDockerCrt?k8s_cluster_id=' + this.id
+        case 'registrycrt':
+          title = '安装私有镜像仓库证书'
+          url = 'api/v1/installK8s/InstallContainerdCrt?k8s_cluster_id=' + this.id
           break
         case 'lvs':
           title = '安装Lvs'
           url = 'api/v1/installK8s/installLvs?k8s_cluster_id=' + this.id
-          break
-        case 'dns':
-          title = '安装Dns'
-          url = 'api/v1/installK8s/installDns?k8s_cluster_id=' + this.id
           break
         case 'finish':
           title = '完成安装'
@@ -593,15 +593,15 @@ export default {
           break
         case 'start':
           title = this.serviceData[this.service]
-          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=start&do_docker=' + this.doDocker
+          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=start&do_containerd=' + this.doContainerd
           break
         case 'restart':
           title = this.serviceData[this.service]
-          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=restart&do_docker=' + this.doDocker
+          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=restart&do_containerd=' + this.doContainerd
           break
         case 'stop':
           title = this.serviceData[this.service]
-          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=stop&do_docker=' + this.doDocker
+          url = 'api/v1/installK8s/' + this.service + '?k8s_cluster_id=' + this.id + '&do_what=stop&do_containerd=' + this.doContainerd
           break
         default:
           return

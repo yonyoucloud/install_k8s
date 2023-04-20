@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 
-	"git.yonyou.com/sysbase/backend/config"
+	"sysbase/config"
 )
 
 type Model interface {

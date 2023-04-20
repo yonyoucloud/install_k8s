@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.yonyou.com/sysbase/backend/model"
+	"sysbase/model"
 )
 
 func (ik *InstallK8s) NewetcdInstall() {

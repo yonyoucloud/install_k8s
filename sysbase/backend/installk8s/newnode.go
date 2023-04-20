@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"git.yonyou.com/sysbase/backend/model"
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/model"
+	"sysbase/tool/execremote"
 )
 
 func (ik *InstallK8s) NewnodeInstall() {
@@ -16,8 +16,8 @@ func (ik *InstallK8s) NewnodeInstall() {
 		return
 	}
 	ik.newnodeInstallBase()
-	ik.newnodeInstallDocker()
-	ik.newnodeInstallDockerCrt()
+	ik.newnodeInstallContainerd()
+	ik.newnodeInstallContainerdCrt()
 	ik.newnodeInstallNode()
 	ik.newnodeServiceNodeStart()
 	ik.newnodeKubeletcniNode()
@@ -123,29 +123,23 @@ func (ik *InstallK8s) newnodeInstallBase() {
 	ik.Stdout <- "[结束]安装基础环境"
 }
 
-func (ik *InstallK8s) newnodeInstallDocker() {
+func (ik *InstallK8s) newnodeInstallContainerd() {
 	newnodeRole, ok := ik.resources["newnode"]
 	if !ok {
 		ik.Stdout <- "没有newnode资源"
 		return
 	}
 
-	ik.Stdout <- "[开始]安装docker"
+	ik.Stdout <- "[开始]安装containerd"
 	ik.er.SetRole(newnodeRole)
-	ik.installDocker()
-	ik.Stdout <- "[结束]安装docker"
+	ik.InstallContainerd()
+	ik.Stdout <- "[结束]安装containerd"
 }
 
-func (ik *InstallK8s) newnodeInstallDockerCrt() {
+func (ik *InstallK8s) newnodeInstallContainerdCrt() {
 	newnodeRole, ok := ik.resources["newnode"]
 	if !ok {
 		ik.Stdout <- "没有newnode资源"
-		return
-	}
-
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
 		return
 	}
 
@@ -155,12 +149,11 @@ func (ik *InstallK8s) newnodeInstallDockerCrt() {
 		return
 	}
 
-	ik.Stdout <- "[开始]安装docker证书"
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
+	ik.Stdout <- "[开始]安装私有镜像仓库证书"
 
 	newnodeRole.Parallel = false
-	ik.installDockerCrt(priDockerHost, publishRole, newnodeRole)
-	ik.Stdout <- "[结束]安装docker证书"
+	ik.installContainerdCrt(publishRole, newnodeRole)
+	ik.Stdout <- "[结束]安装私有镜像仓库证书"
 }
 
 func (ik *InstallK8s) newnodeInstallNode() {
@@ -182,17 +175,10 @@ func (ik *InstallK8s) newnodeInstallNode() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
 	masterLbHost := strings.Split(masterLbRole.Hosts[0], ":")[0]
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
 
 	ik.Stdout <- "[开始]安装node节点"
-	ik.installNode(masterLbHost, priDockerHost, publishRole, newnodeRole)
+	ik.installNode(masterLbHost, publishRole, newnodeRole)
 	ik.Stdout <- "[结束]安装node节点"
 }
 
@@ -211,7 +197,7 @@ func (ik *InstallK8s) newnodeServiceNodeStart() {
 
 	ik.Stdout <- "[开始]启动新node节点"
 	ik.Params.DoWhat = "start"
-	ik.Params.DoDocker = true
+	ik.Params.DoContainerd = true
 	ik.serviceNode(newnodeRole)
 
 	publishRole.WaitOutput = true

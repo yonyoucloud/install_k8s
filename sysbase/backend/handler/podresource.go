@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"git.yonyou.com/sysbase/backend/model"
+	"sysbase/model"
 )
 
 type PodResourceHandler struct{}

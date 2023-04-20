@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/tool/execremote"
 )
 
 func (ik *InstallK8s) InstallNode() {
@@ -26,21 +26,14 @@ func (ik *InstallK8s) InstallNode() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
 	if !ik.createSslNode() {
 		ik.Stdout <- "Node证书创建失败"
 		return
 	}
 
 	masterLbHost := strings.Split(masterLbRole.Hosts[0], ":")[0]
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
 
-	ik.installNode(masterLbHost, priDockerHost, publishRole, nodeRole)
+	ik.installNode(masterLbHost, publishRole, nodeRole)
 }
 
 func (ik *InstallK8s) UpdateSslNode() {
@@ -51,7 +44,7 @@ func (ik *InstallK8s) UpdateSslNode() {
 
 	ik.Stdout <- "[开始]重启node服务"
 	ik.Params.DoWhat = "restart"
-	ik.Params.DoDocker = false
+	ik.Params.DoContainerd = false
 	if nodeRole, ok := ik.resources["node"]; ok {
 		ik.serviceNode(nodeRole)
 	}
@@ -63,7 +56,14 @@ func (ik *InstallK8s) UpdateSslNode() {
 	ik.Stdout <- "[结束]所有节点证书更新完毕[祝您好运！]"
 }
 
-func (ik *InstallK8s) installNode(masterLbHost, priDockerHost string, publishRole, nodeRole execremote.Role) {
+func (ik *InstallK8s) installNode(masterLbHost string, publishRole, nodeRole execremote.Role) {
+	pridnsRole, ok := ik.resources["pridns"]
+	if !ok {
+		ik.Stdout <- "没有pridns资源"
+		return
+	}
+	pridnsHost := strings.Split(pridnsRole.Hosts[0], ":")[0]
+
 	for _, host := range nodeRole.Hosts {
 		curHost := strings.Split(host, ":")[0]
 
@@ -74,7 +74,6 @@ func (ik *InstallK8s) installNode(masterLbHost, priDockerHost string, publishRol
 			fmt.Sprintf(`cd %s/node && sed "s#NODE_HOST#%s#g" kubelet.yaml.tpl > etc/kubernetes/kubelet.yaml`, ik.SourceDir, curHost),
 			fmt.Sprintf(`cd %s/node && sed "s#K8S_MASTER_LVS#%s#g" config.tpl > etc/kubernetes/config`, ik.SourceDir, masterLbHost),
 			fmt.Sprintf(`cd %s/node && sed -i "s#K8S_MASTER_LVS#%s#g" etc/kubernetes/kubelet`, ik.SourceDir, masterLbHost),
-			fmt.Sprintf(`cd %s/node && sed -i "s#PRI_DOCKER_HOST#%s#g" etc/kubernetes/kubelet`, ik.SourceDir, priDockerHost),
 			fmt.Sprintf(`cd %s/node && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=frognew kubelet-csr.json | cfssljson -bare kubelet`, ik.SourceDir),
 
 			// kubelet.conf
@@ -107,6 +106,7 @@ func (ik *InstallK8s) installNode(masterLbHost, priDockerHost string, publishRol
 			`tar zxvf /tmp/node.gz -C / && rm -rf /tmp/node.gz`,
 			`systemctl daemon-reload && systemctl enable kube-proxy && systemctl enable kubelet && mkdir -p /data/kubelet && chmod 750 /data/kubelet`,
 		}
+		cmds = getModifyDnsCmds(cmds, pridnsHost)
 		ik.er.Run(cmds...)
 		ik.er.Local(fmt.Sprintf("rm -rf %s/node/node.gz", ik.SourceDir))
 	}
@@ -125,27 +125,20 @@ func (ik *InstallK8s) modifyNodeConf() {
 		return
 	}
 
-	pridockerRole, ok := ik.resources["pridocker"]
-	if !ok {
-		ik.Stdout <- "没有pridocker资源"
-		return
-	}
-
 	if !ik.createSslNode() {
 		ik.Stdout <- "Node证书创建失败"
 		return
 	}
 
 	masterLbHost := strings.Split(masterLbRole.Hosts[0], ":")[0]
-	priDockerHost := strings.Split(pridockerRole.Hosts[0], ":")[0]
 
 	ik.OnlyConf = true
 	if nodeRole, ok := ik.resources["node"]; ok {
-		ik.installNode(masterLbHost, priDockerHost, publishRole, nodeRole)
+		ik.installNode(masterLbHost, publishRole, nodeRole)
 		ik.kubeletcniNode(nodeRole)
 	}
 	if newnodeRole, ok := ik.resources["newnode"]; ok {
-		ik.installNode(masterLbHost, priDockerHost, publishRole, newnodeRole)
+		ik.installNode(masterLbHost, publishRole, newnodeRole)
 		ik.kubeletcniNode(newnodeRole)
 	}
 }

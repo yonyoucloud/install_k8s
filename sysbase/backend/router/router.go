@@ -3,10 +3,10 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 
-	"git.yonyou.com/sysbase/backend/config"
-	"git.yonyou.com/sysbase/backend/handler"
-	"git.yonyou.com/sysbase/backend/router/middleware/auth"
-	"git.yonyou.com/sysbase/backend/router/middleware/cors"
+	"sysbase/config"
+	"sysbase/handler"
+	"sysbase/router/middleware/auth"
+	"sysbase/router/middleware/cors"
 )
 
 // InitRouter initialize routing information
@@ -82,13 +82,13 @@ func InitRouter(c *config.Config) *gin.Engine {
 		installK8sGroup.GET("/installAll", installK8sHandler.InstallAll)
 		installK8sGroup.GET("/installBase", installK8sHandler.InstallBase)
 		installK8sGroup.GET("/updateKernel", installK8sHandler.UpdateKernel)
-		installK8sGroup.GET("/installBin", installK8sHandler.InstallBin)
-		installK8sGroup.GET("/installDocker", installK8sHandler.InstallDocker)
-		installK8sGroup.GET("/installPriDocker", installK8sHandler.InstallPriDocker)
+		installK8sGroup.GET("/InstallBaseBin", installK8sHandler.InstallBaseBin)
+		installK8sGroup.GET("/InstallContainerd", installK8sHandler.InstallContainerd)
+		installK8sGroup.GET("/installRegistry", installK8sHandler.InstallRegistry)
 		installK8sGroup.GET("/installEtcd", installK8sHandler.InstallEtcd)
 		installK8sGroup.GET("/installMaster", installK8sHandler.InstallMaster)
 		installK8sGroup.GET("/installNode", installK8sHandler.InstallNode)
-		installK8sGroup.GET("/installDockerCrt", installK8sHandler.InstallDockerCrt)
+		installK8sGroup.GET("/InstallContainerdCrt", installK8sHandler.InstallContainerdCrt)
 		installK8sGroup.GET("/installLvs", installK8sHandler.InstallLvs)
 		installK8sGroup.GET("/installDns", installK8sHandler.InstallDns)
 		installK8sGroup.GET("/finishInstall", installK8sHandler.FinishInstall)

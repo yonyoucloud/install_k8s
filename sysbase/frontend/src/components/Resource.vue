@@ -126,7 +126,7 @@
               <el-option label="etcdlb" value="etcdlb"></el-option>
               <el-option label="masterlb" value="masterlb"></el-option>
               <el-option label="lvs" value="lvs"></el-option>
-              <el-option label="pridocker" value="pridocker"></el-option>
+              <el-option label="registry" value="registry"></el-option>
               <el-option label="pridns" value="pridns"></el-option>
               <el-option label="newnode" value="newnode"></el-option>
               <el-option label="newetcd" value="newetcd"></el-option>

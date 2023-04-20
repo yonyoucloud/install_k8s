@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/tool/execremote"
 )
 
 func (ik *InstallK8s) InstallMaster() {
@@ -102,7 +102,7 @@ func (ik *InstallK8s) UpdateSslMaster() {
 
 	ik.Stdout <- "[开始]重启node服务"
 	ik.Params.DoWhat = "restart"
-	ik.Params.DoDocker = false
+	ik.Params.DoContainerd = false
 	if nodeRole, ok := ik.resources["node"]; ok {
 		ik.serviceNode(nodeRole)
 	}

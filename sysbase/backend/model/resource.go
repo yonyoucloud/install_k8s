@@ -5,7 +5,7 @@ type Resource struct {
 	ID        uint   `gorm:"primaryKey;autoIncrement;comment:自增ID"`
 	Name      string `gorm:"type:varchar(127);not null;default:'';comment:必要描述名称，便于查看选择"`
 	Category  string `gorm:"type:enum('vps','mysql','redis','mongodb','rabbitmq','elasticsearch','kafka');default:'vps';comment:资源类别"`
-	Scope     string `gorm:"type:enum('default','master','sources','replicas','publish','node','etcd','etcdlb','masterlb','lvs','pridocker','pridns','newnode','newetcd','newmaster');default:'default';comment:特定资源的特定描述"`
+	Scope     string `gorm:"type:enum('default','master','sources','replicas','publish','node','etcd','etcdlb','masterlb','lvs','registry','pridns','newnode','newetcd','newmaster');default:'default';comment:特定资源的特定描述"`
 	Host      string `gorm:"type:varchar(255);not null;default:'';comment:主机地址，也可以是IP"`
 	Port      uint32 `gorm:"not null;default:0;comment:端口号"`
 	User      string `gorm:"type:varchar(127);not null;default:'';comment:用户名"`

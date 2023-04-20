@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/tool/execremote"
 )
 
 func (ik *InstallK8s) InstallEtcd() {

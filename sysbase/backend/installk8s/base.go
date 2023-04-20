@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"git.yonyou.com/sysbase/backend/model"
-	"git.yonyou.com/sysbase/backend/tool/execremote"
+	"sysbase/model"
+	"sysbase/tool/execremote"
 )
 
 type (
@@ -25,7 +25,7 @@ type (
 	Params struct {
 		K8sClusterID uint
 		DoWhat       string
-		DoDocker     bool
+		DoContainerd bool
 	}
 )
 
@@ -52,14 +52,17 @@ func (ik *InstallK8s) Call(funcName string) {
 	case "UpdateKernel":
 		ik.UpdateKernel()
 		break
-	case "InstallBin":
-		ik.InstallBin()
+	case "InstallBaseBin":
+		ik.InstallBaseBin()
 		break
-	case "InstallDocker":
-		ik.InstallDocker()
+	case "InstallDns":
+		ik.InstallDns()
 		break
-	case "InstallPriDocker":
-		ik.InstallPriDocker()
+	case "InstallContainerd":
+		ik.InstallContainerd()
+		break
+	case "InstallRegistry":
+		ik.InstallRegistry()
 		break
 	case "InstallEtcd":
 		ik.InstallEtcd()
@@ -70,14 +73,11 @@ func (ik *InstallK8s) Call(funcName string) {
 	case "InstallNode":
 		ik.InstallNode()
 		break
-	case "InstallDockerCrt":
-		ik.InstallDockerCrt()
+	case "InstallContainerdCrt":
+		ik.InstallContainerdCrt()
 		break
 	case "InstallLvs":
 		ik.InstallLvs()
-		break
-	case "InstallDns":
-		ik.InstallDns()
 		break
 	case "ServicePublish":
 		ik.ServicePublish()
@@ -181,7 +181,7 @@ func (ik *InstallK8s) InstallAll() {
 	if r, ok := ik.resources["node"]; ok {
 		hosts = append(hosts, r.Hosts...)
 	}
-	if r, ok := ik.resources["pridocker"]; ok {
+	if r, ok := ik.resources["registry"]; ok {
 		hosts = append(hosts, r.Hosts...)
 	}
 	if r, ok := ik.resources["lvs"]; ok {
@@ -195,15 +195,15 @@ func (ik *InstallK8s) InstallAll() {
 		return
 	}
 	ik.InstallBase()
-	ik.InstallBin()
-	ik.InstallDocker()
-	ik.InstallPriDocker()
+	ik.InstallBaseBin()
+	ik.InstallDns()
+	ik.InstallContainerd()
+	ik.InstallRegistry()
 	ik.InstallEtcd()
 	ik.InstallMaster()
 	ik.InstallNode()
-	ik.InstallDockerCrt()
+	ik.InstallContainerdCrt()
 	ik.InstallLvs()
-	ik.InstallDns()
 	ik.FinishInstall()
 }
 
@@ -222,7 +222,7 @@ func (ik *InstallK8s) InstallBase() {
 	if r, ok := ik.resources["node"]; ok {
 		role = append(role, r)
 	}
-	if r, ok := ik.resources["pridocker"]; ok {
+	if r, ok := ik.resources["registry"]; ok {
 		role = append(role, r)
 	}
 	if r, ok := ik.resources["lvs"]; ok {
@@ -258,7 +258,7 @@ func (ik *InstallK8s) UpdateKernel() {
 	if r, ok := ik.resources["node"]; ok {
 		role = append(role, r)
 	}
-	if r, ok := ik.resources["pridocker"]; ok {
+	if r, ok := ik.resources["registry"]; ok {
 		role = append(role, r)
 	}
 	if r, ok := ik.resources["lvs"]; ok {
@@ -295,7 +295,14 @@ func (ik *InstallK8s) updateKernel() {
 	ik.er.Run("reboot")
 }
 
-func (ik *InstallK8s) InstallBin() {
+func (ik *InstallK8s) InstallBaseBin() {
+	pridnsRole, ok := ik.resources["pridns"]
+	if !ok {
+		ik.Stdout <- "没有pridns资源"
+		return
+	}
+	pridnsHost := strings.Split(pridnsRole.Hosts[0], ":")[0]
+
 	var role []execremote.Role
 
 	if r, ok := ik.resources["publish"]; ok {
@@ -304,8 +311,8 @@ func (ik *InstallK8s) InstallBin() {
 
 	ik.er.SetRole(role...)
 
-	ik.er.Put(fmt.Sprintf("%s/bin.gz", ik.SourceDir), "/tmp")
-	ik.er.Run("tar zxvf /tmp/bin.gz -C / && rm -rf /tmp/bin.gz")
+	ik.er.Put(fmt.Sprintf("%s/basebin.gz", ik.SourceDir), "/tmp")
+	ik.er.Run("tar zxvf /tmp/basebin.gz -C / && rm -rf /tmp/basebin.gz")
 
 	if r, ok := ik.resources["etcdlb"]; ok {
 		host := strings.Split(r.Hosts[0], ":")
@@ -320,6 +327,7 @@ spec:
   etcdCertFile: "/etc/cni/net.d/calico-tls/etcd-cert"
   etcdCACertFile: "/etc/cni/net.d/calico-tls/etcd-ca"' > /etc/calico/calicoctl.cfg`, host[0]),
 		}
+		cmds = getModifyDnsCmds(cmds, pridnsHost)
 		ik.er.Run(cmds...)
 	}
 }
@@ -504,11 +512,24 @@ func (ik *InstallK8s) InstallDns() {
 		return
 	}
 
+	registryRole, ok := ik.resources["registry"]
+	if !ok {
+		ik.Stdout <- "没有registry资源"
+		return
+	}
+
+	registryHost := strings.Split(registryRole.Hosts[0], ":")[0]
+
 	ik.er.SetRole(pridnsRole)
 	ik.er.Run("yum install -y bind-chroot")
 
 	ik.er.SetRole(publishRole)
-	ik.er.Run(fmt.Sprintf(`cd %s/bind && tar zcvf bind.gz var etc`, ik.SourceDir))
+
+	cmds := []string{
+		fmt.Sprintf(`cd %s/bind && sed -i "s#HOST#%s#g" var/named/zones/registry.k8s.io.zone`, ik.SourceDir, registryHost),
+		fmt.Sprintf(`cd %s/bind && tar zcvf bind.gz var etc`, ik.SourceDir),
+	}
+	ik.er.Run(cmds...)
 
 	// 如果是在发布机上运行，此步骤不需要执行
 	if !strInArr(strings.Split(publishRole.Hosts[0], ":")[0], localIps) {
@@ -517,7 +538,7 @@ func (ik *InstallK8s) InstallDns() {
 
 	ik.er.SetRole(pridnsRole)
 	ik.er.Put(fmt.Sprintf("%s/bind/bind.gz", ik.SourceDir), "/tmp")
-	ik.er.Run("tar zxvf /tmp/bind.gz -C / && rm -rf /tmp/bind.gz && chown -R named:named /var/named/zones && chown root:named /var/named /etc/named.conf /etc/named.rfc1912.zones && systemctl enable named-chroot")
+	ik.er.Run("tar zxvf /tmp/bind.gz -C / && rm -rf /tmp/bind.gz && chown -R named:named /var/named/zones && chown root:named /var/named /etc/named.conf /etc/named.rfc1912.zones && systemctl enable --now named-chroot")
 	ik.er.Local(fmt.Sprintf("rm -rf %s/bind/bind.gz", ik.SourceDir))
 }
 
