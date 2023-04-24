@@ -3,6 +3,7 @@
 # Filename:    install.sh
 # Revision:    2.0
 # Date:        2018/06/21
+# update_Date: 2019/09/24
 # Author:      bishenghua
 # Email:       net.bsh@gmail.com
 # Description: Script to install the kubernets system
@@ -28,6 +29,11 @@
 # -------------------------------------------------------------------------------
 
 echo -e "\033[32m{`date`}[开始]初始化安装.............................\033[0m"
+# 增加epel源不可获取问题解决方法
+yum install -y wget
+wget http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+rpm -ivh epel-release-latest-7.noarch.rpm
+rm -f epel-release-latest-7.noarch.rpm
 while true
 do 
     yum -y install epel-release net-tools vim python-pip python-setuptools bzip2 unzip telnet
