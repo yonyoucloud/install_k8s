@@ -501,9 +501,12 @@ func (er *ExecRemote) insecureClientConfig() {
 		Config: ssh.Config{
 			Ciphers: []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-cbc", "aes192-cbc",
 				"aes256-cbc", "3des-cbc", "des-cbc"},
-			KeyExchanges: []string{"diffie-hellman-group1-sha1",
+			KeyExchanges: []string{
+				"diffie-hellman-group1-sha1",
 				"diffie-hellman-group-exchange-sha1",
-				"diffie-hellman-group14-sha1"},
+				"diffie-hellman-group14-sha1",
+				"diffie-hellman-group-exchange-sha256",
+			},
 		},
 	}
 }
