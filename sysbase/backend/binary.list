@@ -1,24 +1,24 @@
 images:
 ./registry.k8s.io/sysbase.io/web-test/v1.0.0
-./registry.k8s.io/quay.io/kiali/kiali/v1.63.1
-./registry.k8s.io/k8s.gcr.io/coredns/coredns/v1.10.1
-./registry.k8s.io/k8s.gcr.io/kube-state-metrics/kube-state-metrics/v2.8.2
-./registry.k8s.io/k8s.gcr.io/metrics-server/metrics-server/v0.6.3
+./registry.k8s.io/quay.io/kiali/kiali/v2.0
+./registry.k8s.io/k8s.gcr.io/coredns/coredns/v1.12.0
+./registry.k8s.io/k8s.gcr.io/kube-state-metrics/kube-state-metrics/v2.14.0
+./registry.k8s.io/k8s.gcr.io/metrics-server/metrics-server/v0.7.2
 ./registry.k8s.io/docker.io/kubernetesui/dashboard/v2.7.0
-./registry.k8s.io/docker.io/kubernetesui/metrics-scraper/v1.0.8
-./registry.k8s.io/docker.io/prom/prometheus/v2.43.0
-./registry.k8s.io/docker.io/prom/alertmanager/v0.25.0
-./registry.k8s.io/docker.io/prom/node-exporter/v1.5.0
-./registry.k8s.io/docker.io/jaegertracing/all-in-one/1.35
-./registry.k8s.io/docker.io/istio/proxyv2/1.17.1
-./registry.k8s.io/docker.io/istio/pilot/1.17.1
-./registry.k8s.io/docker.io/library/registry/2.8.1
+./registry.k8s.io/docker.io/kubernetesui/metrics-scraper/v1.0.9
+./registry.k8s.io/docker.io/prom/prometheus/v3.1.0
+./registry.k8s.io/docker.io/prom/alertmanager/v0.27.0
+./registry.k8s.io/docker.io/prom/node-exporter/v1.8.2
+./registry.k8s.io/docker.io/jaegertracing/all-in-one/1.58
+./registry.k8s.io/docker.io/istio/proxyv2/1.24.2
+./registry.k8s.io/docker.io/istio/pilot/1.24.2
+./registry.k8s.io/docker.io/library/registry/2.8.3
 ./registry.k8s.io/docker.io/library/busybox/latest
-./registry.k8s.io/docker.io/calico/cni/v3.25.1
-./registry.k8s.io/docker.io/calico/kube-controllers/v3.25.1
-./registry.k8s.io/docker.io/calico/node/v3.25.1
-./registry.k8s.io/docker.io/jimmidyson/configmap-reload/v0.8.0
-./registry.k8s.io/docker.io/grafana/grafana/9.4.7
+./registry.k8s.io/docker.io/calico/cni/v3.29.1
+./registry.k8s.io/docker.io/calico/kube-controllers/v3.29.1
+./registry.k8s.io/docker.io/calico/node/v3.29.1
+./registry.k8s.io/docker.io/jimmidyson/configmap-reload/v0.9.0
+./registry.k8s.io/docker.io/grafana/grafana/11.4.0
 ./registry.k8s.io/gcr.io/google_containers/pause-amd64/3.2
 
 basebin.gz:
@@ -26,6 +26,7 @@ basebin.gz:
 /usr/local/bin/cfssl-scan
 /usr/local/bin/cfssl-certinfo
 /usr/local/bin/etcdctl
+/usr/local/bin/etcdutl
 /usr/local/bin/kubemark
 /usr/local/bin/cfssl-bundle
 /usr/local/bin/cfssl
@@ -64,11 +65,11 @@ containerd/opt/cni/bin/tuning
 
 编译二进制：
 cfssl:
-git clone https://github.com/cloudflare/cfssl.git && git checkout v1.6.1 && make
+git clone https://github.com/cloudflare/cfssl.git && git checkout v1.6.5 && make
 /data/go/src/github.com/cloudflare/cfssl/bin
 
 etcd:
-git clone https://github.com/etcd-io/etcd.git && git checkout v3.5.3 && make build
+git clone https://github.com/etcd-io/etcd.git && git checkout v3.5.17 && make build
 /data/go/src/github.com/etcd-io/etcd/bin
 
 # 已用containerd替换docker，以下相关docker的可以忽略
@@ -84,18 +85,33 @@ git clone https://github.com/moby/moby.git && git checkout v20.10.14 && make BIN
 https://download.docker.com/linux/static/stable/x86_64
 
 kubernetes:
-git clone https://github.com/kubernetes/kubernetes.git && git checkout v1.23.6 && make
+git clone https://github.com/kubernetes/kubernetes.git && git checkout v1.31.4 && make
 /data/go/src/github.com/kubernetes/kubernetes/_output/bin
 
 coredns配置:
 https://github.com/coredns/deployment/blob/master/kubernetes/coredns.yaml.sed
 
 metrics-server:
-https://github.com/kubernetes-sigs/metrics-server/tree/v0.6.3/manifests/base
-delete autoscaling/addon-resizer:1.8.14
+https://github.com/kubernetes-sigs/metrics-server/tree/v0.7.2/manifests/base
 
 kube-state-metrics:
-https://github.com/kubernetes/kube-state-metrics/blob/v2.8.2/examples/standard
+https://github.com/kubernetes/kube-state-metrics/blob/v2.14.0/examples/standard
+
+containerd:
+https://containerd.io/downloads/
+
+runc:
+https://github.com/opencontainers/runc/releases
+
+crictl:
+https://github.com/kubernetes-sigs/cri-tools/releases
+
+nerdctl:
+https://github.com/containerd/nerdctl/releases
+
+cni:
+https://github.com/containernetworking/plugins/releases
+
 
 
 # 粗暴的删除安装（生产环境慎用，会清理全部数据）：

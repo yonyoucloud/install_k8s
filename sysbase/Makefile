@@ -39,7 +39,7 @@ build:  ## 编译 sysbase
 	@cd backend && \
 		rm -rf $(DISTDIR)/bin/sysbase-$(ARCH) && \
 		go mod tidy && \
-		CGO_ENABLED=0 \
+		CGO_ENABLED=1 \
 		GOOS=$(OS) \
 		GOARCH=$(ARCH) \
 		go build -ldflags "$(LDFLAGS)" -o $(DISTDIR)/bin/sysbase-$(VERSION)-$(OS)-$(ARCH) ./
@@ -53,7 +53,7 @@ runf:  ## 运行 sysbase 前端
 runb:  ## 运行 sysbase 后端
 	@cd backend && \
 		go mod tidy && \
-		CGO_ENABLED=0 \
+		CGO_ENABLED=1 \
 		GOOS=$(OS) \
 		GOARCH=$(ARCH) \
 		go run -ldflags "$(LDFLAGS)" ./

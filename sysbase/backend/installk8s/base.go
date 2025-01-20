@@ -538,8 +538,12 @@ func (ik *InstallK8s) InstallDns() {
 
 	ik.er.SetRole(pridnsRole)
 	ik.er.Put(fmt.Sprintf("%s/bind/bind.gz", ik.SourceDir), "/tmp")
-	ik.er.Run("tar zxvf /tmp/bind.gz -C / && rm -rf /tmp/bind.gz && chown -R named:named /var/named/zones && chown root:named /var/named /etc/named.conf /etc/named.rfc1912.zones && systemctl enable --now named-chroot")
+	ik.er.Run("tar zxvf /tmp/bind.gz -C / && rm -rf /tmp/bind.gz && chown -R named:named /var/named/zones && chown root:named /var/named /etc/named.conf /etc/named.rfc1912.zones && systemctl enable --now named-chroot && systemctl restart named-chroot")
 	ik.er.Local(fmt.Sprintf("rm -rf %s/bind/bind.gz", ik.SourceDir))
+
+	// 发布机添加DNS记录
+	ik.er.SetRole(publishRole)
+	ik.er.Run(fmt.Sprintf(`nmcli con mod "$(nmcli -t -f NAME connection show | head -n 1)" ipv4.dns "%s" && systemctl restart NetworkManager`, registryHost))
 }
 
 func strInArr(str string, arr []string) bool {
@@ -552,7 +556,7 @@ func strInArr(str string, arr []string) bool {
 }
 
 func getLocalIp() ([]string, error) {
-	var ips []string
+	var ips = []string{"localhost", "127.0.0.1"}
 
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {

@@ -13,22 +13,23 @@ type K8sCluster struct {
 	CreatedAt int64  `gorm:"autoCreateTime:milli"`
 }
 
-func (kc K8sCluster) InitTable() {
+func (kc K8sCluster) InitTable() error {
 	// 设置表信息
-	migrator := db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='K8sClusters表'").Migrator()
+	//migrator := DBConn[DBName].Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='K8sClusters表'").Migrator()
+	migrator := DBConn[DBName].Set("gorm:table_options", "").Migrator()
 
 	// 判断表是否存在
 	if migrator.HasTable(&K8sCluster{}) {
 		// 存在就自动适配表，也就说原先没字段的就增加字段
-		migrator.AutoMigrate(&K8sCluster{})
-	} else {
-		// 不存在就创建新表
-		migrator.CreateTable(&K8sCluster{})
+		return migrator.AutoMigrate(&K8sCluster{})
 	}
+
+	// 不存在就创建新表
+	return migrator.CreateTable(&K8sCluster{})
 }
 
 func (kc K8sCluster) Insert(resourceID string) (K8sCluster, error) {
-	tx := db.Create(&kc)
+	tx := DBConn[DBName].Create(&kc)
 	err := tx.Error
 	if err == nil {
 		kc.K8sClusterResourceInsert(resourceID)
@@ -38,17 +39,17 @@ func (kc K8sCluster) Insert(resourceID string) (K8sCluster, error) {
 
 func (kc K8sCluster) List() ([]K8sCluster, error) {
 	var kcs []K8sCluster
-	result := db.Order("id desc").Find(&kcs)
+	result := DBConn[DBName].Order("id desc").Find(&kcs)
 	return kcs, result.Error
 }
 
 func (kc K8sCluster) Delete() error {
-	tx := db.Delete(&kc)
+	tx := DBConn[DBName].Delete(&kc)
 	return tx.Error
 }
 
 func (kc K8sCluster) Edit(kcData K8sCluster, resourceID string) error {
-	tx := db.Model(&kc)
+	tx := DBConn[DBName].Model(&kc)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -77,6 +78,6 @@ func (kc K8sCluster) K8sClusterResourceInsert(resourceID string) {
 
 func (kc K8sCluster) Get() (K8sCluster, error) {
 	var kcData K8sCluster
-	err := db.Where(&kc).Find(&kcData).Error
+	err := DBConn[DBName].Where(&kc).Find(&kcData).Error
 	return kcData, err
 }

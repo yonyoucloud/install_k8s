@@ -2,32 +2,38 @@
 ===============
 #### 版本说明
 
-|             service           |     version     |
-|-------------------------------|-----------------|
-| `kubernetes`                  | v1.26.4         |
-| `etcd`                        | 3.5.7           |
-| `istio`                       | 1.17.1          |
-| `containerd`                  | v1.6.20         |
-| `calico`                      | v3.25.1         |
-| `coredns`                     | v1.10.1         |
-| `dashboard`                   | v2.7.0          |
-| `metrics-server`              | v0.6.3          |
-| `prometheus`                  | v2.43.0         |
-| `alertmanager`                | v0.25.0         |
-| `grafana`                     | 9.4.7           |
-| `kube-state-metrics`          | v2.8.2          |
-| `node-exporter`               | v1.5.0          |
-| `helm`                        | v3.11.2         |
-| `cfssl`                       | v1.6.3          |
+| service              | version |
+|----------------------|---------|
+| `kubernetes`         | v1.31.4 |
+| `etcd`               | 3.5.17  |
+| `istio`              | 1.24.2  |
+| `containerd`         | v1.7.24 |
+| `calico`             | v3.29.1 |
+| `coredns`            | v1.12.0 |
+| `dashboard`          | v2.7.0  |
+| `metrics-server`     | v0.7.2  |
+| `prometheus`         | v3.1.0  |
+| `alertmanager`       | v0.27.0 |
+| `grafana`            | 11.4.0  |
+| `kube-state-metrics` | v2.14.0 |
+| `node-exporter`      | v1.8.2  |
+| `helm`               | v3.16.4 |
+| `cfssl`              | v1.6.5  |
+| `runc`               | v1.2.4  |
+| `crictl`             | v1.32.0 |
+| `nerdctl`            | v2.0.2  |
+| `cni`                | v1.6.2  |
 
 #### 安装说明
 
-##### 1、下载并解压缩二进制安装文件(installk8s-v1.26.4-20230420.gz):
+##### 1、下载并解压缩二进制安装文件(installk8s-v1.31.4-20250120.gz):
+[v1.31.4版本静态安装包下载](https://pan.baidu.com/s/1TOqKINTELq2qpxHfOSJuzw?pwd=ap6v)
+
 [v1.26.4版本静态安装包下载](https://pan.baidu.com/s/1Q5XaSDyCKzkT_mtJcOV5dA?pwd=mv7n)
 
 [v1.23.6版本静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a)
 ```
-cd /data/ && tar zxvf installk8s-v1.26.4-20230420.gz
+cd /data/ && tar zxvf installk8s-v1.31.4-20250120.gz
 
 cd /data/installk8s/sysbase
 /data/installk8s/sysbase

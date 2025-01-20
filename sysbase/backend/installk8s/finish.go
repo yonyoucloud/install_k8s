@@ -308,8 +308,6 @@ func (ik *InstallK8s) installIstio() {
 	cmds := []string{
 		// install istio
 		fmt.Sprintf(`istioctl install --manifests=%s/istio/manifests -y`, ik.SourceDir),
-		fmt.Sprintf(`istioctl manifest generate > %s/addons/istio/generated-manifest.yaml`, ik.SourceDir),
-		fmt.Sprintf(`istioctl verify-install -f %s/addons/istio/generated-manifest.yaml`, ik.SourceDir),
 
 		fmt.Sprintf(`kubectl apply -f %s/addons/istio`, ik.SourceDir),
 		`kubectl -n istio-system get deployment`,
@@ -321,6 +319,21 @@ func (ik *InstallK8s) installIstio() {
 		fmt.Sprintf(`kubectl apply -f %s/addons/gateways`, ik.SourceDir),
 	}
 	ik.er.Run(cmds...)
+
+	publishRole.WaitOutput = true
+	ik.er.SetRole(publishRole)
+	for i := 1; i <= 180; i++ {
+		ik.Stdout <- fmt.Sprintf("等待istio初始化(%d)s...", i)
+		ik.er.Run("kubectl get configmap istio-sidecar-injector -n istio-system -oyaml | grep registry.k8s.io > /dev/null ; echo $?")
+		if ik.er.GetCmdReturn()[0] == "0" {
+			publishRole.WaitOutput = false
+			ik.er.SetRole(publishRole)
+			ik.Stdout <- "istio初始化完成"
+			break
+		}
+		ik.er.Run(`kubectl get configmap istio-sidecar-injector -n istio-system -oyaml | sed 's#"hub": "docker.io/istio"#"hub": "registry.k8s.io/docker.io/istio"#g' | kubectl apply -f -`)
+		time.Sleep(1 * time.Second)
+	}
 }
 
 func (ik *InstallK8s) initWebTest() {
@@ -333,7 +346,6 @@ func (ik *InstallK8s) initWebTest() {
 	ik.er.SetRole(publishRole)
 	cmds := []string{
 		`kubectl create namespace test-system ; kubectl label namespace test-system istio-injection=enabled`,
-		fmt.Sprintf(`cd %s/web-test && kubectl create namespace test-system`, ik.SourceDir),
 		fmt.Sprintf(`cd %s/web-test && kubectl apply -f yaml`, ik.SourceDir),
 	}
 	ik.er.Run(cmds...)

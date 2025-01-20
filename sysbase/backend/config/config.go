@@ -1,9 +1,7 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
-	"time"
 
 	"gopkg.in/yaml.v2"
 )
@@ -11,16 +9,15 @@ import (
 type (
 	Config struct {
 		Static     string     `yaml:"static"`
-		Mysql      Mysql      `yaml:"mysql"`
+		Db         Db         `yaml:"db"`
 		InstallK8s InstallK8s `yaml:"install-k8s"`
 	}
-	Mysql struct {
-		MasterDsn       string        `yaml:"master-dsn"`
-		SourcesDsn      []string      `yaml:"sources-dsn"`
-		ReplicasDsn     []string      `yaml:"replicas-dsn"`
-		MaxIdleConns    int           `yam:"set-max-idle-conns"`
-		MaxOpenConns    int           `yam:"set-max-open-conns"`
-		ConnMaxLifetime time.Duration `yaml:"set-conn-max-lifetime"`
+	Db []struct {
+		Name         string `yaml:"name"`
+		Type         string `yaml:"type"`
+		Dsn          string `yaml:"dsn"`
+		MaxOpenConns int    `yaml:"set_max_open_conns"`
+		TablePrefix  string `yaml:"table_prefix"`
 	}
 	InstallK8s struct {
 		SourceDir string `yaml:"source-dir"`
@@ -28,7 +25,7 @@ type (
 )
 
 func (c *Config) ReadConfigFile(fileName string) error {
-	data, err := ioutil.ReadFile(fileName)
+	data, err := os.ReadFile(fileName)
 	if err != nil {
 		return err
 	}
@@ -51,7 +48,7 @@ func (c *Config) WriteConfigFile() error {
 	}
 
 	configPath := execPath + "/etc/config.yaml"
-	err = ioutil.WriteFile(configPath, data, 0755)
+	err = os.WriteFile(configPath, data, 0755)
 	if err != nil {
 		return err
 	}

@@ -45,23 +45,31 @@ func (ik *InstallK8s) InstallRegistry() {
 		return
 	}
 
+	// 获取一下发布机上的镜像文件路径名称
+	publishRole.WaitOutput = true
+	ik.er.SetRole(publishRole)
+	ik.er.Run(fmt.Sprintf("ls %s/images/registry.k8s.io/docker.io/library/registry/* | head -n 1", ik.SourceDir))
+	registryImage := ik.er.GetCmdReturn()[0]
+	publishRole.WaitOutput = false
+
+	ik.er.SetRole(registryRole)
+
 	// 如果是在发布机上运行，此步骤不需要执行
 	if !strInArr(strings.Split(publishRole.Hosts[0], ":")[0], localIps) {
 		ik.er.Get(fmt.Sprintf("%s/containerd/create_ssl.sh", ik.SourceDir), fmt.Sprintf("%s/containerd", ik.SourceDir))
 		ik.er.Get(fmt.Sprintf("%s/containerd/start_registry.sh", ik.SourceDir), fmt.Sprintf("%s/containerd", ik.SourceDir))
 	}
 
-	ik.er.SetRole(registryRole)
 	ik.er.Put(fmt.Sprintf("%s/containerd/create_ssl.sh", ik.SourceDir), "/tmp")
 	ik.er.Run("sh /tmp/create_ssl.sh && rm -rf /tmp/create_ssl.sh")
 	ik.er.Get("/etc/certs/registry.k8s.io.crt", fmt.Sprintf("%s/containerd", ik.SourceDir))
 
 	ik.er.Run("systemctl restart containerd")
-	ik.er.Put(fmt.Sprintf("%s/images/registry.k8s.io/docker.io/library/registry/2.8.1", ik.SourceDir), "/tmp")
+	ik.er.Put(registryImage, "/tmp/registry.image.tar")
 	ik.er.Put(fmt.Sprintf("%s/containerd/start_registry.sh", ik.SourceDir), "/tmp")
 	cmds := []string{
-		`nerdctl -n k8s.io load -i /tmp/2.8.1`,
-		`/tmp/start_registry.sh ; rm -rf /tmp/2.8.1 /tmp/start_registry.sh`,
+		`nerdctl -n k8s.io load -i /tmp/registry.image.tar`,
+		`/tmp/start_registry.sh ; rm -rf /tmp/registry.image.tar /tmp/start_registry.sh`,
 	}
 	ik.er.Run(cmds...)
 

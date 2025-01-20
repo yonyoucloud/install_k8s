@@ -11,38 +11,39 @@ type TenantPod struct {
 	Pod        Pod    `gorm:"foreignKey:PodID;references:ID;constraint:OnDelete:NO ACTION,OnUpdate:NO ACTION"`
 }
 
-func (tp TenantPod) InitTable() {
+func (tp TenantPod) InitTable() error {
 	// 设置表信息
-	migrator := db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='TenantPods表'").Migrator()
+	//migrator := DBConn[DBName].Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='TenantPods表'").Migrator()
+	migrator := DBConn[DBName].Set("gorm:table_options", "").Migrator()
 
 	// 判断表是否存在
 	if migrator.HasTable(&TenantPod{}) {
 		// 存在就自动适配表，也就说原先没字段的就增加字段
-		migrator.AutoMigrate(&TenantPod{})
-	} else {
-		// 不存在就创建新表
-		migrator.CreateTable(&TenantPod{})
+		return migrator.AutoMigrate(&TenantPod{})
 	}
+
+	// 不存在就创建新表
+	return migrator.CreateTable(&TenantPod{})
 }
 
 func (tp TenantPod) Insert() (TenantPod, error) {
-	tx := db.Create(&tp)
+	tx := DBConn[DBName].Create(&tp)
 	return tp, tx.Error
 }
 
 func (tp TenantPod) List() ([]TenantPod, error) {
 	var tps []TenantPod
-	result := db.Order("id desc").Find(&tps)
+	result := DBConn[DBName].Order("id desc").Find(&tps)
 	return tps, result.Error
 }
 
 func (tp TenantPod) Delete() error {
-	tx := db.Delete(&tp)
+	tx := DBConn[DBName].Delete(&tp)
 	return tx.Error
 }
 
 func (tp TenantPod) Edit(tpData TenantPod) error {
-	tx := db.Model(&tp)
+	tx := DBConn[DBName].Model(&tp)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -52,6 +53,6 @@ func (tp TenantPod) Edit(tpData TenantPod) error {
 
 func (tp TenantPod) Get() (TenantPod, error) {
 	var tpData TenantPod
-	err := db.Where(&tp).Find(&tpData).Error
+	err := DBConn[DBName].Where(&tp).Find(&tpData).Error
 	return tpData, err
 }

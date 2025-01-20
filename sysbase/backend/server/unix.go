@@ -31,7 +31,7 @@ func NewServer(c *config.Config) *Server {
 
 func (s *Server) Run() error {
 	// 连接数据库
-	model.InitDB(s.config.Mysql)
+	model.InitDB(s.config.Db)
 
 	// 初始化路由
 	router := router.InitRouter(s.config)

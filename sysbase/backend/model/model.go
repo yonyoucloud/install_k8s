@@ -1,18 +1,18 @@
 package model
 
 import (
-	"log"
-	"time"
+	"errors"
+	"fmt"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/plugin/dbresolver"
+	"gorm.io/gorm/schema"
 
 	"sysbase/config"
 )
 
 type Model interface {
-	InitTable()
+	InitTable() error
 }
 
 var (
@@ -23,46 +23,50 @@ var (
 	_ Model = PodResource{}
 	_ Model = TenantPod{}
 
-	db *gorm.DB
+	DBConn map[string]*gorm.DB
 )
 
-func InitDB(c config.Mysql) {
-	var err error
-	db, err = gorm.Open(mysql.Open(c.MasterDsn), &gorm.Config{})
+const DBName = "sysbase"
 
-	var sources []gorm.Dialector
-	for _, dsn := range c.SourcesDsn {
-		sources = append(sources, mysql.Open(dsn))
+func InitDB(dbs config.Db) error {
+
+	DBConn = make(map[string]*gorm.DB)
+	for _, db := range dbs {
+		switch db.Type {
+		case "sqlite":
+			if len(db.Dsn) == 0 {
+				return errors.New(fmt.Sprintf("%s 数据库配置为空", db.Name))
+			}
+			var err error
+			conn, err := gorm.Open(sqlite.Open(db.Dsn), &gorm.Config{
+				NamingStrategy: schema.NamingStrategy{
+					TablePrefix:   db.TablePrefix,
+					SingularTable: true,
+				},
+			})
+			if err != nil {
+				return err
+			}
+
+			sqlDB, err := conn.DB()
+			if err != nil {
+				return err
+			}
+
+			// 设置打开数据库连接的最大数量
+			sqlDB.SetMaxOpenConns(db.MaxOpenConns)
+
+			DBConn[db.Name] = conn
+			break
+		}
 	}
 
-	var replicas []gorm.Dialector
-	for _, dsn := range c.ReplicasDsn {
-		replicas = append(replicas, mysql.Open(dsn))
-	}
+	_ = Resource{}.InitTable()
+	_ = K8sCluster{}.InitTable()
+	_ = Pod{}.InitTable()
+	_ = K8sClusterResource{}.InitTable()
+	_ = PodResource{}.InitTable()
+	_ = TenantPod{}.InitTable()
 
-	db.Use(dbresolver.Register(dbresolver.Config{
-		Sources:  sources,
-		Replicas: replicas,
-		// sources/replicas 负载均衡策略
-		Policy: dbresolver.RandomPolicy{},
-	}).
-		//设置了连接可复用的最大时间
-		SetConnMaxIdleTime(time.Hour).
-		//设置了连接可复用的最大时间
-		SetConnMaxLifetime(c.ConnMaxLifetime).
-		// 设置空闲连接池中连接的最大数量
-		SetMaxIdleConns(c.MaxIdleConns).
-		// 设置打开数据库连接的最大数量
-		SetMaxOpenConns(c.MaxOpenConns))
-
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	Resource{}.InitTable()
-	K8sCluster{}.InitTable()
-	Pod{}.InitTable()
-	K8sClusterResource{}.InitTable()
-	PodResource{}.InitTable()
-	TenantPod{}.InitTable()
+	return nil
 }
