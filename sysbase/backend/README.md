@@ -1,10 +1,3 @@
-Mac下部署：（其他系统类似，参考Makefile）
-# make mac
-# make static
-# make run
-
-安装最新稳定版：
-===============
 #### 版本说明
 
 | service              | version |

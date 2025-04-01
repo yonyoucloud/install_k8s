@@ -4,36 +4,38 @@
 
 | service              | version |
 |----------------------|---------|
-| `kubernetes`         | v1.31.4 |
-| `etcd`               | 3.5.17  |
-| `istio`              | 1.24.2  |
-| `containerd`         | v1.7.24 |
-| `calico`             | v3.29.1 |
+| `kubernetes`         | v1.32.3 |
+| `etcd`               | 3.5.21  |
+| `istio`              | 1.25.1  |
+| `containerd`         | v1.7.27 |
+| `calico`             | v3.29.3 |
 | `coredns`            | v1.12.0 |
 | `dashboard`          | v2.7.0  |
 | `metrics-server`     | v0.7.2  |
-| `prometheus`         | v3.1.0  |
-| `alertmanager`       | v0.27.0 |
-| `grafana`            | 11.4.0  |
-| `kube-state-metrics` | v2.14.0 |
-| `node-exporter`      | v1.8.2  |
-| `helm`               | v3.16.4 |
+| `prometheus`         | v3.2.1  |
+| `alertmanager`       | v0.28.1 |
+| `grafana`            | 11.6.0  |
+| `kube-state-metrics` | v2.15.0 |
+| `node-exporter`      | v1.9.0  |
+| `helm`               | v3.17.2 |
 | `cfssl`              | v1.6.5  |
-| `runc`               | v1.2.4  |
+| `runc`               | v1.2.6  |
 | `crictl`             | v1.32.0 |
-| `nerdctl`            | v2.0.2  |
+| `nerdctl`            | v2.0.4  |
 | `cni`                | v1.6.2  |
 
 #### 安装说明
 
-##### 1、下载并解压缩二进制安装文件(installk8s-v1.31.4-20250120.gz):
+##### 1、下载并解压缩二进制安装文件(installk8s-v1.32.3-20250401.gz):
+[v1.32.3版本静态安装包下载](https://pan.baidu.com/s/1OuwYBsirXzZL-kJJdBrocQ?pwd=dznm)
+
 [v1.31.4版本静态安装包下载](https://pan.baidu.com/s/1TOqKINTELq2qpxHfOSJuzw?pwd=ap6v)
 
 [v1.26.4版本静态安装包下载](https://pan.baidu.com/s/1Q5XaSDyCKzkT_mtJcOV5dA?pwd=mv7n)
 
 [v1.23.6版本静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a)
 ```
-cd /data/ && tar zxvf installk8s-v1.31.4-20250120.gz
+cd /data/ && tar zxvf installk8s-v1.32.3-20250401.gz -C /data
 
 cd /data/installk8s/sysbase
 /data/installk8s/sysbase

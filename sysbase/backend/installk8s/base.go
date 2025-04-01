@@ -237,7 +237,7 @@ func (ik *InstallK8s) installBase() {
 	cmds := []string{
 		fmt.Sprintf(`chown -R root:root %s`, ik.SourceDir),
 		"yum install -y telnet net-tools openssl socat",
-		"mkdir /data > /dev/null 2>&1;if [ $? == 0 ];then useradd -d /data/www esn && useradd -d /data/www www && usermod -G esn www && chmod 750 /data/www && mkdir -p /data/log/php && mkdir -p /data/log/nginx && mkdir -p /data/yy_log && chown -R www:www /data/log /data/yy_log && chmod 750 /data/log /data/yy_log;fi",
+		"mkdir /data > /dev/null 2>&1;if [ $? == 0 ];then useradd -d /data/www esn && useradd -d /data/www www && usermod -G esn www && chmod 750 /data/www && mkdir -p /data/log/nginx && chown -R www:www /data/log && chmod 750 /data/log;fi",
 		"systemctl stop firewalld && systemctl disable firewalld",
 		`sed -i "s#SELINUX=enforcing#SELINUX=disabled#g" /etc/selinux/config && setenforce 0`,
 		`cat /etc/sysctl.conf | grep net.ipv4.ip_forward > /dev/null 2>&1 ; if [ $? -ne 0 ];then echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf && sysctl -p;fi`,
@@ -278,8 +278,10 @@ func (ik *InstallK8s) checkHostsKernel(hosts []string) []string {
 			WaitOutput: true,
 		}
 		ik.er.SetRole(oneHostRole)
-		ik.er.Run(`uname -a | grep 4.19.94 > /dev/null ; echo $?`)
-		if ik.er.GetCmdReturn()[0] == "1" {
+		// 当前内核版本小于 4.19.94，则升级内核
+		ik.er.Run(`[ "$(printf '%s\n' "4.19.94" "$(uname -r | cut -d'-' -f1)" | sort -V | head -n1)" != "4.19.94" ] && echo 1`)
+		rets := ik.er.GetCmdReturn()
+		if len(rets) > 0 && ik.er.GetCmdReturn()[0] == "1" {
 			oneHostRole.WaitOutput = false
 			needUpdateHosts = append(needUpdateHosts, host)
 		}

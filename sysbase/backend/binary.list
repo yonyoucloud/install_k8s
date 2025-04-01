@@ -2,23 +2,23 @@ images:
 ./registry.k8s.io/sysbase.io/web-test/v1.0.0
 ./registry.k8s.io/quay.io/kiali/kiali/v2.0
 ./registry.k8s.io/k8s.gcr.io/coredns/coredns/v1.12.0
-./registry.k8s.io/k8s.gcr.io/kube-state-metrics/kube-state-metrics/v2.14.0
+./registry.k8s.io/k8s.gcr.io/kube-state-metrics/kube-state-metrics/v2.15.0
 ./registry.k8s.io/k8s.gcr.io/metrics-server/metrics-server/v0.7.2
 ./registry.k8s.io/docker.io/kubernetesui/dashboard/v2.7.0
 ./registry.k8s.io/docker.io/kubernetesui/metrics-scraper/v1.0.9
-./registry.k8s.io/docker.io/prom/prometheus/v3.1.0
-./registry.k8s.io/docker.io/prom/alertmanager/v0.27.0
-./registry.k8s.io/docker.io/prom/node-exporter/v1.8.2
+./registry.k8s.io/docker.io/prom/prometheus/v3.2.1
+./registry.k8s.io/docker.io/prom/alertmanager/v0.28.1
+./registry.k8s.io/docker.io/prom/node-exporter/v1.9.0
 ./registry.k8s.io/docker.io/jaegertracing/all-in-one/1.58
-./registry.k8s.io/docker.io/istio/proxyv2/1.24.2
-./registry.k8s.io/docker.io/istio/pilot/1.24.2
+./registry.k8s.io/docker.io/istio/proxyv2/1.25.1
+./registry.k8s.io/docker.io/istio/pilot/1.25.1
 ./registry.k8s.io/docker.io/library/registry/2.8.3
 ./registry.k8s.io/docker.io/library/busybox/latest
-./registry.k8s.io/docker.io/calico/cni/v3.29.1
-./registry.k8s.io/docker.io/calico/kube-controllers/v3.29.1
-./registry.k8s.io/docker.io/calico/node/v3.29.1
+./registry.k8s.io/docker.io/calico/cni/v3.29.3
+./registry.k8s.io/docker.io/calico/kube-controllers/v3.29.3
+./registry.k8s.io/docker.io/calico/node/v3.29.3
 ./registry.k8s.io/docker.io/jimmidyson/configmap-reload/v0.9.0
-./registry.k8s.io/docker.io/grafana/grafana/11.4.0
+./registry.k8s.io/docker.io/grafana/grafana/11.6.0
 ./registry.k8s.io/gcr.io/google_containers/pause-amd64/3.2
 
 basebin.gz:
@@ -69,7 +69,7 @@ git clone https://github.com/cloudflare/cfssl.git && git checkout v1.6.5 && make
 /data/go/src/github.com/cloudflare/cfssl/bin
 
 etcd:
-git clone https://github.com/etcd-io/etcd.git && git checkout v3.5.17 && make build
+git clone https://github.com/etcd-io/etcd.git && git checkout v3.5.21 && make build
 /data/go/src/github.com/etcd-io/etcd/bin
 
 # 已用containerd替换docker，以下相关docker的可以忽略
@@ -85,7 +85,7 @@ git clone https://github.com/moby/moby.git && git checkout v20.10.14 && make BIN
 https://download.docker.com/linux/static/stable/x86_64
 
 kubernetes:
-git clone https://github.com/kubernetes/kubernetes.git && git checkout v1.31.4 && make
+git clone https://github.com/kubernetes/kubernetes.git && git checkout v1.32.3 && make
 /data/go/src/github.com/kubernetes/kubernetes/_output/bin
 
 coredns配置:
@@ -95,7 +95,7 @@ metrics-server:
 https://github.com/kubernetes-sigs/metrics-server/tree/v0.7.2/manifests/base
 
 kube-state-metrics:
-https://github.com/kubernetes/kube-state-metrics/blob/v2.14.0/examples/standard
+https://github.com/kubernetes/kube-state-metrics/blob/v2.15.0/examples/standard
 
 containerd:
 https://containerd.io/downloads/

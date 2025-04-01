@@ -194,7 +194,10 @@ func (ik *InstallK8s) initImages() {
 	}
 
 	ik.er.SetRole(publishRole)
+	ik.er.Run(`until curl -sk --head https://registry.k8s.io/v2/ | grep -E "200|401" > /dev/null 2>&1; do echo "私有镜像仓库暂时无法访问，5秒后重试..."; sleep 5; done`)
 	ik.er.Run(fmt.Sprintf(`cd %s/images && for file in $(find . -type f); do file=${file/\.\/}; saveIFS=$IFS IFS="/" fileArr=($file) IFS=$saveIFS; count=${#fileArr[*]} repository=$(IFS="/"; echo "${fileArr[*]: 0: $count-1}") tag=${fileArr[*]: -1}; nerdctl -n k8s.io load -i $file && nerdctl -n k8s.io push "${repository}:${tag}";done`, ik.SourceDir))
+	// 清理一下悬空镜像（<none>）
+	ik.er.Run("nerdctl -n k8s.io image prune -f")
 }
 
 func (ik *InstallK8s) initCalico() {
