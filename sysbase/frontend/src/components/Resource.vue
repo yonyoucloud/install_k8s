@@ -104,23 +104,23 @@
         <el-form-item label="资源类别">
           <el-select v-model="resourceForm.Category" placeholder="请选择资源类别">
             <el-option label="vps" value="vps"></el-option>
-            <el-option label="mysql" value="mysql"></el-option>
+            <!-- <el-option label="mysql" value="mysql"></el-option>
             <el-option label="redis" value="redis"></el-option>
             <el-option label="mongodb" value="mongodb"></el-option>
             <el-option label="rabbitmq" value="rabbitmq"></el-option>
             <el-option label="elasticsearch" value="elasticsearch"></el-option>
-            <el-option label="kafka" value="kafka"></el-option>
+            <el-option label="kafka" value="kafka"></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item label="特定描述">
           <el-tooltip placement="top">
             <div slot="content">特定资源的特定描述，如mysql的话，可以标明是主库或是从库</div>
             <el-select v-model="resourceForm.Scope" placeholder="请选择特定描述">
-              <el-option label="default" value="default"></el-option>
-              <el-option label="master" value="master"></el-option>
-              <el-option label="sources" value="sources"></el-option>
-              <el-option label="replicas" value="replicas"></el-option>
+              <!-- <el-option label="default" value="default"></el-option> -->
+              <!-- <el-option label="sources" value="sources"></el-option>
+              <el-option label="replicas" value="replicas"></el-option> -->
               <el-option label="publish" value="publish"></el-option>
+              <el-option label="master" value="master"></el-option>
               <el-option label="node" value="node"></el-option>
               <el-option label="etcd" value="etcd"></el-option>
               <el-option label="etcdlb" value="etcdlb"></el-option>
@@ -171,7 +171,7 @@ export default {
       resourceFormInit: {
         Name: '',
         Category: 'vps',
-        Scope: 'default',
+        Scope: 'publish',
         Host: '',
         Port: 0,
         User: '',

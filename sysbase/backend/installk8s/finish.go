@@ -103,7 +103,8 @@ func (ik *InstallK8s) FinishInstall() {
 			ik.er.Run(`kubectl -n istio-system get pod -o wide | grep istio-ingressgateway | grep Running | awk '{print "设置Hosts: "$7" dashboard.k8s.com 然后您可以访问kubernetes-dashboard: https://dashboard.k8s.com:10443"}'`)
 			ik.Stdout <- "用下面输出的token登录kubernetes-dashboard"
 			// ik.er.Run(`kubectl describe secret $(kubectl get secret -n kube-system | grep admin-token | awk '{print $1}') -n kube-system | grep token: | awk '{print $2}'`)
-			ik.er.Run(`kubectl -n kube-system get secret admin-user-token -oyaml | grep token: | awk -F 'token: ' '{print $2}' | base64 -d && echo`)
+			//ik.er.Run(`kubectl -n kube-system get secret admin-user-token -oyaml | grep token: | awk -F 'token: ' '{print $2}' | base64 -d && echo`)
+			ik.er.Run(`kubectl get secret admin-user-token -n kube-system -o jsonpath="{.data.token}" | base64 -d && echo`)
 			break
 		}
 		time.Sleep(1 * time.Second)

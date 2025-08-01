@@ -4,29 +4,31 @@
 
 | service              | version |
 |----------------------|---------|
-| `kubernetes`         | v1.32.3 |
-| `etcd`               | 3.5.21  |
-| `istio`              | 1.25.1  |
-| `containerd`         | v1.7.27 |
-| `calico`             | v3.29.3 |
-| `coredns`            | v1.12.0 |
-| `dashboard`          | v2.7.0  |
-| `metrics-server`     | v0.7.2  |
-| `prometheus`         | v3.2.1  |
+| `kubernetes`         | v1.33.3 |
+| `etcd`               | 3.6.4   |
+| `istio`              | 1.26.3  |
+| `containerd`         | v2.0.6  |
+| `calico`             | v3.30.2 |
+| `coredns`            | v1.12.2 |
+| `dashboard`          | 7.13.0  |
+| `metrics-server`     | v0.8.0  |
+| `prometheus`         | v3.5.0  |
 | `alertmanager`       | v0.28.1 |
-| `grafana`            | 11.6.0  |
-| `kube-state-metrics` | v2.15.0 |
-| `node-exporter`      | v1.9.0  |
-| `helm`               | v3.17.2 |
+| `grafana`            | 12.1.0  |
+| `kube-state-metrics` | v2.16.0 |
+| `node-exporter`      | v1.9.1  |
+| `helm`               | v3.18.4 |
 | `cfssl`              | v1.6.5  |
-| `runc`               | v1.2.6  |
-| `crictl`             | v1.32.0 |
-| `nerdctl`            | v2.0.4  |
-| `cni`                | v1.6.2  |
+| `runc`               | v1.3.0  |
+| `crictl`             | v1.33.0 |
+| `nerdctl`            | v2.1.3  |
+| `cni`                | v1.7.1  |
 
 #### 安装说明
 
-##### 1、下载并解压缩二进制安装文件(installk8s-v1.32.3-20250401.gz):
+##### 1、下载并解压缩二进制安装文件(installk8s-v1.33.3-20250801.gz):
+[v1.33.3版本静态安装包下载](https://pan.baidu.com/s/17ObTIQ-VafuramHc7I9L-g?pwd=k8ef)
+
 [v1.32.3版本静态安装包下载](https://pan.baidu.com/s/1OuwYBsirXzZL-kJJdBrocQ?pwd=dznm)
 
 [v1.31.4版本静态安装包下载](https://pan.baidu.com/s/1TOqKINTELq2qpxHfOSJuzw?pwd=ap6v)
@@ -35,7 +37,7 @@
 
 [v1.23.6版本静态安装包下载](https://pan.baidu.com/s/1kJ4vc9yMrskW-UyXXZ2Hng?pwd=hc3a)
 ```
-cd /data/ && tar zxvf installk8s-v1.32.3-20250401.gz -C /data
+cd /data/ && tar zxvf installk8s-v1.33.3-20250801.gz -C /data
 
 cd /data/installk8s/sysbase
 /data/installk8s/sysbase
